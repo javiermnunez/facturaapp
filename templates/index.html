@@ -28,7 +28,9 @@
 
   <script>(function (e, t, n) { var r = e.querySelectorAll("html")[0]; r.className = r.className.replace(/(^|\s)no-js(\s|$)/, "$1js$2") })(document, window, 0);</script>
 
-
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css"
+    integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
 </head>
 
 <body>
@@ -49,12 +51,19 @@
   <br>
 
   {% if usuario %}
-    
+
   <div class="container-fluid">
 
     <div class="row">
       <div class=" col-md-6 offset-md-3 text-center">
-
+        {% with messages= get_flashed_messages() %}
+        {% if messages %}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          {% for message in messages %}{{ message }}{% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
         <button type="button" class="btn btn-dark" data-toggle="modal" data-target="#exampleModal"
           title="Cargar archivo">
           <i class="fas  fa-arrow-up"></i> Subir Archivo
@@ -74,6 +83,7 @@
               </div>
 
               <div class="modal-body">
+
                 <form action="/repositorioSubir" method="post" enctype=multipart/form-data>
                   <input id="ruta" type="text" value={{repositorio}} hidden>
                   <input name="id" type="text" value={{id}} hidden>
@@ -219,7 +229,8 @@
           <table class="table  table-bordered text-center table-hover">
             <thead class="thead-dark">
               <tr>
-                <th><i class="fas fa-inbox"></i></th>
+                <th><i class="fas fa-truck"></i> Proveedor</th>
+                <th><i class="fas fa-barcode"></i></i> CAE</th>
                 <th><i class="fas fa-file"></i> Nombre</th>
                 <th><i class="fad fa-bolt" style="max-width:30px;"></i> Opciones</th>
 
@@ -228,8 +239,9 @@
             <tbody>
               {% for archivo in archivos %}
               <tr>
-                <td><i class="fas fa-barcode"></i></td>
-                <td>{{ archivo[1] }}</td>
+                <td>{{ archivo[4] }}</td>
+                <td>{{ archivo[6] }}</td>
+                <td>{{ archivo[8] }}</td>
                 <td>
                   <div class="row">
                     <div class="col">
@@ -275,7 +287,8 @@
           <table class="table  table-bordered text-center table-hover">
             <thead class="thead-dark">
               <tr>
-                <th style="color: rgb(127, 221, 33);"><i class="fas fa-inbox"></i></th>
+                <th style="color: rgb(127, 221, 33);"><i class="fas fa-truck"></i> Proveedor</th>
+                <th style="color: rgb(127, 221, 33);"><i class="fas fa-barcode"></i> CAE</th>
                 <th style="color: rgb(127, 221, 33);"><i class="fas fa-file"></i> Nombre</th>
                 <th style="color: rgb(127, 221, 33);"><i class="fad fa-bolt"></i> Opciones</th>
 
@@ -286,8 +299,9 @@
               {% for archivoA in archivosA %}
 
               <tr>
-                <td><i class="fas fa-barcode"></i></td>
-                <td style="color: rgb(127, 221, 33);">{{ archivoA[1] }}</td>
+                <td> {{ archivoA[4] }}</td>
+                <td> {{ archivoA[6] }}</td>
+                <td style="color: rgb(127, 221, 33);">{{ archivoA[8] }}</td>
                 <td>
                   <div class="row">
                     <div class="col">
@@ -326,8 +340,17 @@
       {% endif %}
     </div>
   </div>
-  
-  
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.5/dist/umd/popper.min.js"
+    integrity="sha384-Xe+8cL9oJa6tN/veChSP7q+mnSPaj5Bcu9mPX5F5xIGE0DVittaqT5lorf0EI7Vk"
+    crossorigin="anonymous"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.min.js"
+    integrity="sha384-kjU+l4N0Yf4ZOJErLsIcvOU2qSb74wXpOhqTvwVx3OElZRweTnQ6d31fXEoRD1Jy"
+    crossorigin="anonymous"></script>
+
 </body>
 
 

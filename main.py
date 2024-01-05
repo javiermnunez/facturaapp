@@ -66,8 +66,17 @@ def rutaArchivo(id_archivo):
     else:
         print("Error: El archivo no se encuentra en la ruta especificada.")
 
-    return ruta.replace(" ","_")
+    return ruta
     
+
+def buscarArchivo(cae):
+    cursor = conexion.cursor()
+    sqlArchivo = f"select * from archivos where cae = {cae};"
+    cursor.execute(sqlArchivo)
+    archivo = cursor.fetchall()
+    conexion.commit()
+    print(len(archivo))
+    return len(archivo)
 
 def renombrarArchivo(rutaArchivoOriginal,nombreNuevo):
     # Ruta del archivo actual
@@ -94,7 +103,7 @@ def volverInicio(usuario, password):
         usuarioO = None
     
     if usuarioO:
-        sqlArchivosRepo = buscarArchivosRepo(usuarioO.centro)
+        sqlArchivosRepo = buscarArchivosRepo(usuarioO, usuarioO.centro)
         sqlArchivosApro = buscarArchivosApro(usuarioO.centro)
         listaArchivos = sqlArchivosRepo
         listaArchivosA = sqlArchivosApro
@@ -104,11 +113,14 @@ def volverInicio(usuario, password):
     return redirect('/')
 
 
-def buscarArchivosRepo(centro):
+def buscarArchivosRepo(usuario,centro):
     print(centro)
     repositorio = []
     cursor = conexion.cursor()
-    cursor.execute(f"SELECT * FROM archivos where `centro`='{centro}' AND (estado='NO_APROBADO');")
+    if usuario.roll == "EMPLEADO":
+        cursor.execute(f"SELECT * FROM archivos where `centro`='{centro}' AND (usuario='{usuario.id}')AND (estado='NO_APROBADO');")
+    else:
+        cursor.execute(f"SELECT * FROM archivos where `centro`='{centro}' AND (estado='NO_APROBADO');")
     repo = cursor.fetchall()
     conexion.commit()
     for registro in repo:
@@ -121,7 +133,8 @@ def buscarArchivosRepo(centro):
         centro = registro[5]
         cae = registro[6]
         estado = registro[7]
-        repositorio.append([id,ruta,fecha,usuario,proveedor,centro,cae,estado])
+        nombre = registro[8]
+        repositorio.append([id,ruta,fecha,usuario,proveedor,centro,cae,estado,nombre])
     
     return repositorio
 
@@ -140,7 +153,8 @@ def buscarArchivosApro(centro):
         centro = registro[5]
         cae = registro[6]
         estado = registro[7]
-        aprobados.append([id,ruta,fecha,usuario,proveedor,centro,cae,estado])
+        nombre = registro[8]
+        aprobados.append([id,ruta,fecha,usuario,proveedor,centro,cae,estado,nombre])
 
     return aprobados
 @app.route('/noLogin')
@@ -182,6 +196,7 @@ def eliminarArchivo():
         usuario = usuario_o.mail
         contrasenia = usuario_o.contraseña
     # Manejar el caso en el que no se encuentra el usuario
+    redirect('/repositorio')
     return volverInicio(usuario,contrasenia)
 
 
@@ -304,11 +319,11 @@ def mover_archivoA(id,ruta_completa):
             ruta = current_dir + carpetaDatos +ruta_carpeta
         try:
             nombre_archivo, extension = os.path.splitext(os.path.basename(ruta_completa))
-            nombre = nombre_archivo.replace(" ","_")
+            
             unaRuta = codificar(ruta_completa)
-            otraRuta = codificar(ruta+"\\"+nombre+extension)
+            otraRuta = codificar(ruta+"\\"+nombre_archivo+extension)
             cursor = conexion.cursor()
-            cursor.execute(f"UPDATE `archivos` SET `ruta` = '{otraRuta}', `estado` = 'APROBADO' WHERE `archivos`.`ruta` = '{unaRuta}';")
+            cursor.execute(f"UPDATE `archivos` SET `ruta` = '{otraRuta}', `estado` = 'APROBADO', `usuario` = '{usuarioO.id}' WHERE `archivos`.`ruta` = '{unaRuta}';")
             conexion.commit()
 
             shutil.move(ruta_completa, ruta)
@@ -383,7 +398,30 @@ def agregar_usuario():
     conexion.commit()
     return redirect('/usuarios')
 
+
+@app.route('/repositorio/<int:usuario>', methods=['GET','POST'])
+def verificarUsuarioParametrizado(usuario):
+
     
+    sqlUsuario = buscarUsuario(usuario)
+
+    if str(sqlUsuario) != "()" and str(sqlUsuario) != "[]":
+        usuarioO = Usuario(sqlUsuario[0][0],sqlUsuario[0][1],sqlUsuario[0][2],sqlUsuario[0][3],sqlUsuario[0][4],sqlUsuario[0][5],sqlUsuario[0][6],sqlUsuario[0][7])
+    else:
+        usuarioO = None
+    
+    if usuarioO:
+        sqlArchivosRepo = buscarArchivosRepo(usuarioO,usuarioO.centro)
+        sqlArchivosApro = buscarArchivosApro(usuarioO.centro)
+        listaArchivos = sqlArchivosRepo
+        listaArchivosA = sqlArchivosApro
+        
+        
+        return render_template('index.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio)           
+    else:
+                flash('Error.')
+    return redirect('/')
+
 @app.route('/repositorio', methods=['GET','POST'])
 def verificarUsuario():
     
@@ -393,6 +431,7 @@ def verificarUsuario():
         password = request.form['contrasenia']
         sqlUsuario = buscarUsuarioPass(usuario,password)
     except:
+        print("Voy por aca")
         return redirect('/noLogin')
     
     if str(sqlUsuario) != "()" and str(sqlUsuario) != "[]":
@@ -401,7 +440,7 @@ def verificarUsuario():
         usuarioO = None
     
     if usuarioO:
-        sqlArchivosRepo = buscarArchivosRepo(usuarioO.centro)
+        sqlArchivosRepo = buscarArchivosRepo(usuarioO,usuarioO.centro)
         sqlArchivosApro = buscarArchivosApro(usuarioO.centro)
         listaArchivos = sqlArchivosRepo
         listaArchivosA = sqlArchivosApro
@@ -429,15 +468,21 @@ def subirA():
         usuarioO = None
     
     if usuarioO:
-        sqlArchivosRepo = buscarArchivosRepo(usuarioO.id)
-        sqlArchivosApro = buscarArchivosApro(usuarioO.id)
-        listaArchivos = sqlArchivosRepo
-        listaArchivosA = sqlArchivosApro
+        #sqlArchivosRepo = buscarArchivosRepo(usuarioO,usuarioO.id)
+        #sqlArchivosApro = buscarArchivosApro(usuarioO.id)
+        #listaArchivos = sqlArchivosRepo
+        #listaArchivosA = sqlArchivosApro
         
         if request.method == 'POST':
-            subirArchivo(usuarioO.id,carpetaRepositorio ,request.form['proveedor'],request.form['centro'],request.form['cae'])
-        render_template('index.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA)
-        return redirect('/repositorio')            
+            if buscarArchivo(request.form['cae']) == 0:
+                subirArchivo(usuarioO.id,carpetaRepositorio ,request.form['proveedor'],request.form['centro'],request.form['cae'])
+            else:
+                flash('Ya hay un archivo con número de CAE: '+request.form['cae']+".")
+            
+            
+        #render_template('index.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA)
+        #return redirect(f'/repositorio/{usuarioO.id}')
+        return volverInicio(usuarioO.mail,usuarioO.contraseña)            
     else:
                 flash('Error.')        
     return redirect('/')
@@ -450,28 +495,41 @@ def decodificar(codificada):
     decodificada = base64.b64decode(codificada).decode('utf-8')
     return decodificada
 
-def subirArchivo(id_usuario, ruta_repo, proveedor,centro,cae):
-    #Comprobar si la solicitud de publicación tiene la parte del archivo
+
+
+def subirArchivo(id_usuario, ruta_repo, proveedor, centro, cae):
+    # Comprobar si la solicitud de publicación tiene la parte del archivo
     if 'file' not in request.files:
-        print('No se cargo ningun archivo')
+        print('No se cargó ningún archivo')
         return redirect(request.url)
+    
     file = request.files['file']
-    #Si el usuario no selecciona un archivo
+
+    # Si el usuario no selecciona un archivo
     if file.filename == '':
-        print('No se cargo ningun archivo')
+        print('No se cargó ningún archivo')
         return redirect(request.url)
     else:
         filename = secure_filename(file.filename)
+
+        # Agregar el valor de cae como un prefijo al nombre del archivo
+        nombre_base, extension = os.path.splitext(filename)
+        nuevo_nombre = f"{cae}_{nombre_base}{extension}"
+        filename = nuevo_nombre
+
+        # Guardar el archivo en la ubicación de destino
         file.save(os.path.join(ruta_repo, filename))
-        rutaBd = f"{ruta_repo}\\{file.filename}"
+        rutaBd = os.path.join(ruta_repo, filename)
         ruta_codificada = codificar(rutaBd)
-        print("Archivo guardado con éxito")
-        #Se redirecciona a la pagina principal
+        print(f"Archivo guardado con éxito como {filename}")
+
+        # Se redirecciona a la página principal
         cursor = conexion.cursor()
         fechaActual = datetime.now()
-        sqlUsuario = f"INSERT INTO `archivos` (`id_archivo`, `ruta`, `fecha`, `usuario`, `proveedor`,`centro`,`cae`,`estado`) VALUES (NULL, '{ruta_codificada}', '{fechaActual}', '{id_usuario}', '{proveedor}', '{centro}','{cae}','NO_APROBADO');"
+        sqlUsuario = f"INSERT INTO `archivos` (`id_archivo`, `ruta`, `fecha`, `usuario`, `proveedor`,`centro`,`cae`,`estado`,`nombre`) VALUES (NULL, '{ruta_codificada}', '{fechaActual}', '{id_usuario}', '{proveedor}', '{centro}','{cae}','NO_APROBADO','{nuevo_nombre}');"
         cursor.execute(sqlUsuario)
         conexion.commit()
+
     
 @ app.route('/verPdf', methods=['POST'])
 def ver_pdf():
