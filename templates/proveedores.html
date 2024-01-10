@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>FacturaApp</title>
+  <title>FacturaApp {% if usuario %} -{{usuario.nombre}} {{ usuario.apellido }}{% endif %}</title>
   <link rel="shortcut icon" href="{{ url_for('static', filename='img/space.ico')}}">
   <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/all.css')}}">
@@ -71,7 +71,46 @@
   {% if usuario %}
 
   <div class="container-fluid">
-
+    {% for archivo in archivos %}
+    <div class="modal fade" id="detalleModal{{ archivo[0] }}" tabindex="-1" role="dialog" aria-labelledby="detalleModalLabel{{ archivo[0] }}" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="detalleModalLabel{{ archivo[0] }}">Detalle del Archivo</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <textarea rows="5" cols="50">{{ archivo[10] }}</textarea>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    {% for archivoA in archivosA %}
+    <div class="modal fade" id="detalleModal{{ archivoA[0] }}" tabindex="-1" role="dialog" aria-labelledby="detalleModalLabel{{ archivoA[0] }}" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="detalleModalLabel{{ archivoA[0] }}">Detalle del Archivo</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <textarea rows="5" cols="50">{{ archivoA[10] }}</textarea>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
     <div class="row">
       <div class=" col-md-6 offset-md-3 text-center">
         {% with messages= get_flashed_messages() %}
@@ -217,7 +256,10 @@
                 <label for="fecha" class="form-label">Fecha factura</label>
                 <input type="date" class="form-data" name="fecha" required>
               </div>
-
+              <div class="mb-3">
+                <label for="detalle" class="form-label">Detalle</label>
+                <textarea id="detalle" name="detalle" rows="2" cols="50"></textarea>
+              </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fal fa-times-octagon"
                     style="font-size:20pt;"></i></button>
@@ -253,9 +295,9 @@
               <tr>
                 <th style="color: rgb(127, 221, 33);"><i class="fas fa-planet"></i> Centro</th>
                 <th style="color: rgb(127, 221, 33);"><i class="fas fa-truck"></i> Proveedor</th>
-                
                 <th style="color: rgb(127, 221, 33);"><i class="fas fa-file"></i> Cae/Archivo</th>
                 <th style="color: rgb(127, 221, 33);"><i class="fas fa-calendar"></i> Fecha FC</th>
+                <th style="color: rgb(127, 221, 33);"><i class="fas fa-edit"></i> Detalle</th>
                 <th style="color: rgb(127, 221, 33);"><i class="fad fa-bolt"></i> Opciones</th>
 
               </tr>
@@ -270,6 +312,7 @@
                
                 <td style="color: rgb(127, 221, 33);">{{ archivoA[8] }}</td>
                 <td> {{ archivoA[9] }}</td>
+                <td><a href="#" data-toggle="modal" data-target="#detalleModal{{ archivoA[0] }}" class="btn btn-info btn-sm">Detalle</a></td>
                 <td>
                   <div class="row">
                     <div class="col">
@@ -363,7 +406,7 @@
                           }
             },
             "order": [
-                [3, 'desc'] // Ordenar por la cuarta columna (índice 3) de forma ascendente
+                [2, 'desc'] // Ordenar por la cuarta columna (índice 3) de forma ascendente
             ]
         });
     });

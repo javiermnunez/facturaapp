@@ -115,7 +115,8 @@ def buscarAprovadosControl():
         estado = registro[7]
         nombre = registro[8]
         fechaFC = registro[9]
-        aprobadosC.append([id,ruta,fecha,usuario,proveedor,centro,cae,estado,nombre,fechaFC])
+        detalle = registro[10]
+        aprobadosC.append([id,ruta,fecha,usuario,proveedor,centro,cae,estado,nombre,fechaFC,detalle])
 
     return aprobadosC
 
@@ -136,7 +137,8 @@ def buscarLiberados():
         estado = registro[7]
         nombre = registro[8]
         fechaFC = registro[9]
-        aprobadosC.append([id,ruta,fecha,usuario,proveedor,centro,cae,estado,nombre,fechaFC])
+        detalle = registro[10]
+        aprobadosC.append([id,ruta,fecha,usuario,proveedor,centro,cae,estado,nombre,fechaFC,detalle])
 
     return aprobadosC
 
@@ -199,7 +201,8 @@ def buscarArchivosRepo(usuario,centro):
         estado = registro[7]
         nombre = registro[8]
         fechaFC = registro[9]
-        repositorio.append([id,ruta,fecha,usuario,proveedor,centro,cae,estado,nombre,fechaFC])
+        detalle = registro[10]
+        repositorio.append([id,ruta,fecha,usuario,proveedor,centro,cae,estado,nombre,fechaFC,detalle])
     
     return repositorio
 
@@ -220,7 +223,8 @@ def buscarArchivosApro(centro):
         estado = registro[7]
         nombre = registro[8]
         fechaFC = registro[9]
-        aprobados.append([id,ruta,fecha,usuario,proveedor,centro,cae,estado,nombre,fechaFC])
+        detalle = registro[10]
+        aprobados.append([id,ruta,fecha,usuario,proveedor,centro,cae,estado,nombre,fechaFC,detalle])
 
     return aprobados
 @app.route('/noLogin')
@@ -578,9 +582,9 @@ def subirA():
         if request.method == 'POST':
             if buscarArchivo(request.form['cae']) == 0:
                 if usuarioO.roll == 'PROVEEDORES':
-                    subirArchivoProveedores(usuarioO.id,carpetaRepositorio ,request.form['proveedor'],request.form['centro'],request.form['cae'],request.form['fecha'])
+                    subirArchivoProveedores(usuarioO.id,carpetaLiberados ,request.form['proveedor'],request.form['centro'],request.form['cae'],request.form['fecha'],request.form['detalle'])
                 else:
-                    subirArchivo(usuarioO.id,carpetaRepositorio ,request.form['proveedor'],request.form['centro'],request.form['cae'],request.form['fecha'])
+                    subirArchivo(usuarioO.id,carpetaRepositorio ,request.form['proveedor'],request.form['centro'],request.form['cae'],request.form['fecha'],request.form['detalle'])
             else:
                 flash('Ya hay un archivo con número de CAE: '+request.form['cae']+".")
             
@@ -602,7 +606,7 @@ def decodificar(codificada):
 
 
 
-def subirArchivo(id_usuario, ruta_repo, proveedor, centro, cae, fechaFactura):
+def subirArchivo(id_usuario, ruta_repo, proveedor, centro, cae, fechaFactura, detalle):
     # Comprobar si la solicitud de publicación tiene la parte del archivo
     if 'file' not in request.files:
         print('No se cargó ningún archivo')
@@ -631,12 +635,12 @@ def subirArchivo(id_usuario, ruta_repo, proveedor, centro, cae, fechaFactura):
         # Se redirecciona a la página principal
         cursor = conexion.cursor()
         fechaActual = datetime.now()
-        sqlUsuario = f"INSERT INTO `archivos` (`id_archivo`, `ruta`, `fecha`, `usuario`, `proveedor`,`centro`,`cae`,`estado`,`nombre`,`fecha_factura`) VALUES (NULL, '{ruta_codificada}', '{fechaActual}', '{id_usuario}', '{proveedor}', '{centro}','{cae}','NO_APROBADO','{nuevo_nombre}', '{fechaFactura}');"
+        sqlUsuario = f"INSERT INTO `archivos` (`id_archivo`, `ruta`, `fecha`, `usuario`, `proveedor`,`centro`,`cae`,`estado`,`nombre`,`fecha_factura`,`detalle`) VALUES (NULL, '{ruta_codificada}', '{fechaActual}', '{id_usuario}', '{proveedor}', '{centro}','{cae}','NO_APROBADO','{nuevo_nombre}', '{fechaFactura}', '{detalle}');"
         cursor.execute(sqlUsuario)
         conexion.commit()
 
 
-def subirArchivoProveedores(id_usuario, ruta_repo, proveedor, centro, cae, fechaFactura):
+def subirArchivoProveedores(id_usuario, ruta_repo, proveedor, centro, cae, fechaFactura, detalle):
     # Comprobar si la solicitud de publicación tiene la parte del archivo
     if 'file' not in request.files:
         print('No se cargó ningún archivo')
@@ -665,7 +669,7 @@ def subirArchivoProveedores(id_usuario, ruta_repo, proveedor, centro, cae, fecha
         # Se redirecciona a la página principal
         cursor = conexion.cursor()
         fechaActual = datetime.now()
-        sqlUsuario = f"INSERT INTO `archivos` (`id_archivo`, `ruta`, `fecha`, `usuario`, `proveedor`,`centro`,`cae`,`estado`,`nombre`,`fecha_factura`) VALUES (NULL, '{ruta_codificada}', '{fechaActual}', '{id_usuario}', '{proveedor}', '{centro}','{cae}','LIBERADO','{nuevo_nombre}', '{fechaFactura}');"
+        sqlUsuario = f"INSERT INTO `archivos` (`id_archivo`, `ruta`, `fecha`, `usuario`, `proveedor`,`centro`,`cae`,`estado`,`nombre`,`fecha_factura`, `detalle`) VALUES (NULL, '{ruta_codificada}', '{fechaActual}', '{id_usuario}', '{proveedor}', '{centro}','{cae}','LIBERADO','{nuevo_nombre}', '{fechaFactura}, '{detalle}'');"
         cursor.execute(sqlUsuario)
         conexion.commit()
 
