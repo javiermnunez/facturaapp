@@ -242,72 +242,15 @@
         <div class="row">
           <h4>{{usuario.nombre}} {{usuario.apellido}}</h4>
         </div>
-        {% if archivos %}
+
+        
+
         <div class="table-responsive-sm">
-          <h3>Archivos cargados {% if usuario.roll == "JEFE" %}para {{usuario.centro}}{% endif %}</h3>
+          <h3>Liberados</h3>
           <table class="table  table-bordered text-center table-hover">
             <thead class="thead-dark">
               <tr>
-                <th><i class="fas fa-truck"></i> Proveedor</th>
-                
-                <th><i class="fas fa-file"></i> Cae/Archivo</th>
-                <th><i class="fas fa-calendar"></i> Fecha FC</th>
-                <th><i class="fad fa-bolt" style="max-width:30px;"></i> Opciones</th>
-
-              </tr>
-            </thead>
-            <tbody>
-              {% for archivo in archivos %}
-              <tr>
-                <td>{{ archivo[4] }}</td>
-                
-                <td>{{ archivo[8] }}</td>
-                <td>{{ archivo[9] }}</td>
-                <td>
-                  <div class="row">
-                    <div class="col">
-                      <form action="/verPdf" method="post" enctype=multipart/form-data target="_blank">
-                        <input type="text" name="id_archivo" value="{{archivo[0]}}" hidden>
-                        <input type="text" name="id" value="{{id}}" hidden>
-                        <button type="submit" class="btn  btn-outline-info btn-sm" title="Ver archivo"><i
-                            class="fas fa-eye" fa-lg></i></button>
-                      </form>
-                    </div>
-                    {% if usuario.roll != "EMPLEADO" %}
-                    <div class="col">
-
-                      <form action="/aprobar" method="post" enctype=multipart/form-data>
-                        <input type="text" name="id" value="{{id}}" hidden>
-                        <input type="text" name="archivo" value="{{archivo[1]}}" hidden>
-                        <button type="submit" class="btn btn-outline-primary btn-sm" title="Aprobar"><i
-                            class="fas fa-plus fa-lg"></i>
-                        </button>
-                      </form>
-                    </div>
-                    {% endif %}
-                    <div class="col">
-
-                      <form action="/eliminarArchivo" method="post" enctype=multipart/form-data>
-                        <input type="text" name="cae" value="{{cae}}" hidden>
-                        <input type="text" name="id" value="{{id}}" hidden>
-                        <input type="text" name="archivo" value="{{archivo[1]}}" hidden>
-                        <button type="submit" class="btn btn-outline-danger btn-sm" title="Eliminar"><i class="fas fa-trash
-                              fa-lg"></i></button>
-                      </form>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-        {% endif %}
-        <div class="table-responsive-sm">
-          <h3>Aprobados</h3>
-          <table class="table  table-bordered text-center table-hover">
-            <thead class="thead-dark">
-              <tr>
+                <th style="color: rgb(127, 221, 33);"><i class="fas fa-planet"></i> Centro</th>
                 <th style="color: rgb(127, 221, 33);"><i class="fas fa-truck"></i> Proveedor</th>
                 
                 <th style="color: rgb(127, 221, 33);"><i class="fas fa-file"></i> Cae/Archivo</th>
@@ -321,6 +264,7 @@
               {% for archivoA in archivosA %}
 
               <tr>
+                <td> {{ archivoA[5] }}</td>
                 <td> {{ archivoA[4] }}</td>
                
                 <td style="color: rgb(127, 221, 33);">{{ archivoA[8] }}</td>
@@ -336,16 +280,17 @@
                             class="fas fa-eye fa-lg" title="Ver"></i></button>
                       </form>
                     </div>
-                    {% if usuario.roll != "EMPLEADO" %}
-                    <div class="col">
-                      <form action="/noAprobar" method="post" enctype=multipart/form-data>
-                        <input type="text" name="id" value="{{id}}" hidden>
-                        <input type="text" name="archivo" value="{{archivoA[1]}}" hidden>
-                        <button type="submit" class="btn btn-outline-warning btn-sm"><i class="fas fa-stop-circle fa-lg"
-                            title="Recuperar"></i></button>
-                      </form>
-                    </div>
-                    {% endif %}
+                    
+                  </div>
+                  <div class="col">
+
+                    <form action="/eliminarArchivo" method="post" enctype=multipart/form-data>
+                      <input type="text" name="cae" value="{{cae}}" hidden>
+                      <input type="text" name="id" value="{{id}}" hidden>
+                      <input type="text" name="archivo" value="{{archivoA[1]}}" hidden>
+                      <button type="submit" class="btn btn-outline-danger btn-sm" title="Eliminar"><i class="fas fa-trash
+                            fa-lg"></i></button>
+                    </form>
                   </div>
                 </td>
               </tr>

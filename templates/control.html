@@ -248,6 +248,7 @@
           <table class="table  table-bordered text-center table-hover">
             <thead class="thead-dark">
               <tr>
+                <th><i class="fas fa-planet"></i> Centro</th>
                 <th><i class="fas fa-truck"></i> Proveedor</th>
                 
                 <th><i class="fas fa-file"></i> Cae/Archivo</th>
@@ -259,6 +260,7 @@
             <tbody>
               {% for archivo in archivos %}
               <tr>
+                <td>{{ archivo[5] }}</td>
                 <td>{{ archivo[4] }}</td>
                 
                 <td>{{ archivo[8] }}</td>
@@ -308,6 +310,7 @@
           <table class="table  table-bordered text-center table-hover">
             <thead class="thead-dark">
               <tr>
+                <th style="color: rgb(127, 221, 33);"><i class="fas fa-planet"></i> Centro</th>
                 <th style="color: rgb(127, 221, 33);"><i class="fas fa-truck"></i> Proveedor</th>
                 
                 <th style="color: rgb(127, 221, 33);"><i class="fas fa-file"></i> Cae/Archivo</th>
@@ -321,6 +324,7 @@
               {% for archivoA in archivosA %}
 
               <tr>
+                <td> {{ archivoA[5] }}</td>
                 <td> {{ archivoA[4] }}</td>
                
                 <td style="color: rgb(127, 221, 33);">{{ archivoA[8] }}</td>
@@ -342,7 +346,16 @@
                         <input type="text" name="id" value="{{id}}" hidden>
                         <input type="text" name="archivo" value="{{archivoA[1]}}" hidden>
                         <button type="submit" class="btn btn-outline-warning btn-sm"><i class="fas fa-stop-circle fa-lg"
-                            title="Recuperar"></i></button>
+                            title="No aprobar"></i></button>
+                      </form>
+                    </div>
+                    {% endif %}
+                    {% if usuario.roll == "CONTROL" %}
+                    <div class="col">
+                      <form action="/liberar" method="post" enctype=multipart/form-data>
+                        <input type="text" name="id" value="{{id}}" hidden>
+                        <input type="text" name="archivo" value="{{archivoA[1]}}" hidden>
+                        <button type="submit" class="btn btn-outline-success btn-sm"><i class="fa fa-check" title="Liberar"></i></button>
                       </form>
                     </div>
                     {% endif %}
