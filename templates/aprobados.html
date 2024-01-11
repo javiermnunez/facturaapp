@@ -13,12 +13,17 @@
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
+          <form action="/editarDetalle" method="post" enctype=multipart/form-data>
           <div class="modal-body">
-            <textarea rows="5" cols="50">{{ archivoA[10] }}</textarea>
+            <textarea rows="5" cols="50" name="detalle">{{ archivoA[10] }}</textarea>
+            <input name="cae" value="{{archivoA[6]}}" hidden>
+            <input name="usuario" type="text" value={{usuario.id}} hidden>
           </div>
           <div class="modal-footer">
+            <button type="submit" class="btn btn-info">Modificar</button>
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
           </div>
+        </form>
         </div>
       </div>
     </div>
@@ -181,7 +186,7 @@
     <div class="row">
       <div class="col-12 col-md-1"></div>
       <div class="col-12 col-md-10 ">
-        {% if archivosA %}
+        
         <div class="table-responsive">
           <h3>Aprobados</h3>
           <table class="table  table-bordered text-center table-hover" id="miTabla2">
@@ -294,7 +299,7 @@
         {% endif %}
       </div>
       <div class="col-12 col-md-1"></div>
-      {% endif %}
+      
     </div>
   </div>
   <br>

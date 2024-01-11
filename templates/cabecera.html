@@ -53,7 +53,7 @@
             <li>
                     <button type="submit" class="btn btn-dark">{{usuario.roll}}</button>
             </li>
-            <li>{% if usuario %}
+            <li>{% if usuario.roll == "CONTROL" %}
                 <form action="/repositorioC" method="POST" style="margin-left: auto;">
                     <input type="email" class="form-control" id="email" name="usuario" value="{{usuario.mail}}" hidden>
                     <input type="password" class="form-control" id="password" name="contrasenia"
@@ -75,7 +75,7 @@
                 </form>
                 {% endif %}
             </li>
-            <li>{% if usuario %}
+            <li>{% if usuario.roll == "CONTROL" %}
                 <form action="/liberados" method="POST" style="margin-left: auto;">
                     <input type="email" class="form-control" id="email" name="usuario" value="{{usuario.mail}}" hidden>
                     <input type="password" class="form-control" id="password" name="contrasenia"

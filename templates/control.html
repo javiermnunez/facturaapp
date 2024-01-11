@@ -1,7 +1,7 @@
 {% include 'cabecera.html' %}
   <br>
 
-  {% if usuario %}
+  {% if usuario.roll == "CONTROL" %}
 
   <div class="container-fluid">
     {% for archivo in archivos %}
@@ -208,7 +208,7 @@
       <div class="col-12 col-md-2"></div>
       <div class="col-12 col-md-8 ">
 
-        {% if archivos %}
+        
         <div class="table-responsive-sm">
           <h3>Archivos cargados {% if usuario.roll == "JEFE" %}para {{usuario.centro}}{% endif %}</h3>
           <table class="table  table-bordered text-center table-hover" id="miTabla">
@@ -277,7 +277,7 @@
 
       </div>
       <div class="col-12 col-md-2"></div>
-      {% endif %}
+      
     </div>
   </div>
 {% include 'pie.html' %}

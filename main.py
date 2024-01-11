@@ -868,6 +868,33 @@ def mover_archivo_a_Liberar():
     # Manejar el caso en el que no se encuentra el usuario
     return volverInicio(usuario,contrasenia)
 
+
+@app.route('/editarDetalle', methods=['POST'])
+def detalle_editar():
+    # Obtener los parámetros de la solicitud POST
+    id_usuario = request.form['usuario']
+    cae = request.form['cae']
+    detalle = request.form['detalle']
+    cursor = conexion.cursor()
+    sqlUsuario = f"UPDATE `archivos` SET `detalle` = '{detalle}' WHERE `cae` = '{cae}';"
+    cursor.execute(sqlUsuario)
+    conexion.commit()
+    sql_usuario = buscarUsuario(id_usuario)
+    if sql_usuario and sql_usuario != "()" and sql_usuario != "[]":
+        # Crear el objeto Usuario si se encuentra
+        usuario_o = Usuario(sql_usuario[0][0],sql_usuario[0][1], sql_usuario[0][2], sql_usuario[0][3],
+                            sql_usuario[0][4], sql_usuario[0][5], sql_usuario[0][6], sql_usuario[0][7])
+        
+        # Redirigir a la URL "/repositorio" con las credenciales del usuario como parámetros de consulta
+        
+        sqlArchivosRepo = buscarArchivosRepo(usuario_o, usuario_o.centro)
+        sqlArchivosApro = buscarAprovadosControl()
+        listaArchivos = sqlArchivosRepo
+        listaArchivosA = sqlArchivosApro
+        return render_template('aprobados.html',usuario = usuario_o,id=usuario_o.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio)
+    
+    
+
 @app.route('/aprobar', methods=['POST'])
 def moverArchivoAprobado():
     # Obtener los parámetros de la solicitud POST
