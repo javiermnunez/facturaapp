@@ -1,0 +1,302 @@
+{% include 'cabecera.html' %}
+  <br>
+  {% if usuario %}
+  <div class="container-fluid">
+    {% for liberado in liberados %}
+    <div class="modal fade" id="detalleModal{{ liberado[0] }}" tabindex="-1" role="dialog"
+      aria-labelledby="detalleModalLabel{{ liberado[0] }}" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="detalleModalLabel{{ liberado[0] }}">Detalle del Archivo</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <textarea rows="5" cols="50">{{ liberado[10] }}</textarea>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    <div class="row">
+      <div class=" col-md-6 offset-md-3 text-center">
+        {% with messages= get_flashed_messages() %}
+        {% if messages %}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          {% for message in messages %}{{ message }}{% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+          aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel"><i class="fal fa-folder-upload"
+                    style="font-size:30pt;"></i> Cargar Archivo</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+
+              <div class="modal-body">
+
+                <form action="/repositorioSubir" method="post" enctype=multipart/form-data>
+                  <input id="ruta" type="text" value={{repositorio}} hidden>
+                  <input name="id" type="text" value={{id}} hidden>
+                  <input name="usuario" type="text" value={{usuario.mail}} hidden>
+                  <input name="contrasenia" type="text" value={{usuario.contraseña}} hidden>
+                  <div class="form-group ">
+                    <input type="file" name="file" id="file" class="inputfile inputfile-4"
+                      data-multiple-caption="{count} files selected" multiple />
+                    <label for="file">
+                      <i class="fas fa-file" style="font-size:30pt"></i>
+                      <br>
+                      <span>Seleccione un archivo&hellip;</span>
+                    </label>
+                  </div>
+              </div>
+              <div class="mb-3">
+                <label for="proveedor" class="form-label">Proveedor</label>
+                <input type="text" class="form-data" name="proveedor" placeholder="Proveedor" required>
+              </div>
+              <div class="mb-3">
+                <label for="centro" class="form-label">Centro</label>
+                <select class="form-data" name="centro">
+                  <option value="{{usuario.centro}}">{{usuario.centro}}</option>
+                  <option value="O600">ABASTECIMIENTO</option>
+                  <option value="X300">ADMINISTRACIÓN</option>
+                  <option value="X600">ADMINISTRACIÓN LR</option>
+                  <option value="Z300">ADR</option>
+                  <option value="M500">ARTE</option>
+                  <option value="G400">ASEG. CALIDAD</option>
+                  <option value="G500">ASEG. CALIDAD LR</option>
+                  <option value="L100">ASUNTOS INSTITUC.</option>
+                  <option value="M140">AVISOS</option>
+                  <option value="X400">BETA</option>
+                  <option value="G120">CC EMPAQUE</option>
+                  <option value="G110">CC FARMACEUTICO</option>
+                  <option value="X200">COMERCIALIZACIÓN</option>
+                  <option value="M130">CONGRESOS INTERNACIO</option>
+                  <option value="M131">CONGRESOS NACIONALES</option>
+                  <option value="O215">CONTADURÍA</option>
+                  <option value="O510">CONTROL DE GESTIÓN</option>
+                  <option value="P322">CÓRDOBA - ZONA 6000</option>
+                  <option value="G300">CTRL. CAL. LA RIOJA</option>
+                  <option value="P324">CUYO - ZONA 8000</option>
+                  <option value="O720">DEPÓSITO ANDREANI</option>
+                  <option value="R100">DESARROLLO ANALÍTICO</option>
+                  <option value="R200">DESARROLLO GALÉNICO</option>
+                  <option value="X101">DEV DISPRO - DESTRUC</option>
+                  <option value="D000">DIRECCIÓN MÉDICA</option>
+                  <option value="O411">DISTRIBUCION SERVICIOS</option>
+                  <option value="P316">DISTRITO CENTRO - ZONA 1500</option>
+                  <option value="P313">DISTRITO NORTE - ZONA 1200</option>
+                  <option value="P314">DISTRITO OESTE - ZONA 1300</option>
+                  <option value="P315">DISTRITO SUR - ZONA 1400</option>
+                  <option value="Z400">FACT SOCIEDADES VINCULADAS</option>
+                  <option value="O210">FINANZAS</option>
+                  <option value="G100">GCIA. GTIA. CALIDAD</option>
+                  <option value="M000">GERENCIA DE PHARMA</option>
+                  <option value="P100">GERENCIA PROMOCIÓN</option>
+                  <option value="M001">GS AUTOMOVIL TOYOTA</option>
+                  <option value="O220">IMP. Y PROVEEDORES</option>
+                  <option value="M133">INSTITUCIONES</option>
+                  <option value="X500">INVEST.Y DESARROLLO</option>
+                  <option value="M132">JORNADAS</option>
+                  <option value="M120">LITERATURAS</option>
+                  <option value="P327">LITORAL CENTRO - ZONA 11.000</option>
+                  <option value="P321">LITORAL NORTE - ZONA 5000</option>
+                  <option value="P326">LP / MDQ / TAO - ZONA 10.000</option>
+                  <option value="O340">MANTENIMIENTO</option>
+                  <option value="M100">MARKETING</option>
+                  <option value="P318">METROPOLIT CENTRO 2 - ZONA 1600</option>
+                  <option value="O530">NEG.INTERNACIONALES</option>
+                  <option value="P323">NOROESTE - ZONA 7000</option>
+                  <option value="O430">OFICINA DE PERSONAL</option>
+                  <option value="V000">OFICINA DE VENTAS</option>
+                  <option value="O100">OPERACIONES</option>
+                  <option value="O710">PLANEAMIENTO</option>
+                  <option value="O715">PLANEAMIENTO LR</option>
+                  <option value="O330">PLANTA LA RIOJA</option>
+                  <option value="O333">PLANTA LR - ACONDICIONAMIENTO</option>
+                  <option value="O338">PLANTA LR - ADMINISTRACION</option>
+                  <option value="O335">PLANTA LR - COMPRIMIDOS /GRAJEAS</option>
+                  <option value="O339">PLANTA LR - DEPÓSITO</option>
+                  <option value="O334">PLANTA LR - HORMONALES</option>
+                  <option value="O336">PLANTA LR - IMPRENTA</option>
+                  <option value="O332">PLANTA LR - MANTENIMIENTO</option>
+                  <option value="O331">PLANTA LR - NO HORMONALES</option>
+                  <option value="Z100">PRESIDENCIA</option>
+                  <option value="X100">PRODUCCIÓN</option>
+                  <option value="O313">PRODUCCION - ADMINISTRACION</option>
+                  <option value="O312">PRODUCCIÓN (BS.AS.)</option>
+                  <option value="R300">REGULACIÓN</option>
+                  <option value="P320">ROSARIO - ZONA 4000</option>
+                  <option value="M210">RRPP - PROTOCOLOS</option>
+                  <option value="X700">SANEAMIENTO SOCIETARIO</option>
+                  <option value="Z200">SECRETARÍA</option>
+                  <option value="O415">SEGURIDAD INDUSTRIAL</option>
+                  <option value="O410">SERVICIOS</option>
+                  <option value="O520">SISTEMAS</option>
+                  <option value="P325">SUR - ZONA 9000</option>
+                  <option value="M145">TRATAMIENTOS COMPART</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="cae" class="form-label">CAE</label>
+                <input type="text" class="form-data" name="cae" placeholder="CAE" required>
+              </div>
+              <div class="mb-3">
+                <label for="fecha" class="form-label">Fecha factura</label>
+                <input type="date" class="form-data" name="fecha" required>
+              </div>
+              <div class="mb-3">
+                <label for="detalle" class="form-label">Detalle</label>
+                <textarea id="detalle" name="detalle" rows="2" cols="50"></textarea>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fal fa-times-octagon"
+                    style="font-size:20pt;"></i></button>
+                <button type="submit" class="btn btn-primary"><i class="far fa-cloud-upload-alt"
+                    style="font-size:20pt;"></i></button>
+
+              </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+
+    </div>
+    <div class="row">
+      <div class="col-12 col-md-1"></div>
+      <div class="col-12 col-md-10 ">
+        {% if liberados %}
+        <div class="table-responsive">
+          <h3>Editar liberados</h3>
+          <table class="table  table-bordered text-center table-hover" id="miTabla2">
+            <thead class="thead-dark">
+              <tr>
+                <th style="color: rgb(127, 221, 33);"><i class="fas fa-planet"></i> Centro</th>
+                <th style="color: rgb(127, 221, 33);"><i class="fas fa-truck"></i> Proveedor</th>
+                <th style="color: rgb(127, 221, 33);"><i class="fas fa-file"></i> Cae/Archivo</th>
+                <th style="color: rgb(127, 221, 33);"><i class="fas fa-calendar"></i> Fecha FC</th>
+                <th style="color: rgb(127, 221, 33);"><i class="fas fa-edit"></i> Detalle</th>
+                <th style="color: rgb(127, 221, 33);"><i class="fad fa-bolt"></i> Opciones</th>
+                <th style="color: rgb(127, 221, 33);"><i class="fad fa-bolt"></i> Liberar</th>
+
+
+              </tr>
+            </thead>
+            <tbody>
+
+              {% for liberado in liberados %}
+
+              <tr>
+                <td> {{ liberado[5] }}</td>
+                <td> {{ liberado[4] }}</td>
+
+                <td style="color: rgb(33, 67, 221);">{{ liberado[8] }}</td>
+                <td> {{ liberado[9] }}</td>
+                <td><a href="#" data-toggle="modal" data-target="#detalleModal{{ liberado[0] }}"
+                    class="btn btn-outline-secondary btn-sm">Detalle</a></td>
+                <td>
+                  <div class="row">
+                    <div class="col">
+                      <form action="/verPdf" method="post" enctype=multipart/form-data target="_blank"
+                        rel="noopener noreferrer">
+                        <input type="text" name="id_archivo" value="{{liberado[0]}}" hidden>
+                        <input type="text" name="id" value="{{id}}" hidden>
+                        <button type="submit" class="btn  btn-outline-info btn-sm" title="Ver archivo"><i
+                            class="fas fa-eye fa-lg" title="Ver"></i></button>
+                      </form>
+                    </div>
+                    {% if usuario.roll != "EMPLEADO" %}
+                    <div class="col">
+                      <form action="/noAprobar" method="post" enctype=multipart/form-data>
+                        <input type="text" name="id" value="{{id}}" hidden>
+                        <input type="text" name="archivo" value="{{liberado[1]}}" hidden>
+                        <button type="submit" class="btn btn-outline-warning btn-sm" title="No aprobar"><i class="fas fa-stop-circle fa-lg"
+                            ></i></button>
+                      </form>
+                    </div>
+                    {% endif %}
+
+                  </div>
+                </td>
+                <td>
+                  <div class="row">
+                    {% if usuario.roll == "CONTROL" %}
+                    <div class="col">
+                      <form action="/liberar" method="post" enctype=multipart/form-data>
+                        <input type="text" name="id" value="{{id}}" hidden>
+                        <input type="text" name="archivo" value="{{liberado[1]}}" hidden>
+                        <div class="row">
+                          
+                          <div class="col-6">
+                            <select name="destino">
+                                <option>{{liberado[11]}}</option>
+                                <option title="PROVEEDORES" value="PROVEEDORES">P</option>
+                                <option title="SERVICIOS" value="SERVICIOS">S</option>
+                                <option title="PAGO DIRECTO" value="DIRECTO">D</option>
+                            </select>
+                            <!--
+                            <div class="form-check">
+                              <input class="form-check-input" type="radio" name="destino" id="flexRadioDefault1" title="PROVEEDORES" value="PROVEEDORES" checked>
+                              <label class="form-check-label" for="flexRadioDefault1" >
+                                P
+                              </label>
+                            </div>
+                            <div class="form-check">
+                              <input class="form-check-input" type="radio" name="destino" id="flexRadioDefault2" title="SERVICIOS" value="SERVICIOS">
+                              <label class="form-check-label" for="flexRadioDefault2" >
+                                S
+                              </label>
+                            </div>
+                            <div class="form-check">
+                              <input class="form-check-input" type="radio" name="destino" id="flexRadioDefault3" title="PAGO DIRECTO" value="DIRECTO">
+                              <label class="form-check-label" for="flexRadioDefault3" >
+                                D
+                              </label>
+                            </div>--> 
+                          </div>
+                            
+
+                          <div class="col-6">
+                            <button type="submit" class="btn btn-outline-success btn-sm" title="Liberar"><i class="fa fa-check"
+                                ></i></button>
+                          </div>
+                          
+                        </div>
+
+
+
+                      </form>
+                    </div>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+
+        </div>
+        {% endif %}
+      </div>
+      <div class="col-12 col-md-1"></div>
+      {% endif %}
+    </div>
+  </div>
+  <br>
+  {% include 'pie.html' %}

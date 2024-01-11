@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="no-js">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>FacturaApp {% if usuario %} -{{usuario.nombre}} {{ usuario.apellido }}{% endif %}</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='img/space.ico')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/all.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome-pro/web/css/all.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css')}}">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/normalize.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/component.css')}}">
+
+    <script src="{{ url_for('static', filename='bootstrap/js/jquery-3.5.1.slim.min.js')}}"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="{{ url_for('static', filename='bootstrap/js/popper.min.js')}}"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"
+        integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
+        crossorigin="anonymous"></script>
+
+    <script>(function (e, t, n) { var r = e.querySelectorAll("html")[0]; r.className = r.className.replace(/(^|\s)no-js(\s|$)/, "$1js$2") })(document, window, 0);</script>
+
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css"
+        integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+    <link href="https://cdn.datatables.net/v/bs5/dt-1.13.8/datatables.min.css" rel="stylesheet">
+</head>
+
+<body>
+
+
+    <header>
+        <section class="wrapper">
+    <!-- Inicia Navbar-->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark titulo-nav">
+        
+        
+        <ul>
+            <li>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            </li>
+            <li>
+                    <button type="submit" class="btn btn-dark">{{usuario.roll}}</button>
+            </li>
+            <li>{% if usuario %}
+                <form action="/repositorioC" method="POST" style="margin-left: auto;">
+                    <input type="email" class="form-control" id="email" name="usuario" value="{{usuario.mail}}" hidden>
+                    <input type="password" class="form-control" id="password" name="contrasenia"
+                        value="{{usuario.contraseña}}" hidden>
+                    <button type="submit" class="btn btn-dark">Repositorio</button>
+                </form>
+                {% endif %}
+            </li>
+            <li>
+                {% if usuario %}
+                <form action="/repositorio" method="POST" style="margin-left: auto;">
+                    <input type="email" class="form-control" id="email" name="usuario" value="{{usuario.mail}}" hidden>
+                    <input type="password" class="form-control" id="password" name="contrasenia"
+                        value="{{usuario.contraseña}}" hidden>
+
+                    <button type="submit" class="btn btn-dark">Aprobados</button>
+
+
+                </form>
+                {% endif %}
+            </li>
+            <li>{% if usuario %}
+                <form action="/liberados" method="POST" style="margin-left: auto;">
+                    <input type="email" class="form-control" id="email" name="usuario" value="{{usuario.mail}}" hidden>
+                    <input type="password" class="form-control" id="password" name="contrasenia"
+                        value="{{usuario.contraseña}}" hidden>
+                    <button type="submit" class="btn btn-dark">Liberados</button>
+                </form>
+                {% endif %}
+            </li>
+            
+            <li>
+                <div style="margin-left: auto;">
+
+                    <button type="button" class="btn btn-dark" data-toggle="modal" data-target="#exampleModal"
+                        title="Cargar archivo">
+                        <i class="fas  fa-arrow-up" style="color: greenyellow;"></i> Subir Archivo
+                    </button>
+
+                </div>
+            </li>
+            <li>
+                <form action="/"  style="margin-left: auto;">
+                    
+                    <button type="submit" class="btn btn-dark">Salir</button>
+                </form>
+            </li>
+        </ul>
+    </nav>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+
+        
+
+        nav ul {
+            list-style: none;
+            overflow: hidden;
+            /* Limpiamos errores de float */
+        }
+
+        nav ul li {
+            float: left;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+        }
+
+        nav ul li a {
+            display: block;
+            /* Convertimos los elementos a en elementos bloque para manipular el padding */
+            padding: 20px;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .contenido {
+            padding-top: 80px;
+        }
+
+        .wrapper {
+            width: 100%;
+            margin: auto;
+            overflow: hidden;
+        }
+        header {
+            background: rgba(0,0,0,0.9);
+            width: 100%;
+            position: fixed;
+            z-index: 10;
+        }
+    </style>
+    </section>
+</header>
+    <section class="contenido wrapper">

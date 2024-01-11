@@ -286,7 +286,7 @@
         <div class="row">
           <h4>{{usuario.nombre}} {{usuario.apellido}}</h4>
         </div>
-        {% if archivos %}
+        
         <div class="table-responsive-sm">
           <h3>Archivos cargados {% if usuario.roll == "JEFE" %}para {{usuario.centro}}{% endif %}</h3>
           <table class="table  table-bordered text-center table-hover" id="miTabla">
@@ -307,7 +307,7 @@
                 
                 <td>{{ archivo[8] }}</td>
                 <td>{{ archivo[9] }}</td>
-                <td><a href="#" data-toggle="modal" data-target="#detalleModal{{ archivo[0] }}" class="btn btn-info btn-sm">Detalle</a></td>
+                <td><a href="#" data-toggle="modal" data-target="#detalleModal{{ archivo[0] }}" class="btn btn-outline-secondary btn-sm">Detalle</a></td>
                 <td>
                   <div class="row">
                     <div class="col">
@@ -347,7 +347,8 @@
             </tbody>
           </table>
         </div>
-        {% endif %}
+        
+        {% if archivosA %}
         <div class="table-responsive-sm">
           <h3>Aprobados</h3>
           <table class="table  table-bordered text-center table-hover" id="miTabla2">
@@ -368,9 +369,9 @@
               <tr>
                 <td> {{ archivoA[4] }}</td>
                
-                <td style="color: rgb(127, 221, 33);">{{ archivoA[8] }}</td>
+                <td style="color: rgb(33, 61, 221);">{{ archivoA[8] }}</td>
                 <td> {{ archivoA[9] }}</td>
-                <td><a href="#" data-toggle="modal" data-target="#detalleModal{{ archivoA[0] }}" class="btn btn-info btn-sm">Detalle</a></td>
+                <td><a href="#" data-toggle="modal" data-target="#detalleModal{{ archivoA[0] }}" class="btn btn-outline-secondary btn-sm">Detalle</a></td>
                 <td>
                   <div class="row">
                     <div class="col">
@@ -400,12 +401,9 @@
           </table>
 
         </div>
-
+        {% endif %}
       </div>
       <div class="col-12 col-md-2"></div>
-
-
-
       {% endif %}
     </div>
   </div>
