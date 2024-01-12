@@ -32,6 +32,25 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css"
         integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
     <link href="https://cdn.datatables.net/v/bs5/dt-1.13.8/datatables.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+       
+
+        footer {
+            background-color: rgb(212, 211, 211);
+            padding: 20px 0; /* Ajusta el espaciado superior e inferior según sea necesario */
+        }
+
+        .footer-content {
+            width: 100%;
+            max-height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Puedes agregar más estilos según tus necesidades */
+    </style>
 </head>
 
 <body>
@@ -51,7 +70,7 @@
             </button>
             </li>
             <li>
-                    <button type="submit" class="btn btn-dark">{{usuario.roll}}</button>
+                    <p style="color: rgb(58, 176, 255);padding: 8px 12px;">{{usuario.roll}}</p>
             </li>
             <li>{% if usuario.roll == "CONTROL" %}
                 <form action="/repositorioC" method="POST" style="margin-left: auto;">
@@ -63,13 +82,24 @@
                 {% endif %}
             </li>
             <li>
-                {% if usuario %}
+                {% if usuario.roll == "CONTROL" %}
                 <form action="/repositorio" method="POST" style="margin-left: auto;">
                     <input type="email" class="form-control" id="email" name="usuario" value="{{usuario.mail}}" hidden>
                     <input type="password" class="form-control" id="password" name="contrasenia"
                         value="{{usuario.contraseña}}" hidden>
 
                     <button type="submit" class="btn btn-dark">Aprobados</button>
+
+
+                </form>
+                {% endif %}
+                {% if usuario.roll == "JEFE" or usuario.roll == "EMPLEADO" %}
+                <form action="/repositorio" method="POST" style="margin-left: auto;">
+                    <input type="email" class="form-control" id="email" name="usuario" value="{{usuario.mail}}" hidden>
+                    <input type="password" class="form-control" id="password" name="contrasenia"
+                        value="{{usuario.contraseña}}" hidden>
+
+                    <button type="submit" class="btn btn-dark">Repositorio</button>
 
 
                 </form>
@@ -81,6 +111,14 @@
                     <input type="password" class="form-control" id="password" name="contrasenia"
                         value="{{usuario.contraseña}}" hidden>
                     <button type="submit" class="btn btn-dark">Liberados</button>
+                </form>
+                {% endif %}
+                {% if usuario.roll == "JEFE" or usuario.roll == "EMPLEADO" %}
+                <form action="/aprobados" method="POST" style="margin-left: auto;">
+                    <input type="email" class="form-control" id="email" name="usuario" value="{{usuario.mail}}" hidden>
+                    <input type="password" class="form-control" id="password" name="contrasenia"
+                        value="{{usuario.contraseña}}" hidden>
+                    <button type="submit" class="btn btn-dark">Aprobados</button>
                 </form>
                 {% endif %}
             </li>
@@ -146,6 +184,19 @@
             width: 100%;
             position: fixed;
             z-index: 10;
+        }
+        footer {
+            background-color: rgb(212, 211, 211);
+            padding: 20px 0; /* Ajusta el espaciado superior e inferior según sea necesario */
+            min-height: 100px;
+        }
+
+        .footer-content {
+            width: 100%;
+            max-height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
     </style>
     </section>

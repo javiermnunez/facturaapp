@@ -244,6 +244,45 @@ def volverInicio(usuario, password):
     return redirect('/')
 
 
+def volverInicioOrigen(usuario, password,origen):
+    sqlUsuario = buscarUsuarioPass(usuario,password)
+    
+    print('string:'+str(sqlUsuario))
+    if str(sqlUsuario) != "()" and str(sqlUsuario) != "[]":
+        usuarioO = Usuario(sqlUsuario[0][0],sqlUsuario[0][1],sqlUsuario[0][2],sqlUsuario[0][3],sqlUsuario[0][4],sqlUsuario[0][5],sqlUsuario[0][6],sqlUsuario[0][7])
+        
+    else:
+        usuarioO = None
+    
+    if usuarioO:
+        if usuarioO.roll == "EMPLEADO" or usuarioO.roll == "JEFE":
+            sqlArchivosRepo = buscarArchivosRepo(usuarioO, usuarioO.centro)
+            sqlArchivosApro = buscarArchivosApro(usuarioO.centro)
+            listaArchivos = sqlArchivosRepo
+            listaArchivosA = sqlArchivosApro
+            return render_template(f'{origen}.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio)
+        if usuarioO.roll == "CONTROL":
+            sqlArchivosRepo = buscarArchivosRepo(usuarioO, usuarioO.centro)
+            sqlArchivosApro = buscarAprovadosControl()
+            listaArchivos = sqlArchivosRepo
+            listaArchivosA = sqlArchivosApro
+            if origen == "liberados":
+                sqlArchivosRepo = buscarArchivosRepo(usuarioO, usuarioO.centro)
+                sqlLiberados = buscarLiberadosC(usuarioO.id)
+                listaArchivos = sqlArchivosRepo
+                listaLiberados = sqlLiberados
+                return render_template('liberados.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, liberados = listaLiberados, repositorio = carpetaRepositorio)
+            return render_template(f'{origen}.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio)   
+        if usuarioO.roll == "PROVEEDORES":
+            sqlArchivosRepo = buscarArchivosRepo(usuarioO, usuarioO.centro)
+            sqlArchivosApro = buscarLiberadosP()
+            listaArchivos = sqlArchivosRepo
+            listaArchivosA = sqlArchivosApro
+            return render_template('proveedores.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio)        
+    else:
+                flash('Error.')
+    return redirect('/')
+
 def buscarArchivosRepo(usuario,centro):
     print(centro)
     repositorio = []
@@ -321,6 +360,7 @@ def noLogin():
 #Función para la eliminacion de archivos 
 @app.route('/eliminarArchivo', methods=['POST'])
 def eliminarArchivo():
+    origen = request.form['origen']
     ruta = request.form['archivo']
     id_usuario = request.form['id']
     borrar_archivo(ruta)
@@ -339,7 +379,7 @@ def eliminarArchivo():
         contrasenia = usuario_o.contraseña
     # Manejar el caso en el que no se encuentra el usuario
     redirect('/repositorio')
-    return volverInicio(usuario,contrasenia)
+    return volverInicioOrigen(usuario,contrasenia,origen)
 
 
 #Funcion para la descarga de archivos
@@ -612,7 +652,7 @@ def verificarUsuario():
             sqlArchivosApro = buscarArchivosApro(usuarioO.centro)
             listaArchivos = sqlArchivosRepo
             listaArchivosA = sqlArchivosApro
-            return render_template('index.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio)
+            return render_template('repo.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio)
         if usuarioO.roll == "CONTROL":
             sqlArchivosRepo = buscarArchivosRepo(usuarioO, usuarioO.centro)
             sqlArchivosApro = buscarAprovadosControl()
@@ -637,6 +677,35 @@ def verificarUsuario():
             listaArchivos = sqlArchivosRepo
             listaArchivosA = sqlArchivosApro
             return render_template('proveedores.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio)            
+    else:
+                flash('Error.')
+    return redirect('/')
+
+@app.route('/aprobados', methods=['GET','POST'])
+def verificarUsuarioAprobados():
+    
+    try:
+        
+        usuario = request.form['usuario']
+        password = request.form['contrasenia']
+        sqlUsuario = buscarUsuarioPass(usuario,password)
+    except:
+        print("Voy por aca")
+        return redirect('/noLogin')
+    
+    if str(sqlUsuario) != "()" and str(sqlUsuario) != "[]":
+        usuarioO = Usuario(sqlUsuario[0][0],sqlUsuario[0][1],sqlUsuario[0][2],sqlUsuario[0][3],sqlUsuario[0][4],sqlUsuario[0][5],sqlUsuario[0][6],sqlUsuario[0][7])
+    else:
+        usuarioO = None
+    
+    if usuarioO:
+        if usuarioO.roll == "EMPLEADO" or usuarioO.roll == "JEFE":
+            sqlArchivosRepo = buscarArchivosRepo(usuarioO, usuarioO.centro)
+            sqlArchivosApro = buscarArchivosApro(usuarioO.centro)
+            listaArchivos = sqlArchivosRepo
+            listaArchivosA = sqlArchivosApro
+            return render_template('aprobados.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio)
+                 
     else:
                 flash('Error.')
     return redirect('/')
@@ -705,6 +774,7 @@ def subirA():
     try:
         usuario = request.form['usuario']
         password = request.form['contrasenia']
+        origen = request.form['origen']
         sqlUsuario = buscarUsuarioPass(usuario,password)
     except:
         return redirect('/noLogin')
@@ -733,7 +803,7 @@ def subirA():
             
         #render_template('index.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA)
         #return redirect(f'/repositorio/{usuarioO.id}')
-        return volverInicio(usuarioO.mail,usuarioO.contraseña)            
+        return volverInicioOrigen(usuarioO.mail,usuarioO.contraseña,origen)            
     else:
                 flash('Error.')        
     return redirect('/')
@@ -811,7 +881,7 @@ def subirArchivoProveedores(id_usuario, ruta_repo, proveedor, centro, cae, fecha
         # Se redirecciona a la página principal
         cursor = conexion.cursor()
         fechaActual = datetime.now()
-        sqlUsuario = f"INSERT INTO `archivos` (`id_archivo`, `ruta`, `fecha`, `usuario`, `proveedor`,`centro`,`cae`,`estado`,`nombre`,`fecha_factura`, `detalle`) VALUES (NULL, '{ruta_codificada}', '{fechaActual}', '{id_usuario}', '{proveedor}', '{centro}','{cae}','LIBERADO','{nuevo_nombre}', '{fechaFactura}, '{detalle}'');"
+        sqlUsuario = f"INSERT INTO `archivos` (`id_archivo`, `ruta`, `fecha`, `usuario`, `proveedor`,`centro`,`cae`,`estado`,`nombre`,`fecha_factura`, `detalle`, `destino`) VALUES (NULL, '{ruta_codificada}', '{fechaActual}', '{id_usuario}', '{proveedor}', '{centro}','{cae}','LIBERADO','{nuevo_nombre}', '{fechaFactura}', '{detalle}', 'PROVEEDORES');"
         cursor.execute(sqlUsuario)
         conexion.commit()
 
@@ -825,6 +895,7 @@ def ver_pdf():
 
 @app.route('/noAprobar', methods=['POST'])#recuperar archivo
 def moverArchivoNoAprobado():
+    origen = request.form['origen']
     ruta = request.form['archivo']
     id_usuario = request.form['id']
     
@@ -842,7 +913,7 @@ def moverArchivoNoAprobado():
         usuario = usuario_o.mail
         contrasenia = usuario_o.contraseña
     # Manejar el caso en el que no se encuentra el usuario
-    return volverInicio(usuario,contrasenia)
+    return volverInicioOrigen(usuario,contrasenia, origen)
 
 @app.route('/liberar', methods=['POST'])
 def mover_archivo_a_Liberar():
@@ -871,6 +942,7 @@ def mover_archivo_a_Liberar():
 
 @app.route('/editarDetalle', methods=['POST'])
 def detalle_editar():
+    origen = request.form['origen']
     # Obtener los parámetros de la solicitud POST
     id_usuario = request.form['usuario']
     cae = request.form['cae']
@@ -880,24 +952,25 @@ def detalle_editar():
     cursor.execute(sqlUsuario)
     conexion.commit()
     sql_usuario = buscarUsuario(id_usuario)
+    usuario = ""
+    contrasenia = ""
     if sql_usuario and sql_usuario != "()" and sql_usuario != "[]":
         # Crear el objeto Usuario si se encuentra
         usuario_o = Usuario(sql_usuario[0][0],sql_usuario[0][1], sql_usuario[0][2], sql_usuario[0][3],
                             sql_usuario[0][4], sql_usuario[0][5], sql_usuario[0][6], sql_usuario[0][7])
         
         # Redirigir a la URL "/repositorio" con las credenciales del usuario como parámetros de consulta
-        
-        sqlArchivosRepo = buscarArchivosRepo(usuario_o, usuario_o.centro)
-        sqlArchivosApro = buscarAprovadosControl()
-        listaArchivos = sqlArchivosRepo
-        listaArchivosA = sqlArchivosApro
-        return render_template('aprobados.html',usuario = usuario_o,id=usuario_o.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio)
+        usuario = usuario_o.mail
+        contrasenia = usuario_o.contraseña
+    # Manejar el caso en el que no se encuentra el usuario
+    return volverInicioOrigen(usuario,contrasenia, origen)
     
     
 
 @app.route('/aprobar', methods=['POST'])
 def moverArchivoAprobado():
     # Obtener los parámetros de la solicitud POST
+    origen = request.form['origen']
     ruta = request.form['archivo']
     id_usuario = request.form['id']
     # Mover el archivo a la carpeta 'aprobados' del usuario
@@ -916,7 +989,7 @@ def moverArchivoAprobado():
         usuario = usuario_o.mail
         contrasenia = usuario_o.contraseña
     # Manejar el caso en el que no se encuentra el usuario
-    return volverInicio(usuario,contrasenia)
+    return volverInicioOrigen(usuario,contrasenia, origen)
 
 #-------------------------------------------------------------------------------------------------------
 #Se debe modificar la ip que corresponda al equipo en donde se esta corriendo

@@ -14,13 +14,23 @@
             </button>
           </div>
           <form action="/editarDetalle" method="post" enctype=multipart/form-data>
+            
+            <input name="origen" value="aprobados" hidden>
+            
           <div class="modal-body">
+            {% if usuario.roll == "CONTROL"%}
             <textarea rows="5" cols="50" name="detalle">{{ archivoA[10] }}</textarea>
+            {% endif %}
+            {% if usuario.roll == "EMPLEADO" or usuario.roll == "JEFE" %}
+            <textarea rows="5" cols="50" name="detalle" disabled>{{ archivoA[10] }}</textarea>
+            {% endif %}
             <input name="cae" value="{{archivoA[6]}}" hidden>
             <input name="usuario" type="text" value={{usuario.id}} hidden>
           </div>
           <div class="modal-footer">
+            {% if usuario.roll == "CONTROL" %}
             <button type="submit" class="btn btn-info">Modificar</button>
+            {% endif %}
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
           </div>
         </form>
@@ -54,6 +64,7 @@
               <div class="modal-body">
 
                 <form action="/repositorioSubir" method="post" enctype=multipart/form-data>
+                  <input name="origen" type="text" value="aprobados" hidden>
                   <input id="ruta" type="text" value={{repositorio}} hidden>
                   <input name="id" type="text" value={{id}} hidden>
                   <input name="usuario" type="text" value={{usuario.mail}} hidden>
@@ -198,8 +209,9 @@
                 <th style="color: rgb(127, 221, 33);"><i class="fas fa-calendar"></i> Fecha FC</th>
                 <th style="color: rgb(127, 221, 33);"><i class="fas fa-edit"></i> Detalle</th>
                 <th style="color: rgb(127, 221, 33);"><i class="fad fa-bolt"></i> Opciones</th>
+                {% if usuario.roll == "CONTROL" %}
                 <th style="color: rgb(127, 221, 33);"><i class="fad fa-bolt"></i> Liberar</th>
-
+                {% endif %}
 
               </tr>
             </thead>
@@ -229,6 +241,7 @@
                     {% if usuario.roll != "EMPLEADO" %}
                     <div class="col">
                       <form action="/noAprobar" method="post" enctype=multipart/form-data>
+                        <input name="origen" type="text" value="aprobados" hidden>
                         <input type="text" name="id" value="{{id}}" hidden>
                         <input type="text" name="archivo" value="{{archivoA[1]}}" hidden>
                         <button type="submit" class="btn btn-outline-warning btn-sm" title="No aprobar"><i class="fas fa-stop-circle fa-lg"
@@ -239,9 +252,10 @@
 
                   </div>
                 </td>
+                {% if usuario.roll == "CONTROL" %}
                 <td>
                   <div class="row">
-                    {% if usuario.roll == "CONTROL" %}
+                    
                     <div class="col">
                       <form action="/liberar" method="post" enctype=multipart/form-data>
                         <input type="text" name="id" value="{{id}}" hidden>
@@ -287,9 +301,10 @@
 
                       </form>
                     </div>
-                    {% endif %}
+                    
                   </div>
                 </td>
+                {% endif %}
               </tr>
               {% endfor %}
             </tbody>

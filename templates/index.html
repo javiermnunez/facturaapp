@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+  <!-- <!DOCTYPE html>
 <html lang="en" dir="ltr" class="no-js">
 
 <head>
@@ -38,7 +38,7 @@
 
 
 
-  <!-- Inicia Navbar-->
+
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark titulo-nav">
     <a class="navbar-brand " style="font-size:25pt;"> <i class="fad fa-book"></i> </i> FacturaAPP</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
@@ -65,7 +65,8 @@
       </a>
     </div>
     
-  </nav>
+  </nav>-->
+  {% include 'cabecera.html' %}
   <br>
 
   {% if usuario %}
@@ -280,13 +281,7 @@
     <div class="row">
       <div class="col-12 col-md-2"></div>
       <div class="col-12 col-md-8 ">
-        <div class="row">
-          <h5>{{usuario.roll}}:</h5>
-        </div>
-        <div class="row">
-          <h4>{{usuario.nombre}} {{usuario.apellido}}</h4>
-        </div>
-        
+                
         <div class="table-responsive-sm">
           <h3>Archivos cargados {% if usuario.roll == "JEFE" %}para {{usuario.centro}}{% endif %}</h3>
           <table class="table  table-bordered text-center table-hover" id="miTabla">
@@ -407,81 +402,4 @@
       {% endif %}
     </div>
   </div>
-  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.5/dist/umd/popper.min.js"
-    integrity="sha384-Xe+8cL9oJa6tN/veChSP7q+mnSPaj5Bcu9mPX5F5xIGE0DVittaqT5lorf0EI7Vk"
-    crossorigin="anonymous"></script>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.min.js"
-    integrity="sha384-kjU+l4N0Yf4ZOJErLsIcvOU2qSb74wXpOhqTvwVx3OElZRweTnQ6d31fXEoRD1Jy"
-    crossorigin="anonymous"></script>
-
-</body>
-
-
-
-<script type="text/javascript">
-  var Global = {
-    data: null
-  };
-
-  $(document).on("click", ".open-Modal", function () {
-    var myDNI = $(this).data('id');
-    Global.data = myDNI
-    console.log(myDNI);
-    $(".modal-body #DNI").val(myDNI);
-  });
-
-  function a() {
-    dato = Global.data;
-    console.log(Global.data);
-    return location.href = "/removefile/" + dato;
-  }
-</script>
-
-<script src="{{ url_for('static', filename='js/custom-file-input.js')}}"></script>
-<script src="{{ url_for('static', filename='js/jquery.custom-file-input.js')}}"></script>
-<script src="https://cdn.datatables.net/v/bs5/dt-1.13.8/datatables.min.js"></script>
-<script>
-    $(document).ready(function() {
-        $('#miTabla').DataTable({
-            "language": {
-              "info": "Mostrando _START_ a _END_ de _TOTAL_ entradas",
-              "lengthMenu": "Mostrar _MENU_ entradas",
-              "search": "Buscar:", // Cambia "Search" por "Buscando"
-              "loadingRecords": "Cargando...",
-              "paginate": {
-                            "first": "Primera",
-                            "last": "Ultima",
-                            "next": "Siguiente",
-                            "previous": "Anterior"
-                          }
-            },
-            "order": [
-                [2, 'desc'] // Ordenar por la cuarta columna (índice 3) de forma ascendente
-            ]
-        });
-    });
-    $(document).ready(function() {
-        $('#miTabla2').DataTable({
-            "language": {
-              "info": "Mostrando _START_ a _END_ de _TOTAL_ entradas",
-              "lengthMenu": "Mostrar _MENU_ entradas",
-              "search": "Buscar:", // Cambia "Search" por "Buscando"
-              "loadingRecords": "Cargando...",
-              "paginate": {
-                            "first": "Primera",
-                            "last": "Ultima",
-                            "next": "Siguiente",
-                            "previous": "Anterior"
-                          }
-            },
-            "order": [
-                [2, 'desc'] // Ordenar por la cuarta columna (índice 3) de forma ascendente
-            ]
-        });
-    });
-</script>
-</html>
+  {% include 'pie.html' %}
