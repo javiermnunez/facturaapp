@@ -580,15 +580,11 @@ def agregar_usuario():
 
 @app.route('/repositorio', methods=['GET','POST'])
 def verificarUsuario():
-    
-    try:
-        
-        usuario = request.form['usuario']
-        password = request.form['contrasenia']
-        sqlUsuario = buscarUsuarioPass(usuario,password)
-    except:
-        print("Voy por aca")
-        return redirect('/noLogin')
+
+    usuario = request.form['usuario']
+    password = request.form['contrasenia']
+    sqlUsuario = buscarUsuarioPass(usuario,password)
+
     
     if str(sqlUsuario) != "()" and str(sqlUsuario) != "[]":
         usuarioO = Usuario(sqlUsuario[0][0],sqlUsuario[0][1],sqlUsuario[0][2],sqlUsuario[0][3],sqlUsuario[0][4],sqlUsuario[0][5],sqlUsuario[0][6],sqlUsuario[0][7])
@@ -937,4 +933,4 @@ def moverArchivoAprobado():
 #-------------------------------------------------------------------------------------------------------
 #Se debe modificar la ip que corresponda al equipo en donde se esta corriendo
 if __name__ == "__main__":
-    app.run(host='89.0.0.28:5000')
+    app.run(host='89.0.0.28')
