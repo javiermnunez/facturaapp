@@ -34,7 +34,7 @@ def enviarMail(destinatario, mensaje):
     try:
         em = EmailMessage()
         em["To"] = destinatario
-        em["Subject"] = "Nuevo archivo en repositorio."
+        em["Subject"] = "Se cargó una nueva Factura."
         em.set_content(mensaje)
         
         with smtplib.SMTP("mail.laboratoriosbeta.com.ar", 26) as smtp:
@@ -94,6 +94,13 @@ def rutaArchivo(id_archivo):
 
     return ruta
     
+def buscarArchivoId(id_archivo):
+    cursor = conexion.cursor()
+    sqlArchivo = f"select * from archivos where id_archivo = {id_archivo};"
+    cursor.execute(sqlArchivo)
+    archivo = cursor.fetchall()
+    conexion.commit()
+    return archivo
 
 def buscarArchivo(nro,proveedor):
     cursor = conexion.cursor()
@@ -103,6 +110,14 @@ def buscarArchivo(nro,proveedor):
     conexion.commit()
     print(len(archivo))
     return len(archivo)
+
+def buscarArchivoPorRuta(ruta):
+    cursor = conexion.cursor()
+    sqlArchivo = f"select * from archivos where ruta = '{ruta}';"
+    cursor.execute(sqlArchivo)
+    archivo = cursor.fetchall()
+    conexion.commit()
+    return archivo
 
 def renombrarArchivo(rutaArchivoOriginal,nombreNuevo):
     # Ruta del archivo actual
@@ -444,59 +459,7 @@ def borrar_archivo_SQL(ruta):
     finally:
         cursor.close()
 
-"""
-def mover_archivo(id,ruta_completa):
-    sqlUsuario = buscarUsuario(id)
-    print('string:'+str(sqlUsuario))
-    if str(sqlUsuario) != "()" and str(sqlUsuario) != "[]":
-        usuarioO = Usuario(sqlUsuario[0][1],sqlUsuario[0][2],sqlUsuario[0][3],sqlUsuario[0][4],sqlUsuario[0][5],sqlUsuario[0][6],sqlUsuario[0][7])
-        id = sqlUsuario[0][0]
-    else:
-        usuarioO = None
-    
-    if usuarioO:
-        carpetasEmpleados = []
-        ficheros = []
-        listaArchivos = []
-        listaArchivosA = []
-        if usuarioO.roll == 'JEFE':
-            ruta_carpeta = '\\repositorio'
-            carpetaDatos = "\\datos\\beta"
-            ruta = current_dir + carpetaDatos +ruta_carpeta
-        try:
-            nombre_archivo, extension = os.path.splitext(os.path.basename(ruta_completa))
-            unaRuta = codificar(ruta_completa)
-            otraRuta = codificar(ruta+"\\"+nombre_archivo+extension)
-            cursor = conexion.cursor()
-            cursor.execute(f"UPDATE `archivos` SET `ruta` = '{otraRuta}' WHERE `archivos`.`ruta` = '{unaRuta}';")
-            conexion.commit()
-            shutil.move(ruta_completa, ruta)
 
-            print(f"El archivo en {ruta_completa} ha sido recuperado.")
-        
-        except OSError as e:
-            print(f"Error al eliminar el archivo en {ruta_completa}: {e}")
-    rutaEmpleados = current_dir + carpetaDatos + ruta_carpeta
-    rutaAprobados = current_dir+carpetaDatos+'\\aprobados'
-    
-    with os.scandir(rutaEmpleados) as empleados:
-        for carpeta in empleados:
-            carpetasEmpleados.append(carpeta.path)
-
-            with os.scandir(carpeta.path) as repositorios:
-                for repositorio in repositorios:
-                    if repositorio.is_file():
-                        ficheros.append(repositorio.name)
-                        listaArchivos.append([carpeta.path, repositorio.name])
-    with os.scandir(rutaAprobados) as aprobados:
-        for aprobado in aprobados:
-            if aprobado.is_file():
-                listaArchivosA.append([rutaAprobados,aprobado.name])
-
-
-    return render_template('index.html', usuario = usuarioO,ficheros = ficheros ,id=id, archivos = listaArchivos, ruta = ruta, archivosA = listaArchivosA) 
-
-"""
 def mover_archivoA(id,ruta_completa):
 
     sqlUsuario = buscarUsuario(id)
@@ -780,6 +743,13 @@ def subirA():
                     subirArchivoProveedores(usuarioO.id,carpetaLiberados ,request.form['proveedor'],request.form['centro'],request.form['nro'],request.form['fecha'],request.form['detalle'])
                 else:
                     subirArchivo(usuarioO.id,carpetaRepositorio ,request.form['proveedor'],request.form['centro'],request.form['nro'],request.form['fecha'],request.form['detalle'],)
+                    #activar mail
+                    if usuarioO.roll == "EMPLEADO":
+                        listaAvisos = listaAvisoEmpleado(usuarioO.centro)
+                        for usuarioM in listaAvisos:
+                            enviarMail(usuarioM.mail , "Se ha subido la factura: "+request.form['nro']+" del proveedor: "+request.form['proveedor']+".\nPor el usuario: "+usuarioO.apellido+" "+usuarioO.nombre+".")
+                    
+                        
             else:
                 flash('Ya existe un archivo con número de factura: '+request.form['nro']+' del proveedor: '+request.form['proveedor']+'.\nNo se cargo el archivo!')
            
@@ -787,6 +757,37 @@ def subirA():
     else:
                 flash('Error.')        
     return redirect('/')
+
+def listaAvisoEmpleado(centro):
+    lista = []
+    cursor = conexion.cursor()
+    cursor.execute(f"SELECT * FROM `usuarios` where `centro`='{centro}' AND(`roll`='JEFE')")
+    usuarioS = cursor.fetchall()
+    conexion.commit()
+    for usuario in usuarioS:
+        
+        lista.append(Usuario(usuario[0],usuario[1],usuario[2],usuario[3],usuario[4],usuario[5],usuario[6],usuario[7]))
+    return lista
+
+def listaAvisoJefe():
+    lista = []
+    cursor = conexion.cursor()
+    cursor.execute(f"SELECT * FROM `usuarios` where `roll`='CONTROL'")
+    usuarioS = cursor.fetchall()
+    conexion.commit()
+    for usuario in usuarioS:
+        lista.append(Usuario(usuario[0],usuario[1],usuario[2],usuario[3],usuario[4],usuario[5],usuario[6],usuario[7]))
+    return lista
+
+def listaAvisoControl(destino):
+    lista = []
+    cursor = conexion.cursor()
+    cursor.execute(f"SELECT * FROM `usuarios` where `roll`='{destino}'")
+    usuarioS = cursor.fetchall()
+    conexion.commit()
+    for usuario in usuarioS:
+        lista.append(Usuario(usuario[0],usuario[1],usuario[2],usuario[3],usuario[4],usuario[5],usuario[6],usuario[7]))
+    return lista
 
 def codificar(algo):
     codificada = base64.b64encode(algo.encode('utf-8')).decode('utf-8')
@@ -902,9 +903,12 @@ def mover_archivo_a_Liberar():
     id_usuario = request.form['id']
     destino = request.form['destino']
     origen = request.form['origen']
+    id_archivo = request.form['id_archivo']
+    archivo = buscarArchivoId(id_archivo)
     # Mover el archivo a la carpeta 'aprobados' del usuario
     mover_archivo_Liberar(id_usuario, ruta, destino)
-
+    #mandar mail a los que correspondan
+    
     # Buscar el usuario
     sql_usuario = buscarUsuario(id_usuario)
     usuario = ""
@@ -917,6 +921,11 @@ def mover_archivo_a_Liberar():
         # Redirigir a la URL "/repositorio" con las credenciales del usuario como parámetros de consulta
         usuario = usuario_o.mail
         contrasenia = usuario_o.contraseña
+        if usuario_o.roll == "CONTROL":
+            listaAvisos = listaAvisoControl(destino)
+            for usuarioM in listaAvisos:
+                mensaje = "Se ha liberado la factura: "+archivo[0][6]+" del proveedor: "+archivo[0][4]+".\nPor el usuario: "+usuario_o.apellido+" "+usuario_o.nombre+"\nDel centro de costos: "+usuario_o.centro+"."
+                enviarMail(usuarioM.mail , mensaje)
     # Manejar el caso en el que no se encuentra el usuario
     return volverInicioOrigen(usuario,contrasenia,origen)
 
@@ -954,9 +963,12 @@ def moverArchivoAprobado():
     origen = request.form['origen']
     ruta = request.form['archivo']
     id_usuario = request.form['id']
+    id_archivo = request.form['id_archivo']
+    archivo = buscarArchivoId(id_archivo)
     # Mover el archivo a la carpeta 'aprobados' del usuario
+    print(archivo)
     mover_archivoA(id_usuario, ruta)
-
+    
     # Buscar el usuario
     sql_usuario = buscarUsuario(id_usuario)
     usuario = ""
@@ -969,6 +981,11 @@ def moverArchivoAprobado():
         # Redirigir a la URL "/repositorio" con las credenciales del usuario como parámetros de consulta
         usuario = usuario_o.mail
         contrasenia = usuario_o.contraseña
+        if usuario_o.roll == "JEFE":
+            listaAvisos = listaAvisoJefe()
+            for usuarioM in listaAvisos:
+                mensaje = "Se ha aprobado la factura: "+archivo[0][6]+" del proveedor: "+archivo[0][4]+".\nPor el usuario: "+usuario_o.apellido+" "+usuario_o.nombre+"\nDel centro de costos: "+usuario_o.centro+"."
+                enviarMail(usuarioM.mail , mensaje)
     # Manejar el caso en el que no se encuentra el usuario
     return volverInicioOrigen(usuario,contrasenia, origen)
 

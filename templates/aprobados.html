@@ -126,6 +126,7 @@
                     
                     <div class="col">
                       <form action="/liberar" method="post" enctype=multipart/form-data>
+                        <input name="id_archivo" type="text" value="{{archivoA[0]}}" hidden>
                         <input type="text" name="id" value="{{id}}" hidden>
                         <input type="text" name="origen" value="aprobados" hidden>
                         <input type="text" name="archivo" value="{{archivoA[1]}}" hidden>

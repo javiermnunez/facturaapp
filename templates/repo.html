@@ -111,6 +111,7 @@
                   <div class="col">
 
                     <form action="/aprobar" method="post" enctype=multipart/form-data>
+                      <input name="id_archivo" type="text" value="{{archivo[0]}}" hidden>
                       <input name="origen" type="text" value="repo" hidden>
                       <input type="text" name="id" value="{{id}}" hidden>
                       <input type="text" name="archivo" value="{{archivo[1]}}" hidden>
