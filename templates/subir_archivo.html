@@ -4,7 +4,7 @@
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel"><i class="fal fa-folder-upload"
-                    style="font-size:30pt;"></i> Cargar Archivo</h5>
+                    style="font-size:15pt;"></i> Cargar Archivo</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
@@ -22,13 +22,13 @@
                     <input type="file" name="file" id="file" class="inputfile inputfile-4"
                       data-multiple-caption="{count} files selected" multiple />
                     <label for="file">
-                      <i class="fas fa-file" style="font-size:30pt"></i>
+                      <i class="fas fa-file" style="font-size:15pt"></i>
                       <br>
                       <span>Seleccione un archivo&hellip;</span>
                     </label>
                   </div>
               </div>
-              <div class="row row-cols-lg-auto">
+              <div class="row row-cols-lg-auto" style="padding: 5px;">
                 <div class="col-sm-2"></div>
                 <label for="proveedor" class="col-sm-2 col-form-label">Proveedor</label>
                 <div class="col-lg-8">
@@ -36,8 +36,8 @@
                 </div>
                 <div class="col-sm-2"></div>
               </div>
-              <br>
-              <div class="row row-cols-lg-auto">
+              
+              <div class="row row-cols-lg-auto" style="padding: 5px;">
                 <div class="col-sm-2"></div>
                 <label for="centro" class="col-sm-2 col-form-label">Centro</label>
                 <div class="col-lg-8">
@@ -124,17 +124,17 @@
                 </div>
                 <div class="col-sm-2"></div>
               </div>
-              <br>
-              <div class="row row-cols-lg-auto">
+              
+              <div class="row row-cols-lg-auto" style="padding: 5px;">
                 <div class="col-sm-2"></div>
-                <label for="nro" class="col-sm-2 col-form-label">Nro factura</label>
+                <label for="nro" class="col-sm-2 col-form-label">Nro fac.</label>
                 <div class="col-lg-8">
                   <input type="text" class="form-control" name="nro" placeholder="Nro factura" required>
                 </div>
                 <div class="col-sm-2"></div>
               </div>
-              <br>
-              <div class="row row-cols-lg-auto">
+              
+              <div class="row row-cols-lg-auto" style="padding: 5px;">
                 <div class="col-sm-2"></div>
                 <label for="fecha" class="col-sm-2 col-form-label">Fecha factura</label>
                 <div class="col-lg-8">
@@ -142,8 +142,8 @@
                 </div>
                 <div class="col-sm-2"></div>
               </div>
-              <br>
-              <div class="row row-cols-lg-auto">
+              
+              <div class="row row-cols-lg-auto" style="padding: 5px;">
                 <div class="col-sm-2"></div>
                 <label for="detalle" class="col-sm-2 col-form-label">Detalle</label>
                 <div class="col-lg-8">
@@ -151,15 +151,13 @@
                 </div>
                 <div class="col-sm-2"></div>
               </div>
-              <br>
+              
               <div class="modal-footer">
-                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fal fa-times-octagon"
-                    style="font-size:20pt;"></i></button>
-                <button type="submit" class="btn btn-primary"><i class="far fa-cloud-upload-alt"
-                    style="font-size:20pt;"></i></button>
+                <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal"> Cancelar</button>
+                <button type="submit" class="btn btn-primary btn-sm" >Subir</button>
 
               </div>
-              <br>
+              
               </form>
             </div>
           </div>

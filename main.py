@@ -16,6 +16,12 @@ from clases.Estado import Estado
 from clases.Roll import Roll
 import mysql.connector #nuevo
 from datetime import datetime
+from email.message import EmailMessage
+import ssl
+import smtplib
+
+
+
 # Obtener la ruta al directorio actual del script
 current_dir = os.path.dirname(os.path.abspath(__file__))
 # Agregar el directorio al sys.path
@@ -24,6 +30,20 @@ carpetaRepositorio = current_dir+"\\datos\\beta\\repositorio"
 carpetaAprobados = current_dir+"\\datos\\beta\\aprobados"
 carpetaLiberados = current_dir+"\\datos\\beta\\liberados"
 
+def enviarMail(destinatario, mensaje):
+    try:
+        em = EmailMessage()
+        em["To"] = destinatario
+        em["Subject"] = "Nuevo archivo en repositorio."
+        em.set_content(mensaje)
+        
+        with smtplib.SMTP("mail.laboratoriosbeta.com.ar", 26) as smtp:
+            smtp.login("sistemas@laboratoriosbeta.com.ar", "Sanjuan2266")
+            smtp.sendmail("sistemas@laboratoriosbeta.com.ar", destinatario, em.as_string())
+            return True
+    except Exception as e:
+        return (f"Error al enviar el correo: {e}")
+        
 
 
 def generarCarpetas():
@@ -320,6 +340,28 @@ def noLogin():
     <dic class="row">
     <div class=" col-md-6 offset-md-3 text-center">
     <h1>Debes iniciar sesión.</h1>
+    <a class="btn btn-primary" href="/">Volver</a>
+    </div>
+    </div>
+     </body> """
+
+@app.route('/mail')
+def mail():
+    
+    resultado = enviarMail("jmn@betalab.com.ar", "Hola, este es el mensaje.")
+        
+    return f"""
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    </head>
+    <body>
+    <div class="container-fluid">
+    <dic class="row">
+    <div class=" col-md-6 offset-md-3 text-center">
+    <h1>¿Se envió mail?</h1>
+    <h2>{resultado}</h2>
     <a class="btn btn-primary" href="/">Volver</a>
     </div>
     </div>
@@ -737,7 +779,7 @@ def subirA():
                 if usuarioO.roll == 'PROVEEDORES':
                     subirArchivoProveedores(usuarioO.id,carpetaLiberados ,request.form['proveedor'],request.form['centro'],request.form['nro'],request.form['fecha'],request.form['detalle'])
                 else:
-                    subirArchivo(usuarioO.id,carpetaRepositorio ,request.form['proveedor'],request.form['centro'],request.form['nro'],request.form['fecha'],request.form['detalle'])
+                    subirArchivo(usuarioO.id,carpetaRepositorio ,request.form['proveedor'],request.form['centro'],request.form['nro'],request.form['fecha'],request.form['detalle'],)
             else:
                 flash('Ya existe un archivo con número de factura: '+request.form['nro']+' del proveedor: '+request.form['proveedor']+'.\nNo se cargo el archivo!')
            

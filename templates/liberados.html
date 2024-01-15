@@ -57,17 +57,17 @@
       <div class="col-12 col-md-1"></div>
       <div class="col-12 col-md-10 ">
         
-        <div class="table-responsive">
+        <div class="table-responsive" style="background-color: white; border-radius: 10px;padding: 10px;margin: 10px;">
           <h3>Editar liberados</h3>
           <table class="table  table-bordered text-center table-hover" id="miTabla2">
             <thead class="thead-dark">
               <tr>
-                <th style="color: rgb(127, 221, 33);"><i class="fas fa-planet"></i> Centro</th>
+                <th style="color: rgb(127, 221, 33);"><i class="fas fa-planet-riged"></i> Centro</th>
                 <th style="color: rgb(127, 221, 33);"><i class="fas fa-truck"></i> Proveedor</th>
                 <th style="color: rgb(127, 221, 33);"><i class="fas fa-file"></i> Nro factura</th>
                 <th style="color: rgb(127, 221, 33);"><i class="fas fa-calendar"></i> Fecha FC</th>
                 <th style="color: rgb(127, 221, 33);"><i class="fas fa-edit"></i> Detalle</th>
-                <th style="color: rgb(127, 221, 33);"><i class="fad fa-bolt"></i> Opciones</th>
+                <th style="color: rgb(127, 221, 33);"><i class="fad fa-ballot-check"></i> Opciones</th>
                 <th style="color: rgb(127, 221, 33);"><i class="fad fa-bolt"></i> Liberar</th>
 
 
@@ -83,7 +83,9 @@
 
                 <td style="color: rgb(33, 67, 221);">{{ liberado[6] }}</td>
                 <td> {{ liberado[9] }}</td>
-                <td><a href="#" data-toggle="modal" data-target="#detalleModal{{ liberado[0] }}"
+                <td>
+                  <p hidden>{{ liberado[10] }}</p>
+                  <a href="#" data-toggle="modal" data-target="#detalleModal{{ liberado[0] }}"
                     class="btn btn-outline-secondary btn-sm">Detalle</a></td>
                 <td>
                   <div class="row">
