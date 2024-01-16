@@ -76,7 +76,7 @@
           <table class="table  table-bordered text-center table-hover" id="miTabla">
             <thead class="thead-dark">
               <tr>
-                <th><i class="fas fa-planet-riged"></i> Centro</th>
+                <th><i class="fas fa-globe"></i> Centro</th>
                 <th><i class="fas fa-truck"></i> Proveedor</th>
 
                 <th><i class="fas fa-file"></i> Nro factura</th>
@@ -111,14 +111,17 @@
                     {% if usuario.roll != "EMPLEADO" %}
                     <div class="col">
 
-                      <form action="/aprobar" method="post" enctype=multipart/form-data>
+                      <form action="/aprobar" method="post" enctype=multipart/form-data id="miFormulario">
                         <input name="id_archivo" type="text" value="{{archivo[0]}}" hidden>
                         <input name="origen" type="text" value='control' hidden>
                         <input type="text" name="id" value="{{id}}" hidden>
                         <input type="text" name="archivo" value="{{archivo[1]}}" hidden>
                         <button type="submit" class="btn btn-outline-primary btn-sm" title="Aprobar"><i
-                            class="fas fa-plus fa-lg"></i>
+                            class="fas fa-plus fa-lg" onclick="cargarPagina()"></i>
                         </button>
+                        <div id="modalBackground">
+                          <div id="modalSpinner" class="spinner"></div>
+                        </div>
                       </form>
                     </div>
                     {% endif %}

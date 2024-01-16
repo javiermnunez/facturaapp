@@ -66,12 +66,12 @@
           <table class="table  table-bordered text-center table-hover" id="miTabla2">
             <thead class="thead-dark">
               <tr>
-                <th style="color: rgb(127, 221, 33);"><i class="fas fa-planet-riged"></i> Centro</th>
+                <th style="color: rgb(127, 221, 33);"><i class="fas fa-globe"></i> Centro</th>
                 <th style="color: rgb(127, 221, 33);"><i class="fas fa-truck"></i> Proveedor</th>
                 <th style="color: rgb(127, 221, 33);"><i class="fas fa-file"></i> Nro factura</th>
                 <th style="color: rgb(127, 221, 33);"><i class="fas fa-calendar"></i> Fecha FC</th>
                 <th style="color: rgb(127, 221, 33);"><i class="fas fa-edit"></i> Detalle</th>
-                <th style="color: rgb(127, 221, 33);"><i class="fas fa-edit"></i> Aprobado por</th>
+                <th style="color: rgb(127, 221, 33);"><i class="fas fa-thumbs-up"></i> Aprobado por</th>
                 <th style="color: rgb(127, 221, 33);"><i class="fad fa-ballot-check"></i> Opciones</th>
                 {% if usuario.roll == "CONTROL" %}
                 <th style="color: rgb(127, 221, 33);"><i class="fad fa-bolt"></i> Liberar</th>
@@ -125,7 +125,7 @@
                   <div class="row">
                     
                     <div class="col">
-                      <form action="/liberar" method="post" enctype=multipart/form-data>
+                      <form action="/liberar" method="post" enctype=multipart/form-data id="miFormulario">
                         <input name="id_archivo" type="text" value="{{archivoA[0]}}" hidden>
                         <input type="text" name="id" value="{{id}}" hidden>
                         <input type="text" name="origen" value="aprobados" hidden>
@@ -161,13 +161,15 @@
                             
 
                           <div class="col-6">
-                            <button type="submit" class="btn btn-outline-success btn-sm" title="Liberar"><i class="fa fa-check"
+                            <button type="submit" class="btn btn-outline-success btn-sm" title="Liberar" onclick="cargarPagina()"><i class="fa fa-check"
                                 ></i></button>
                           </div>
                           
                         </div>
 
-
+                        <div id="modalBackground">
+                          <div id="modalSpinner" class="spinner"></div>
+                        </div>
 
                       </form>
                     </div>

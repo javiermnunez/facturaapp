@@ -146,22 +146,22 @@
             padding: 0;
             margin: 0;
         }
-
-
-        
-
+    
+    
+    
+    
         nav ul {
             list-style: none;
             overflow: hidden;
             /* Limpiamos errores de float */
         }
-
+    
         nav ul li {
             float: left;
             font-family: Arial, sans-serif;
             font-size: 16px;
         }
-
+    
         nav ul li a {
             display: block;
             /* Convertimos los elementos a en elementos bloque para manipular el padding */
@@ -169,28 +169,31 @@
             color: #fff;
             text-decoration: none;
         }
-
+    
         .contenido {
             padding-top: 80px;
         }
-
+    
         .wrapper {
             width: 100%;
             margin: auto;
             overflow: hidden;
         }
+    
         header {
-            background: rgba(0,0,0,0.9);
+            background: rgba(0, 0, 0, 0.9);
             width: 100%;
             position: fixed;
             z-index: 10;
         }
+    
         footer {
             background-color: rgb(212, 211, 211);
-            padding: 20px 0; /* Ajusta el espaciado superior e inferior según sea necesario */
+            padding: 20px 0;
+            /* Ajusta el espaciado superior e inferior según sea necesario */
             min-height: 100px;
         }
-
+    
         .footer-content {
             width: 100%;
             max-height: 100%;
@@ -198,6 +201,34 @@
             justify-content: center;
             align-items: center;
         }
+    
+        /* Estilo del fondo modal */
+    #modalBackground {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Estilo del spinner en el modal */
+    #modalSpinner {
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top: 4px solid #3498db;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
     </style>
     </section>
 </header>

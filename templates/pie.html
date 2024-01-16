@@ -83,6 +83,44 @@
       ]
     });
   });
+  function cargarPagina() {
+      // Obtener el modal y el spinner
+      var modal = document.getElementById('modalBackground');
+      var spinner = document.getElementById('modalSpinner');
+
+      // Mostrar el modal y el spinner
+      modal.style.display = 'flex';
+      spinner.style.display = 'block';
+
+      // Deshabilitar el botón de envío para evitar múltiples envíos
+      document.querySelector('button[type="submit"]').disabled = true;
+
+      // Enviar el formulario después de una demora simulada (puedes ajustar el valor)
+      setTimeout(function() {
+        // Puedes ocultar el modal y el spinner después de enviar el formulario
+        // Aquí, he dejado el código para simular el envío del formulario después de 3 segundos
+        document.getElementById('miFormulario').submit();
+      }, 1000); // Simulación de 3 segundos, ajusta según sea necesario
+    }
+    function cargarPaginaSubir() {
+      // Obtener el modal y el spinner
+      var modal = document.getElementById('modalBackground');
+      var spinner = document.getElementById('modalSpinner');
+
+      // Mostrar el modal y el spinner
+      modal.style.display = 'flex';
+      spinner.style.display = 'block';
+
+      // Deshabilitar el botón de envío para evitar múltiples envíos
+      document.querySelector('button[type="submit"]').disabled = true;
+
+      // Enviar el formulario después de una demora simulada (puedes ajustar el valor)
+      setTimeout(function() {
+        // Puedes ocultar el modal y el spinner después de enviar el formulario
+        // Aquí, he dejado el código para simular el envío del formulario después de 3 segundos
+        document.getElementById('miFormularioSubir').submit();
+      }, 1000); // Simulación de 3 segundos, ajusta según sea necesario
+    }
 </script>
 
 </html>

@@ -20,7 +20,7 @@ from email.message import EmailMessage
 import ssl
 import smtplib
 
-
+servidorIp = "89.0.0.28"
 
 # Obtener la ruta al directorio actual del script
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -103,13 +103,18 @@ def buscarArchivoId(id_archivo):
     return archivo
 
 def buscarArchivo(nro,proveedor):
+    salida = 1
+    print("numero "+nro)
+    print("proveedor "+proveedor)
     cursor = conexion.cursor()
-    sqlArchivo = f"select * from archivos where nro = {nro} and (proveedor = '{proveedor}');"
+    sqlArchivo = f"select * from archivos where `nro` = {nro} AND `proveedor` = '{proveedor}'"
     cursor.execute(sqlArchivo)
     archivo = cursor.fetchall()
     conexion.commit()
     print(len(archivo))
-    return len(archivo)
+    if len(archivo) == 0:
+        salida = 0
+    return salida
 
 def buscarArchivoPorRuta(ruta):
     cursor = conexion.cursor()
@@ -586,9 +591,14 @@ def agregar_usuario():
 @app.route('/repositorio', methods=['GET','POST'])
 def verificarUsuario():
 
-    usuario = request.form['usuario']
-    password = request.form['contrasenia']
-    sqlUsuario = buscarUsuarioPass(usuario,password)
+    try:
+        
+        usuario = request.form['usuario']
+        password = request.form['contrasenia']
+        sqlUsuario = buscarUsuarioPass(usuario,password)
+    except:
+        print("Voy por aca")
+        return redirect('/noLogin')
 
     
     if str(sqlUsuario) != "()" and str(sqlUsuario) != "[]":
@@ -747,7 +757,7 @@ def subirA():
                     if usuarioO.roll == "EMPLEADO":
                         listaAvisos = listaAvisoEmpleado(usuarioO.centro)
                         for usuarioM in listaAvisos:
-                            enviarMail(usuarioM.mail , "Se ha subido la factura: "+request.form['nro']+" del proveedor: "+request.form['proveedor']+".\nPor el usuario: "+usuarioO.apellido+" "+usuarioO.nombre+".")
+                            enviarMail(usuarioM.mail , "Se ha subido la factura: "+request.form['nro']+" del proveedor: "+request.form['proveedor']+".\nPor el usuario: "+usuarioO.apellido+" "+usuarioO.nombre+"."+"\nhref:'http://"+servidorIp+":5000'")
                     
                         
             else:
@@ -874,6 +884,8 @@ def ver_pdf():
 
     return send_file(ruta, as_attachment=False)
 
+
+
 @app.route('/noAprobar', methods=['POST'])#recuperar archivo
 def moverArchivoNoAprobado():
     origen = request.form['origen']
@@ -924,7 +936,7 @@ def mover_archivo_a_Liberar():
         if usuario_o.roll == "CONTROL":
             listaAvisos = listaAvisoControl(destino)
             for usuarioM in listaAvisos:
-                mensaje = "Se ha liberado la factura: "+archivo[0][6]+" del proveedor: "+archivo[0][4]+".\nPor el usuario: "+usuario_o.apellido+" "+usuario_o.nombre+"\nDel centro de costos: "+usuario_o.centro+"."
+                mensaje = "Se ha liberado la factura: "+archivo[0][6]+" del proveedor: "+archivo[0][4]+".\nPor el usuario: "+usuario_o.apellido+" "+usuario_o.nombre+"\nCentro: "+usuario_o.centro+"."+"\nhref:'http://"+servidorIp+":5000'"
                 enviarMail(usuarioM.mail , mensaje)
     # Manejar el caso en el que no se encuentra el usuario
     return volverInicioOrigen(usuario,contrasenia,origen)
@@ -984,7 +996,7 @@ def moverArchivoAprobado():
         if usuario_o.roll == "JEFE":
             listaAvisos = listaAvisoJefe()
             for usuarioM in listaAvisos:
-                mensaje = "Se ha aprobado la factura: "+archivo[0][6]+" del proveedor: "+archivo[0][4]+".\nPor el usuario: "+usuario_o.apellido+" "+usuario_o.nombre+"\nDel centro de costos: "+usuario_o.centro+"."
+                mensaje = "Se ha aprobado la factura: "+archivo[0][6]+" del proveedor: "+archivo[0][4]+".\nPor el usuario: "+usuario_o.apellido+" "+usuario_o.nombre+"\nCentro: "+usuario_o.centro+"."+"\nhref:'http://"+servidorIp+":5000'"
                 enviarMail(usuarioM.mail , mensaje)
     # Manejar el caso en el que no se encuentra el usuario
     return volverInicioOrigen(usuario,contrasenia, origen)
@@ -992,4 +1004,4 @@ def moverArchivoAprobado():
 #-------------------------------------------------------------------------------------------------------
 #Se debe modificar la ip que corresponda al equipo en donde se esta corriendo
 if __name__ == "__main__":
-    app.run(host='89.0.0.28')
+    app.run(host= servidorIp )
