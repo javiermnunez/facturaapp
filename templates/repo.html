@@ -124,16 +124,42 @@
                     </form>
                   </div>
                   {% endif %}
+                  <!--Modal Eliminar-->
                   <div class="col">
-
-                    <form action="/eliminarArchivo" method="post" enctype=multipart/form-data>
-                      <input name="origen" type="text" value="repo" hidden>
-                      <input type="text" name="id" value="{{id}}" hidden>
-                      <input type="text" name="archivo" value="{{archivo[1]}}" hidden>
-                      <button type="submit" class="btn btn-outline-danger btn-sm" title="Eliminar"><i class="fas fa-trash
-                              fa-lg"></i></button>
-                    </form>
-                  </div>
+                    <!-- Botón para abrir el modal de confirmación -->
+                    <button type="button" class="btn btn-outline-danger btn-sm" data-toggle="modal" data-target="#eliminarModal{{ archivo[0] }}">
+                        <i class="fas fa-trash fa-lg"></i>
+                    </button>
+            
+                    <!-- Modal de confirmación -->
+                    <div class="modal fade" id="eliminarModal{{ archivo[0] }}" tabindex="-1" role="dialog" aria-labelledby="eliminarModalLabel{{ archivo[0] }}" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="eliminarModalLabel{{ archivo[0] }}">Confirmar Eliminación</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    ¿Estás seguro de que deseas eliminar este registro "{{archivo[8]}}"?
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                    <!-- Botón para confirmar la eliminación -->
+                                    <form action="/eliminarArchivo" method="post" enctype=multipart/form-data>
+                                      <input type="text" name="origen" value="repo" hidden>
+                                        
+                                        <input type="text" name="id" value="{{id}}" hidden>
+                                        <input type="text" name="archivo" value="{{archivo[1]}}" hidden>
+                                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Fin del modal de confirmación -->
+                </div>
                 </div>
               </td>
             </tr>

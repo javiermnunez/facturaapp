@@ -432,6 +432,7 @@ def buscarUsuarioPass(usuario,contrasenia): #nuevo
     cursor = conexion.cursor()
     cursor.execute(f"SELECT * FROM `usuarios` where mail='{usuario}' AND (contrasenia='{contrasenia}')")
     usuario = cursor.fetchall()
+    print(usuario)
     conexion.commit()
     
     return usuario
@@ -590,9 +591,7 @@ def agregar_usuario():
 
 @app.route('/repositorio', methods=['GET','POST'])
 def verificarUsuario():
-
     try:
-        
         usuario = request.form['usuario']
         password = request.form['contrasenia']
         sqlUsuario = buscarUsuarioPass(usuario,password)
@@ -749,12 +748,21 @@ def subirA():
 
         if request.method == 'POST':
             if buscarArchivo(request.form['nro'],request.form['proveedor']) == 0:
+
                 if usuarioO.roll == 'PROVEEDORES':
-                    subirArchivoProveedores(usuarioO.id,carpetaLiberados ,request.form['proveedor'],request.form['centro'],request.form['nro'],request.form['fecha'],request.form['detalle'])
+                    
+                    s = subirArchivoProveedores(usuarioO.id,carpetaLiberados ,request.form['proveedor'],request.form['centro'],request.form['nro'],request.form['fecha'],request.form['detalle'])
+                    if s == False:
+                        flash("Algo salio mal, no se cargo el archivo!")
+                    
+                        
+                    
                 else:
-                    subirArchivo(usuarioO.id,carpetaRepositorio ,request.form['proveedor'],request.form['centro'],request.form['nro'],request.form['fecha'],request.form['detalle'],)
+                    s = subirArchivo(usuarioO.id,carpetaRepositorio ,request.form['proveedor'],request.form['centro'],request.form['nro'],request.form['fecha'],request.form['detalle'])
+                    if s == False:
+                        flash("Algo salio mal, no se cargo el archivo!")
                     #activar mail
-                    if usuarioO.roll == "EMPLEADO":
+                    if usuarioO.roll == "EMPLEADO" and s:
                         listaAvisos = listaAvisoEmpleado(usuarioO.centro)
                         for usuarioM in listaAvisos:
                             enviarMail(usuarioM.mail , "Se ha subido la factura: "+request.form['nro']+" del proveedor: "+request.form['proveedor']+".\nPor el usuario: "+usuarioO.apellido+" "+usuarioO.nombre+"."+"\nhref:'http://"+servidorIp+":5000'")
@@ -810,17 +818,18 @@ def decodificar(codificada):
 
 
 def subirArchivo(id_usuario, ruta_repo, proveedor, centro, nro, fechaFactura, detalle):
+    subio = False
     # Comprobar si la solicitud de publicación tiene la parte del archivo
     if 'file' not in request.files:
         print('No se cargó ningún archivo')
-        return redirect(request.url)
+        return subio
     
     file = request.files['file']
 
     # Si el usuario no selecciona un archivo
     if file.filename == '':
         print('No se cargó ningún archivo')
-        return redirect(request.url)
+        return subio
     else:
         filename = secure_filename(file.filename)
 
@@ -834,16 +843,18 @@ def subirArchivo(id_usuario, ruta_repo, proveedor, centro, nro, fechaFactura, de
         rutaBd = os.path.join(ruta_repo, filename)
         ruta_codificada = codificar(rutaBd)
         print(f"Archivo guardado con éxito como {filename}")
-
+        subio = True
         # Se redirecciona a la página principal
         cursor = conexion.cursor()
         fechaActual = datetime.now()
         sqlUsuario = f"INSERT INTO `archivos` (`id_archivo`, `ruta`, `fecha`, `usuario`, `proveedor`,`centro`,`nro`,`estado`,`nombre`,`fecha_factura`,`detalle`) VALUES (NULL, '{ruta_codificada}', '{fechaActual}', '{id_usuario}', '{proveedor}', '{centro}','{nro}','NO_APROBADO','{nuevo_nombre}', '{fechaFactura}', '{detalle}');"
         cursor.execute(sqlUsuario)
         conexion.commit()
+    return subio
 
 
 def subirArchivoProveedores(id_usuario, ruta_repo, proveedor, centro, nro, fechaFactura, detalle):
+    subio = False
     # Comprobar si la solicitud de publicación tiene la parte del archivo
     if 'file' not in request.files:
         print('No se cargó ningún archivo')
@@ -868,13 +879,14 @@ def subirArchivoProveedores(id_usuario, ruta_repo, proveedor, centro, nro, fecha
         rutaBd = os.path.join(ruta_repo, filename)
         ruta_codificada = codificar(rutaBd)
         print(f"Archivo guardado con éxito como {filename}")
-
+        subio = True
         # Se redirecciona a la página principal
         cursor = conexion.cursor()
         fechaActual = datetime.now()
         sqlUsuario = f"INSERT INTO `archivos` (`id_archivo`, `ruta`, `fecha`, `usuario`, `proveedor`,`centro`,`nro`,`estado`,`nombre`,`fecha_factura`, `detalle`, `destino`) VALUES (NULL, '{ruta_codificada}', '{fechaActual}', '{id_usuario}', '{proveedor}', '{centro}','{nro}','LIBERADO','{nuevo_nombre}', '{fechaFactura}', '{detalle}', 'PROVEEDORES');"
         cursor.execute(sqlUsuario)
         conexion.commit()
+    return subio
 
     
 @ app.route('/verPdf', methods=['POST'])
