@@ -164,7 +164,7 @@ def buscarAprovadosControl():
 def buscarLiberadosP():
     aprobadosC = []
     cursor = conexion.cursor()
-    cursor.execute(f"SELECT * FROM archivos where estado='LIBERADO' AND(destino='PROVEEDORES');")
+    cursor.execute("SELECT * FROM archivos WHERE (estado='LIBERADO' OR estado='PAGADO') AND destino='PROVEEDORES';")
     apro = cursor.fetchall()
     conexion.commit()
     for registro in apro:
@@ -593,7 +593,9 @@ def agregar_usuario():
 def verificarUsuario():
     try:
         usuario = request.form['usuario']
+        print(usuario)
         password = request.form['contrasenia']
+        print(password)
         sqlUsuario = buscarUsuarioPass(usuario,password)
     except:
         print("Voy por aca")
@@ -1013,6 +1015,29 @@ def moverArchivoAprobado():
     # Manejar el caso en el que no se encuentra el usuario
     return volverInicioOrigen(usuario,contrasenia, origen)
 
+@app.route('/actualizar_estado', methods=['POST'])
+def actualizar_estado():
+    id_usuario = request.form['id_usuario']
+    id_archivo = request.form['id_archivo']
+    nuevo_estado = request.form['estado']
+    # Aquí deberías realizar la actualización en tu base de datos o en tu sistema de almacenamiento
+    cursor = conexion.cursor()
+    sqlUsuario = f"UPDATE `archivos` SET `estado` = '{nuevo_estado}' WHERE `id_archivo` = '{id_archivo}';"
+    cursor.execute(sqlUsuario)
+    conexion.commit()
+    sql_usuario = buscarUsuario(id_usuario)
+    usuario = ""
+    contrasenia = ""
+    if sql_usuario and sql_usuario != "()" and sql_usuario != "[]":
+        # Crear el objeto Usuario si se encuentra
+        usuario_o = Usuario(sql_usuario[0][0],sql_usuario[0][1], sql_usuario[0][2], sql_usuario[0][3],
+                            sql_usuario[0][4], sql_usuario[0][5], sql_usuario[0][6], sql_usuario[0][7])
+        
+        # Redirigir a la URL "/repositorio" con las credenciales del usuario como parámetros de consulta
+        usuario = usuario_o.mail
+        contrasenia = usuario_o.contraseña
+    # Manejar el caso en el que no se encuentra el usuario
+    return volverInicioOrigen(usuario,contrasenia, "proveedores")
 #-------------------------------------------------------------------------------------------------------
 #Se debe modificar la ip que corresponda al equipo en donde se esta corriendo
 if __name__ == "__main__":

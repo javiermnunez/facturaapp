@@ -68,7 +68,7 @@
     <div class="row">
       <div class="col-12 col-md-2"></div>
       <div class="col-12 col-md-8 ">
-        <div class="table-responsive-sm" style="background-color: white; border-radius: 10px;padding: 10px;margin: 10px;">
+        <div class="table-responsive" style="background-color: white; border-radius: 10px;padding: 10px;margin: 10px; min-width: 710px;">
           <h3>Proveedores</h3>
           <table class="table  table-bordered text-center table-hover" id="miTabla">
             <thead class="thead-dark">
@@ -78,7 +78,8 @@
                 <th style="color: rgb(127, 221, 33);"><i class="fas fa-file"></i> Nro factura</th>
                 <th style="color: rgb(127, 221, 33);"><i class="fas fa-calendar"></i> Fecha FC</th>
                 <th style="color: rgb(127, 221, 33);"><i class="fas fa-edit"></i> Detalle</th>
-                <th style="color: rgb(127, 221, 33);"><i class="fad fa-ballot-check"></i> Opciones</th>
+                <th style="color: rgb(127, 221, 33);"><i class="fad fa-ballot-check"></i>Opciones</th>
+                <th style="color: rgb(127, 221, 33);"><i class="fad fa-sack-dollar"></i>Pagado</th>
 
               </tr>
             </thead>
@@ -141,7 +142,29 @@
                         </div>
                         <!-- Fin del modal de confirmación -->
                     </div>
-                </div>
+                  </div>
+                  </td>
+                  <td>
+                      {% if archivoA[7] == "PAGADO" %}
+                      <div class="form-check form-switch">
+                        <form action="/actualizar_estado"  method="post" enctype=multipart/form-data>
+                          <input type="text" value="LIBERADO" name="estado" hidden>
+                          <input type="text" value="{{archivoA[0]}}" name="id_archivo" hidden>
+                          <input type="text" value="{{usuario.id}}" name="id_usuario" hidden>
+                          <button type="submit" class="btn btn-success btn-sm">{{archivoA[7]}}</button>
+                        </form>
+                      </div>
+                      {% endif %}
+                      {% if archivoA[7] != "PAGADO" %}
+                      <div class="form-check form-switch">
+                        <form action="/actualizar_estado"  method="post" enctype=multipart/form-data>
+                          <input type="text" value="PAGADO" name="estado" hidden>
+                          <input type="text" value="{{archivoA[0]}}" name="id_archivo" hidden>
+                          <input type="text" value="{{usuario.id}}" name="id_usuario" hidden>
+                          <button type="submit" class="btn-outline-success">{{archivoA[7]}}</button>
+                        </form>
+                      </div>
+                      {% endif %}
                 </td>
               </tr>
               {% endfor %}
