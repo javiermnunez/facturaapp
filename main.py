@@ -250,6 +250,30 @@ def buscarLiberadosC(idU):
 
     return aprobadosC
 
+def buscarLiberadosCentro(centro):
+
+    aprobadosC = []
+    cursor = conexion.cursor()
+    cursor.execute(f"SELECT * FROM archivos WHERE (estado='LIBERADO' OR estado='PAGADO') AND(centro='{centro}');")
+    apro = cursor.fetchall()
+    conexion.commit()
+    for registro in apro:
+        id = registro[0]
+        ruta = decodificar(registro[1])
+        fecha = registro[2]
+        usuario = registro[3]
+        proveedor =registro[4]
+        centro = registro[5]
+        cae = registro[6]
+        estado = registro[7]
+        nombre = registro[8]
+        fechaFC = registro[9]
+        detalle = registro[10]
+        liberado = registro[11]
+        aprobadosC.append([id,ruta,fecha,usuario,proveedor,centro,cae,estado,nombre,fechaFC,detalle,liberado])
+
+    return aprobadosC
+
 
 def volverInicioOrigen(usuario, password,origen):
     sqlUsuario = buscarUsuarioPass(usuario,password)
@@ -285,7 +309,17 @@ def volverInicioOrigen(usuario, password,origen):
             sqlArchivosApro = buscarLiberadosP()
             listaArchivos = sqlArchivosRepo
             listaArchivosA = sqlArchivosApro
-            return render_template('proveedores.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio)        
+            return render_template('proveedores.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio)
+        if usuarioO.roll == "SERVICIOS":
+            sqlArchivosApro = buscarLiberadosS()
+          
+            listaArchivosA = sqlArchivosApro
+            return render_template('proveedores.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio)   
+        if usuarioO.roll == "DIRECTO":
+            sqlArchivosApro = buscarLiberadosD()
+            
+            listaArchivosA = sqlArchivosApro
+            return render_template('proveedores.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio)         
     else:
                 flash('Error.')
     return redirect('/')
@@ -695,6 +729,33 @@ def verificarUsuarioLiberado():
             listaArchivos = sqlArchivosRepo
             listaLiberados = sqlLiberados
             return render_template('liberados.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, liberados = listaLiberados, repositorio = carpetaRepositorio)
+          
+    else:
+                flash('Error.')
+    return redirect('/')
+
+
+@app.route('/liberadosCentro', methods=['GET','POST'])
+def verificarUsuarioLiberadoCentro():
+    
+    try:
+        
+        usuario = request.form['usuario']
+        password = request.form['contrasenia']
+        sqlUsuario = buscarUsuarioPass(usuario,password)
+    except:
+        print("Voy por aca")
+        return redirect('/noLogin')
+    
+    if str(sqlUsuario) != "()" and str(sqlUsuario) != "[]":
+        usuarioO = Usuario(sqlUsuario[0][0],sqlUsuario[0][1],sqlUsuario[0][2],sqlUsuario[0][3],sqlUsuario[0][4],sqlUsuario[0][5],sqlUsuario[0][6],sqlUsuario[0][7])
+    else:
+        usuarioO = None
+    
+    if usuarioO:
+        sqlLiberados = buscarLiberadosCentro(usuarioO.centro)
+        listaLiberados = sqlLiberados
+        return render_template('liberadosCentro.html',usuario = usuarioO,id=usuarioO.id, liberados = listaLiberados, repositorio = carpetaRepositorio)
           
     else:
                 flash('Error.')

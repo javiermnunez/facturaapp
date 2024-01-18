@@ -34,11 +34,10 @@
     <link href="https://cdn.datatables.net/v/bs5/dt-1.13.8/datatables.min.css" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-       
-
         footer {
             background-color: rgb(212, 211, 211);
-            padding: 20px 0; /* Ajusta el espaciado superior e inferior según sea necesario */
+            padding: 20px 0;
+            /* Ajusta el espaciado superior e inferior según sea necesario */
         }
 
         .footer-content {
@@ -58,178 +57,212 @@
 
     <header>
         <section class="wrapper">
-    <!-- Inicia Navbar-->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark titulo-nav">
-        
-        
-        <ul>
-            <li>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            </li>
-            <li>
-                    <p style="color: rgb(58, 176, 255);padding: 8px 12px;">{{usuario.roll}}</p>
-            </li>
-            <li>{% if usuario.roll == "CONTROL" %}
-                <form action="/repositorioC" method="POST" style="margin-left: auto;">
-                    <input type="email" class="form-control" id="email" name="usuario" value="{{usuario.mail}}" hidden>
-                    <input type="password" class="form-control" id="password" name="contrasenia"
-                        value="{{usuario.contraseña}}" hidden>
-                    <button type="submit" class="btn btn-dark">Repositorio</button>
-                </form>
-                {% endif %}
-            </li>
-            <li>
-                {% if usuario.roll == "CONTROL" %}
-                <form action="/repositorio" method="POST" style="margin-left: auto;">
-                    <input type="email" class="form-control" id="email" name="usuario" value="{{usuario.mail}}" hidden>
-                    <input type="password" class="form-control" id="password" name="contrasenia"
-                        value="{{usuario.contraseña}}" hidden>
-
-                    <button type="submit" class="btn btn-dark">Aprobados</button>
+            <!-- Inicia Navbar-->
+            <nav class="navbar navbar-expand-lg navbar-dark bg-dark titulo-nav">
 
 
-                </form>
-                {% endif %}
-                {% if usuario.roll == "JEFE" or usuario.roll == "EMPLEADO" %}
-                <form action="/repositorio" method="POST" style="margin-left: auto;">
-                    <input type="email" class="form-control" id="email" name="usuario" value="{{usuario.mail}}" hidden>
-                    <input type="password" class="form-control" id="password" name="contrasenia"
-                        value="{{usuario.contraseña}}" hidden>
+                <ul>
+                    <li>
+                        <button class="navbar-toggler" type="button" data-toggle="collapse"
+                            data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                            aria-expanded="false" aria-label="Toggle navigation">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                    </li>
+                    <li>
+                        <p style="color: rgb(58, 176, 255);padding: 8px 12px;">{{usuario.roll}}</p>
+                    </li>
+                    {% if usuario.roll == "PROVEEDORES" or usuario.roll == "SERVICIOS" or usuario.roll == "DIRECTO"%}
+                    <li>
+                        <form action="/repositorio" method="POST" style="margin-left: auto;">
+                            <input type="email" class="form-control" id="email" name="usuario" value="{{usuario.mail}}"
+                                hidden>
+                            <input type="password" class="form-control" id="password" name="contrasenia"
+                                value="{{usuario.contraseña}}" hidden>
+                            <button type="submit" class="btn btn-dark">Inicio</button>
+                        </form>
+                        
+                    </li>
+                    {% endif %}
+                    <li>{% if usuario.roll == "CONTROL" %}
+                        <form action="/repositorioC" method="POST" style="margin-left: auto;">
+                            <input type="email" class="form-control" id="email" name="usuario" value="{{usuario.mail}}"
+                                hidden>
+                            <input type="password" class="form-control" id="password" name="contrasenia"
+                                value="{{usuario.contraseña}}" hidden>
+                            <button type="submit" class="btn btn-dark">Repositorio</button>
+                        </form>
+                        {% endif %}
+                    </li>
+                    <li>
+                        {% if usuario.roll == "CONTROL" %}
+                        <form action="/repositorio" method="POST" style="margin-left: auto;">
+                            <input type="email" class="form-control" id="email" name="usuario" value="{{usuario.mail}}"
+                                hidden>
+                            <input type="password" class="form-control" id="password" name="contrasenia"
+                                value="{{usuario.contraseña}}" hidden>
 
-                    <button type="submit" class="btn btn-dark">Repositorio</button>
+                            <button type="submit" class="btn btn-dark">Aprobados</button>
 
 
-                </form>
-                {% endif %}
-            </li>
-            <li>{% if usuario.roll == "CONTROL" %}
-                <form action="/liberados" method="POST" style="margin-left: auto;">
-                    <input type="email" class="form-control" id="email" name="usuario" value="{{usuario.mail}}" hidden>
-                    <input type="password" class="form-control" id="password" name="contrasenia"
-                        value="{{usuario.contraseña}}" hidden>
-                    <button type="submit" class="btn btn-dark">Liberados</button>
-                </form>
-                {% endif %}
-                {% if usuario.roll == "JEFE" or usuario.roll == "EMPLEADO" %}
-                <form action="/aprobados" method="POST" style="margin-left: auto;">
-                    <input type="email" class="form-control" id="email" name="usuario" value="{{usuario.mail}}" hidden>
-                    <input type="password" class="form-control" id="password" name="contrasenia"
-                        value="{{usuario.contraseña}}" hidden>
-                    <button type="submit" class="btn btn-dark">Aprobados</button>
-                </form>
-                {% endif %}
-            </li>
-            
-            <li>
-                <div style="margin-left: auto;">
+                        </form>
+                        {% endif %}
+                        {% if usuario.roll == "JEFE" or usuario.roll == "EMPLEADO" %}
+                        <form action="/repositorio" method="POST" style="margin-left: auto;">
+                            <input type="email" class="form-control" id="email" name="usuario" value="{{usuario.mail}}"
+                                hidden>
+                            <input type="password" class="form-control" id="password" name="contrasenia"
+                                value="{{usuario.contraseña}}" hidden>
 
-                    <button type="button" class="btn btn-dark" data-toggle="modal" data-target="#exampleModal"
-                        title="Cargar archivo">
-                        <i class="fas  fa-arrow-up" style="color: greenyellow;"></i> Subir Archivo
-                    </button>
+                            <button type="submit" class="btn btn-dark">Repositorio</button>
 
-                </div>
-            </li>
-            <li>
-                <form action="/"  style="margin-left: auto;">
-                    
-                    <button type="submit" class="btn btn-dark">Salir</button>
-                </form>
-            </li>
-        </ul>
-    </nav>
-    <style>
-        * {
-            padding: 0;
-            margin: 0;
-        }
-    
-    
-    
-    
-        nav ul {
-            list-style: none;
-            overflow: hidden;
-            /* Limpiamos errores de float */
-        }
-    
-        nav ul li {
-            float: left;
-            font-family: Arial, sans-serif;
-            font-size: 16px;
-        }
-    
-        nav ul li a {
-            display: block;
-            /* Convertimos los elementos a en elementos bloque para manipular el padding */
-            padding: 20px;
-            color: #fff;
-            text-decoration: none;
-        }
-    
-        .contenido {
-            padding-top: 80px;
-        }
-    
-        .wrapper {
-            width: 100%;
-            margin: auto;
-            overflow: hidden;
-        }
-    
-        header {
-            background: rgba(0, 0, 0, 0.9);
-            width: 100%;
-            position: fixed;
-            z-index: 10;
-        }
-    
-        footer {
-            background-color: rgb(212, 211, 211);
-            padding: 20px 0;
-            /* Ajusta el espaciado superior e inferior según sea necesario */
-            min-height: 100px;
-        }
-    
-        .footer-content {
-            width: 100%;
-            max-height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-    
-        /* Estilo del fondo modal */
-    #modalBackground {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      justify-content: center;
-      align-items: center;
-    }
 
-    /* Estilo del spinner en el modal */
-    #modalSpinner {
-      border: 4px solid rgba(255, 255, 255, 0.3);
-      border-radius: 50%;
-      border-top: 4px solid #3498db;
-      width: 50px;
-      height: 50px;
-      animation: spin 1s linear infinite;
-    }
+                        </form>
+                        {% endif %}
+                    </li>
+                    <li>{% if usuario.roll == "CONTROL" %}
+                        <form action="/liberados" method="POST" style="margin-left: auto;">
+                            <input type="email" class="form-control" id="email" name="usuario" value="{{usuario.mail}}"
+                                hidden>
+                            <input type="password" class="form-control" id="password" name="contrasenia"
+                                value="{{usuario.contraseña}}" hidden>
+                            <button type="submit" class="btn btn-dark">Liberados</button>
+                        </form>
+                        {% endif %}
+                        {% if usuario.roll == "JEFE" or usuario.roll == "EMPLEADO" %}
+                        <form action="/aprobados" method="POST" style="margin-left: auto;">
+                            <input type="email" class="form-control" id="email" name="usuario" value="{{usuario.mail}}"
+                                hidden>
+                            <input type="password" class="form-control" id="password" name="contrasenia"
+                                value="{{usuario.contraseña}}" hidden>
+                            <button type="submit" class="btn btn-dark">Aprobados</button>
+                        </form>
 
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    </style>
-    </section>
-</header>
-    <section class="contenido wrapper" >
+                        {% endif %}
+                    </li>
+                    {% if usuario.roll == "JEFE" or usuario.roll == "EMPLEADO" %}
+                    <li>
+                        <form action="/liberadosCentro" method="POST" style="margin-left: auto;">
+                            <input type="email" class="form-control" id="email" name="usuario" value="{{usuario.mail}}"
+                                hidden>
+                            <input type="password" class="form-control" id="password" name="contrasenia"
+                                value="{{usuario.contraseña}}" hidden>
+                            <button type="submit" class="btn btn-dark">Liberados</button>
+                        </form>
+                    </li>
+                    {% endif %}
+                    <li>
+                        <div style="margin-left: auto;">
+
+                            <button type="button" class="btn btn-dark" data-toggle="modal" data-target="#exampleModal"
+                                title="Cargar archivo">
+                                <i class="fas  fa-arrow-up" style="color: greenyellow;"></i> Subir Archivo
+                            </button>
+
+                        </div>
+                    </li>
+                    <li>
+                        <form action="/" style="margin-left: auto;">
+
+                            <button type="submit" class="btn btn-dark">Salir</button>
+                        </form>
+                    </li>
+                </ul>
+            </nav>
+            <style>
+                * {
+                    padding: 0;
+                    margin: 0;
+                }
+
+
+
+
+                nav ul {
+                    list-style: none;
+                    overflow: hidden;
+                    /* Limpiamos errores de float */
+                }
+
+                nav ul li {
+                    float: left;
+                    font-family: Arial, sans-serif;
+                    font-size: 16px;
+                }
+
+                nav ul li a {
+                    display: block;
+                    /* Convertimos los elementos a en elementos bloque para manipular el padding */
+                    padding: 20px;
+                    color: #fff;
+                    text-decoration: none;
+                }
+
+                .contenido {
+                    padding-top: 80px;
+                }
+
+                .wrapper {
+                    width: 100%;
+                    margin: auto;
+                    overflow: hidden;
+                }
+
+                header {
+                    background: rgba(0, 0, 0, 0.9);
+                    width: 100%;
+                    position: fixed;
+                    z-index: 10;
+                }
+
+                footer {
+                    background-color: rgb(212, 211, 211);
+                    padding: 20px 0;
+                    /* Ajusta el espaciado superior e inferior según sea necesario */
+                    min-height: 100px;
+                }
+
+                .footer-content {
+                    width: 100%;
+                    max-height: 100%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
+
+                /* Estilo del fondo modal */
+                #modalBackground {
+                    display: none;
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.5);
+                    justify-content: center;
+                    align-items: center;
+                }
+
+                /* Estilo del spinner en el modal */
+                #modalSpinner {
+                    border: 4px solid rgba(255, 255, 255, 0.3);
+                    border-radius: 50%;
+                    border-top: 4px solid #3498db;
+                    width: 50px;
+                    height: 50px;
+                    animation: spin 1s linear infinite;
+                }
+
+                @keyframes spin {
+                    0% {
+                        transform: rotate(0deg);
+                    }
+
+                    100% {
+                        transform: rotate(360deg);
+                    }
+                }
+            </style>
+        </section>
+    </header>
+    <section class="contenido wrapper">

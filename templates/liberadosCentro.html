@@ -1,0 +1,128 @@
+{% include 'cabecera.html' %}
+  <br>
+  {% if usuario %}
+  <div class="container-fluid">
+    {% for liberado in liberados %}
+    <div class="modal fade" id="detalleModal{{ liberado[0] }}" tabindex="-1" role="dialog"
+      aria-labelledby="detalleModalLabel{{ liberado[0] }}" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="detalleModalLabel{{ liberado[0] }}">Detalle del Archivo</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <form action="/editarDetalle" method="post" enctype=multipart/form-data>
+            <input name="origen" value="liberados" hidden>
+            <div class="modal-body">
+              {% if usuario.roll == "CONTROL"%}
+              <textarea rows="5" cols="50" name="detalle">{{ liberado[10] }}</textarea>
+              {% endif %}
+              {% if usuario.roll == "EMPLEADO" or usuario.roll == "JEFE" %}
+              <textarea rows="5" cols="50" name="detalle" disabled>{{ liberado[10] }}</textarea>
+              {% endif %}
+              <input name="id_archivo" value="{{liberado[0]}}" hidden>
+              <input name="usuario" type="text" value={{usuario.id}} hidden>
+            </div>
+            <div class="modal-footer">
+              {% if usuario.roll == "CONTROL" %}
+              <button type="submit" class="btn btn-info">Modificar</button>
+              {% endif %}
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    <div class="row">
+      <div class=" col-md-6 offset-md-3 text-center">
+        {% with messages= get_flashed_messages() %}
+        {% if messages %}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          {% for message in messages %}{{ message }}{% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+        <!-- Modal -->
+        {% include 'subir_archivo.html' %}
+      </div>
+    </div>
+    <div class="row">
+
+    </div>
+    <div class="row">
+      <div class="col-12 col-md-1"></div>
+      <div class="col-12 col-md-10 ">
+        
+        <div class="table-responsive" style="background-color: white; border-radius: 10px;padding: 10px;margin: 10px;min-width: 710px;">
+          <h3>Ver liberados</h3>
+          <table class="table  table-bordered text-center table-hover" id="miTabla2">
+            <thead class="thead-dark">
+              <tr>
+                <th style="color: rgb(130, 204, 247);text-align: center;"><i class="fas fa-globe"></i>Centro</th>
+                <th style="color: rgb(130, 204, 247);text-align: center;"><i class="fas fa-truck"></i>Proveedor</th>
+                <th style="color: rgb(130, 204, 247);text-align: center;"><i class="fas fa-file"></i>Nro factura</th>
+                <th style="color: rgb(130, 204, 247);text-align: center;"><i class="fas fa-calendar"></i>Fecha FC</th>
+                <th style="color: rgb(130, 204, 247);text-align: center;"><i class="fas fa-edit"></i>Detalle</th>
+                <th style="color: rgb(130, 204, 247);text-align: center;"><i class="fad fa-ballot-check"></i>Opciones</th>
+                <th style="color: rgb(130, 204, 247);text-align: center;"><i class="fad fa-ballot-check"></i>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+
+              {% for liberado in liberados %}
+
+              <tr>
+                <td> {{ liberado[5] }}</td>
+                <td> {{ liberado[4] }}</td>
+
+                <td style="color: rgb(33, 67, 221);">{{ liberado[6] }}</td>
+                <td> {{ liberado[9] }}</td>
+                <td>
+                  <p hidden>{{ liberado[10] }}</p>
+                  <a href="#" data-toggle="modal" data-target="#detalleModal{{ liberado[0] }}"
+                    class="btn btn-outline-secondary btn-sm">Detalle</a></td>
+                <td>
+                  <div class="row">
+                    <div class="col">
+                      <form action="/verPdf" method="post" enctype=multipart/form-data target="_blank"
+                        rel="noopener noreferrer">
+                        <input type="text" name="id_archivo" value="{{liberado[0]}}" hidden>
+                        <input type="text" name="id" value="{{id}}" hidden>
+                        <button type="submit" class="btn  btn-outline-info btn-sm" title="Ver archivo"><i
+                            class="fas fa-eye fa-lg" title="Ver"></i></button>
+                      </form>
+                    </div>
+                    
+
+                  </div>
+                </td>
+                <td>
+                  {% if liberado[7] == "PAGADO" %}<p style="color: rgb(15, 180, 15);">{{ liberado[7] }} </p>{% endif %}
+                  {% if liberado[7] != "PAGADO" %}<p style="color: rgb(235, 139, 15);">{{ liberado[7] }} </p>{% endif %}
+                </td>
+                
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+
+        </div>
+        {% endif %}
+      </div>
+      <div class="col-12 col-md-1"></div>
+      
+    </div>
+  </div>
+  <br>
+  <script>
+    // Obtener el elemento input por su ID
+    var miInput = document.getElementById('miOrigen');
+
+    // Establecer el valor deseado
+    miInput.value = "liberados";
+  </script>
+  {% include 'pie.html' %}
