@@ -30,11 +30,13 @@ carpetaRepositorio = current_dir+"\\datos\\beta\\repositorio"
 carpetaAprobados = current_dir+"\\datos\\beta\\aprobados"
 carpetaLiberados = current_dir+"\\datos\\beta\\liberados"
 
-def enviarMail(destinatario, mensaje):
+
+def enviarMail(asunto,destinatario, mensaje):
+    #destinatario = "jmn@betalab.com.ar"
     try:
         em = EmailMessage()
         em["To"] = destinatario
-        em["Subject"] = "Se cargó una nueva Factura."
+        em["Subject"] = asunto
         em.set_content(mensaje)
         
         with smtplib.SMTP("mail.laboratoriosbeta.com.ar", 26) as smtp:
@@ -186,7 +188,7 @@ def buscarLiberadosP():
 def buscarLiberadosS():
     aprobadosC = []
     cursor = conexion.cursor()
-    cursor.execute(f"SELECT * FROM archivos where estado='LIBERADO' AND(destino='SERVICIOS');")
+    cursor.execute(f"SELECT * FROM archivos where (estado='LIBERADO' OR estado='PAGADO') AND(destino='SERVICIOS');")
     apro = cursor.fetchall()
     conexion.commit()
     for registro in apro:
@@ -208,7 +210,7 @@ def buscarLiberadosS():
 def buscarLiberadosD():
     aprobadosC = []
     cursor = conexion.cursor()
-    cursor.execute(f"SELECT * FROM archivos where estado='LIBERADO' AND(destino='DIRECTO');")
+    cursor.execute(f"SELECT * FROM archivos where (estado='LIBERADO' OR estado='PAGADO') AND(destino='DIRECTO');")
     apro = cursor.fetchall()
     conexion.commit()
     for registro in apro:
@@ -314,12 +316,12 @@ def volverInicioOrigen(usuario, password,origen):
             sqlArchivosApro = buscarLiberadosS()
           
             listaArchivosA = sqlArchivosApro
-            return render_template('proveedores.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio)   
+            return render_template('proveedores.html',usuario = usuarioO,id=usuarioO.id, archivosA = listaArchivosA, repositorio = carpetaRepositorio)   
         if usuarioO.roll == "DIRECTO":
             sqlArchivosApro = buscarLiberadosD()
             
             listaArchivosA = sqlArchivosApro
-            return render_template('proveedores.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio)         
+            return render_template('proveedores.html',usuario = usuarioO,id=usuarioO.id, archivosA = listaArchivosA, repositorio = carpetaRepositorio)         
     else:
                 flash('Error.')
     return redirect('/')
@@ -826,9 +828,10 @@ def subirA():
                         flash("Algo salio mal, no se cargo el archivo!")
                     #activar mail
                     if usuarioO.roll == "EMPLEADO" and s:
+                        asunto = "Notificación de Carga Factura"
                         listaAvisos = listaAvisoEmpleado(usuarioO.centro)
                         for usuarioM in listaAvisos:
-                            enviarMail(usuarioM.mail , "Se ha subido la factura: "+request.form['nro']+" del proveedor: "+request.form['proveedor']+".\nPor el usuario: "+usuarioO.apellido+" "+usuarioO.nombre+"."+"\nhref:'http://"+servidorIp+":5000'")
+                            enviarMail(asunto, usuarioM.mail , "Se ha cargado la factura nº: "+request.form['nro']+" del proveedor: "+request.form['proveedor']+".\nPor el usuario: "+usuarioO.apellido+" "+usuarioO.nombre+"."+"\nhref:'http://"+servidorIp+":5000'")
                     
                         
             else:
@@ -946,7 +949,7 @@ def subirArchivoProveedores(id_usuario, ruta_repo, proveedor, centro, nro, fecha
         # Se redirecciona a la página principal
         cursor = conexion.cursor()
         fechaActual = datetime.now()
-        sqlUsuario = f"INSERT INTO `archivos` (`id_archivo`, `ruta`, `fecha`, `usuario`, `proveedor`,`centro`,`nro`,`estado`,`nombre`,`fecha_factura`, `detalle`, `destino`) VALUES (NULL, '{ruta_codificada}', '{fechaActual}', '{id_usuario}', '{proveedor}', '{centro}','{nro}','LIBERADO','{nuevo_nombre}', '{fechaFactura}', '{detalle}', 'PROVEEDORES');"
+        sqlUsuario = f"INSERT INTO `archivos` (`id_archivo`, `ruta`, `fecha`, `usuario`, `proveedor`,`centro`,`nro`,`estado`,`nombre`,`fecha_factura`, `detalle`, `destino`,`aprobado_por`) VALUES (NULL, '{ruta_codificada}', '{fechaActual}', '{id_usuario}', '{proveedor}', '{centro}','{nro}','LIBERADO','{nuevo_nombre}', '{fechaFactura}', '{detalle}', 'PROVEEDORES', 'PROVEEDORES');"
         cursor.execute(sqlUsuario)
         conexion.commit()
     return subio
@@ -1010,9 +1013,10 @@ def mover_archivo_a_Liberar():
         contrasenia = usuario_o.contraseña
         if usuario_o.roll == "CONTROL":
             listaAvisos = listaAvisoControl(destino)
+            asunto = "Notificación de Liberación Factura"
             for usuarioM in listaAvisos:
                 mensaje = "Se ha liberado la factura: "+archivo[0][6]+" del proveedor: "+archivo[0][4]+".\nPor el usuario: "+usuario_o.apellido+" "+usuario_o.nombre+"\nCentro: "+usuario_o.centro+"."+"\nhref:'http://"+servidorIp+":5000'"
-                enviarMail(usuarioM.mail , mensaje)
+                enviarMail(asunto, usuarioM.mail , mensaje)
     # Manejar el caso en el que no se encuentra el usuario
     return volverInicioOrigen(usuario,contrasenia,origen)
 
@@ -1070,9 +1074,10 @@ def moverArchivoAprobado():
         contrasenia = usuario_o.contraseña
         if usuario_o.roll == "JEFE":
             listaAvisos = listaAvisoJefe()
+            asunto = "Notificación de Aprobación Factura."
             for usuarioM in listaAvisos:
                 mensaje = "Se ha aprobado la factura: "+archivo[0][6]+" del proveedor: "+archivo[0][4]+".\nPor el usuario: "+usuario_o.apellido+" "+usuario_o.nombre+"\nCentro: "+usuario_o.centro+"."+"\nhref:'http://"+servidorIp+":5000'"
-                enviarMail(usuarioM.mail , mensaje)
+                enviarMail(asunto, usuarioM.mail , mensaje)
     # Manejar el caso en el que no se encuentra el usuario
     return volverInicioOrigen(usuario,contrasenia, origen)
 
