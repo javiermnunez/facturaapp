@@ -72,16 +72,19 @@
           <div class="col-sm-2"></div>
           <label for="detalle" class="col-sm-2 col-form-label">Detalle</label>
           <div class="col-lg-8">
-            <textarea id="detalle" name="detalle" rows="2" cols="50" class="form-control"></textarea>
+            <textarea id="detalle" name="detalle" rows="2" cols="80" class="form-control"></textarea>
           </div>
           <div class="col-sm-2"></div>
         </div>
+
         <div class="row row-cols-lg-auto" style="padding: 5px;">
-          <label for="opcionesSelect" class="col-sm-2 col-form-label">Agr. Centros</label>
-          <div class="row-cols-lg-auto">
-            
+          
             <div class="row">
-              <div class="col-lg-8">
+              
+              <div class="col-4">
+                <label for="opcionesSelect" >Agreg. Centro</label>
+              </div>
+              <div class="col-6">
                 <select id="opcionesSelect" class="form-control">
                   {% for centro in centros %}
                   <option value="{{centro[1]}}">{{centro[2]}}</option>
@@ -89,11 +92,12 @@
                   
                 </select>
               </div>
-              <div class="col-lg-4">
+              <div class="col-2">
                 <button type="button" class="btn btn-secondary btn-sm" onclick="agregarOpcion()">Agregar</button>
               </div>
             </div>
-          </div>
+          
+          
         </div>
         <script>
           // Función para manejar el clic del botón
