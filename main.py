@@ -16,6 +16,7 @@ from datetime import datetime
 from email.message import EmailMessage
 import smtplib
 
+
 servidorIp = "89.0.0.28"
 
 # Obtener la ruta al directorio actual del script
@@ -26,6 +27,8 @@ carpetaRepositorio = current_dir+"\\datos\\beta\\repositorio"
 carpetaAprobados = current_dir+"\\datos\\beta\\aprobados"
 carpetaLiberados = current_dir+"\\datos\\beta\\liberados"
 
+max_size = 10485760 #10mb
+
 def buscarCentros():
     cursor = conexion.cursor()
     cursor.execute("SELECT * FROM `centro`;")
@@ -34,7 +37,7 @@ def buscarCentros():
     return centros
 
 def enviarMail(asunto,destinatario, mensaje):
-    #destinatario = "jmn@betalab.com.ar"
+    destinatario = "jmn@betalab.com.ar"
     try:
         em = EmailMessage()
         em["To"] = destinatario
@@ -838,14 +841,14 @@ def subirA():
                     
                     s = subirArchivoProveedores(usuarioO.id,carpetaLiberados ,request.form['proveedor'],request.form['centro'],request.form['nro'],request.form['fecha'],request.form['detalle'])
                     if s == False:
-                        flash("Algo salio mal, no se cargo el archivo!")
+                        flash("Algo salio mal, no se cargo el archivo o demasiado grande(10mb max)!")
                     
                         
                     
                 else:
                     s = subirArchivo(usuarioO.id,carpetaRepositorio ,request.form['proveedor'],request.form['centro'],request.form['nro'],request.form['fecha'],request.form['detalle'])
                     if s == False:
-                        flash("Algo salio mal, no se cargo el archivo!")
+                        flash("Algo salio mal, no se cargo el archivo o demasiado grande(10mb max)!")
                     #activar mail
                     if usuarioO.roll == "EMPLEADO" and s:
                         asunto = "Notificación de Carga Factura"
@@ -916,7 +919,11 @@ def subirArchivo(id_usuario, ruta_repo, proveedor, centro, nro, fechaFactura, de
     if file.filename == '':
         print('No se cargó ningún archivo')
         return subio
+    
+    
     else:
+        
+        
         filename = secure_filename(file.filename)
 
         # Agregar el valor de cae como un prefijo al nombre del archivo
@@ -944,14 +951,16 @@ def subirArchivoProveedores(id_usuario, ruta_repo, proveedor, centro, nro, fecha
     # Comprobar si la solicitud de publicación tiene la parte del archivo
     if 'file' not in request.files:
         print('No se cargó ningún archivo')
-        return redirect(request.url)
+        return subio
     
     file = request.files['file']
 
     # Si el usuario no selecciona un archivo
     if file.filename == '':
         print('No se cargó ningún archivo')
-        return redirect(request.url)
+        return subio
+    
+    
     else:
         filename = secure_filename(file.filename)
 

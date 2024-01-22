@@ -19,7 +19,7 @@
           <input name="contrasenia" type="text" value={{usuario.contraseña}} hidden>
           <div class="form-group ">
             <input type="file" name="file" id="file" class="inputfile inputfile-4"
-              data-multiple-caption="{count} files selected" multiple />
+              data-multiple-caption="{count} files selected" multiple accept=".pdf, .doc, .docx, .jpg, .jpeg, .gif, .tif"/>
             <label for="file">
               <i class="fas fa-file" style="font-size:15pt"></i>
               <br>
@@ -107,6 +107,15 @@
             // Agregar la opción seleccionada al textarea, separada por una coma (o como prefieras)
             $('#detalle').val(valorTextarea + (valorTextarea ? '\n' : '') + opcionSeleccionada);
           }
+          document.getElementById('file').addEventListener('change', function () {
+    const fileSize = this.files[0].size; // Tamaño del archivo en bytes
+    const maxSize = 10 * 1024 * 1024; // 10 MB
+
+    if (fileSize > maxSize) {
+      alert('El archivo es demasiado grande. El tamaño máximo permitido es 10 MB.');
+      this.value = ''; // Limpiar el campo de entrada para que el usuario pueda seleccionar otro archivo
+    }
+  });
         </script>
 
         <div class="modal-footer">
