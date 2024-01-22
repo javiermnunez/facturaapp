@@ -24,19 +24,5 @@ class Usuario:
                 break
         return encontrado
 
-    def aprobarArchivo(self,archivo):
-        if self.roll == Roll.JEFE or self.roll == Roll.GERENTE:
-            archivo.cambiarEstado(Estado.APROBADO)
-            self.aprobados.append(archivo)
-    def eliminarArchivo(self,archivo):
-        if self.roll == Roll.JEFE or self.roll == Roll.GERENTE or self.roll == Roll.EMPLEADO:
-            if archivo.estado == Estado.NO_APROBADO:
-                self.noAprobados.remove(archivo)
-    def marcarArchivo(self,archivo):
-        if self.roll == Roll.JEFE or self.roll == Roll.GERENTE:
-            archivo.cambiarEstado(Estado.MARCADO)
-
-
-
     def __str__(self):
         return f"Usuario: {self.nombre} {self.apellido}\nSector: {self.sector}\nCentro: {self.centro}\nCorreo electrónico: {self.mail}"
