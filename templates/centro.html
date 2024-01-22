@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <title>Gestión de Usuarios</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f5f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        h2 {
+            color: #2c3e50;
+        }
+
+        h3 {
+            color: #2980b9;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #bdc3c7;
+            text-align: left;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #ecf0f1;
+        }
+
+        form {
+            margin-top: 20px;
+            max-width: 600px;
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 16px;
+            box-sizing: border-box;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #3498db;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div>
+        <h2>Administracón de Centro</h2>
+
+        <!-- Tabla para mostrar la cantidad de usuarios -->
+        <table id="centroTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Código</th>
+                    <th>Detalle</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for centro in centros %}
+                <tr>
+                    <td>{{centro[0]}}</td>
+                    <td>{{centro[1]}}</td>
+                    <td>{{centro[2]}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Formulario para agregar usuarios -->
+        <form action="/agregar_centro" method="POST">
+            <h3>Agregar Centro</h3>
+            <label for="cod">Código:</label>
+            <input type="text" id="cod" name="cod" required>
+
+            <label for="detalle">Detalle:</label>
+            <input type="text" id="detalle" name="detalle" required>
+
+            <div class="row">
+                <div class="col">
+                   <button type="submit">Agregar Centro</button> 
+                </div>
+                <div class="col">
+                    <a class="btn btn-primary" href="/" >Volver</a>
+                </div>
+            </div>
+            
+        </form>
+        
+    </div>
+</body>
+</html>

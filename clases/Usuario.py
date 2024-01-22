@@ -1,7 +1,3 @@
-from clases.Centro import Centro
-from clases.Roll import Roll
-from clases.Archivo import Archivo
-from clases.Estado import Estado
 
 class Usuario:
     def __init__(self):
