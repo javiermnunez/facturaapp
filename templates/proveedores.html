@@ -147,28 +147,7 @@
                   </td>
                   <td>
                     {% include 'modalProveedoresLP.html' %}
-                    <!--
-                      {% if archivoA[7] == "PAGADO" %}
-                      <div class="form-check form-switch">
-                        <form action="/actualizar_estado"  method="post" enctype=multipart/form-data>
-                          <input type="text" value="LIBERADO" name="estado" hidden>
-                          <input type="text" value="{{archivoA[0]}}" name="id_archivo" hidden>
-                          <input type="text" value="{{usuario.id}}" name="id_usuario" hidden>
-                          <button type="submit" class="btn btn-success btn-sm">{{archivoA[7]}}</button>
-                        </form>
-                      </div>
-                      {% endif %}
-                      {% if archivoA[7] != "PAGADO" %}
-                      <div class="form-check form-switch">
-                        <form action="/actualizar_estado"  method="post" enctype=multipart/form-data>
-                          <input type="text" value="PAGADO" name="estado" hidden>
-                          <input type="text" value="{{archivoA[0]}}" name="id_archivo" hidden>
-                          <input type="text" value="{{usuario.id}}" name="id_usuario" hidden>
-                          <button type="submit" class="btn-outline-success">{{archivoA[7]}}</button>
-                        </form>
-                      </div>
-                      {% endif %}
-                      -->
+
                 </td>
               </tr>
               {% endfor %}
@@ -189,7 +168,7 @@
     // Obtener el elemento input por su ID
     var miInput = document.getElementById('miOrigen');
 
-    // Establecer el valor deseado
+    // retorno
     miInput.value = "proveedores";
   </script>
   {% include 'pie.html' %}

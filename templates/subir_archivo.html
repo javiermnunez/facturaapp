@@ -54,7 +54,7 @@
           <div class="col-sm-2"></div>
           <label for="nro" class="col-sm-2 col-form-label">Nro fac.</label>
           <div class="col-lg-8">
-            <input type="text" class="form-control" name="nro" placeholder="Nro factura" required>
+            <input type="number" class="form-control" name="nro" placeholder="Nro factura" required>
           </div>
           <div class="col-sm-2"></div>
         </div>
@@ -79,14 +79,14 @@
         <div class="row row-cols-lg-auto" style="padding: 5px;">
           <label for="opcionesSelect" class="col-sm-2 col-form-label">Agr. Centros</label>
           <div class="row-cols-lg-auto">
-            <!-- Mover el select y el botón debajo del textarea -->
+            
             <div class="row">
               <div class="col-lg-8">
                 <select id="opcionesSelect" class="form-control">
                   {% for centro in centros %}
                   <option value="{{centro[1]}}">{{centro[2]}}</option>
                   {% endfor %}
-                  <!-- Agregar más opciones según sea necesario -->
+                  
                 </select>
               </div>
               <div class="col-lg-4">
