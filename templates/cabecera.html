@@ -69,7 +69,17 @@
                         </button>
                     </li>
                     <li>
-                        <p style="color: rgb(58, 176, 255);padding: 8px 12px;">{{usuario.roll}}</p>
+                        <p style="color: rgb(58, 176, 255);padding: 8px 12px;">
+                            {% if usuario.roll == "JEFE" %} 
+                            RESPONSABLE
+                            {% endif %}
+                            {% if usuario.roll == "EMPLEADO" %} 
+                            UPLOADER
+                            {% endif %}
+                            {% if usuario.roll != "EMPLEADO" and usuario.roll != "JEFE" %} 
+                            {{usuario.roll}}
+                            {% endif %}
+                        </p>
                     </li>
                     {% if usuario.roll == "PROVEEDORES" or usuario.roll == "SERVICIOS" or usuario.roll == "DIRECTO"%}
                     <li>
@@ -163,6 +173,15 @@
                         </div>
                     </li>
                     {% endif %}
+                    <li>
+                        <form action="/proveedores" method="POST" style="margin-left: auto;">
+                            <input type="email" class="form-control" id="email" name="usuario" value="{{usuario.mail}}"
+                                hidden>
+                            <input type="password" class="form-control" id="password" name="contrasenia"
+                                value="{{usuario.contraseña}}" hidden>
+                            <button type="submit" class="btn btn-dark">Tabla Proveedores</button>
+                        </form>
+                    </li>
                     <li>
                         <form action="/" style="margin-left: auto;">
 

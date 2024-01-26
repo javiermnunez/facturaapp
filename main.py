@@ -36,8 +36,15 @@ def buscarCentros():
     conexion.commit()
     return centros
 
+def buscarProveedores():
+    cursor = conexion.cursor()
+    cursor.execute("SELECT * FROM `proveedores`;")
+    proveedores = cursor.fetchall()
+    conexion.commit()
+    return proveedores
+
 def enviarMail(asunto,destinatario, mensaje):
-    destinatario = "jmn@betalab.com.ar"
+    #destinatario = "jmn@betalab.com.ar"
     try:
         em = EmailMessage()
         em["To"] = destinatario
@@ -114,7 +121,7 @@ def buscarArchivo(nro,proveedor):
     print("numero "+nro)
     print("proveedor "+proveedor)
     cursor = conexion.cursor()
-    sqlArchivo = f"select * from archivos where `nro` = {nro} AND `proveedor` = '{proveedor}'"
+    sqlArchivo = f"select * from archivos where `nro` = '{nro}' AND `proveedor` = '{proveedor}'"
     cursor.execute(sqlArchivo)
     archivo = cursor.fetchall()
     conexion.commit()
@@ -285,6 +292,7 @@ def buscarLiberadosCentro(centro):
 def volverInicioOrigen(usuario, password,origen):
     sqlUsuario = buscarUsuarioPass(usuario,password)
     centros = buscarCentros()
+    proveedores = buscarProveedores()
     print('string:'+str(sqlUsuario))
     if str(sqlUsuario) != "()" and str(sqlUsuario) != "[]":
         usuarioO = Usuario(sqlUsuario[0][0],sqlUsuario[0][1],sqlUsuario[0][2],sqlUsuario[0][3],sqlUsuario[0][4],sqlUsuario[0][5],sqlUsuario[0][6],sqlUsuario[0][7])
@@ -298,7 +306,7 @@ def volverInicioOrigen(usuario, password,origen):
             sqlArchivosApro = buscarArchivosApro(usuarioO.centro)
             listaArchivos = sqlArchivosRepo
             listaArchivosA = sqlArchivosApro
-            return render_template(f'{origen}.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio, centros = centros)
+            return render_template(f'{origen}.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio, centros = centros, proveedores = proveedores)
         if usuarioO.roll == "CONTROL":
             sqlArchivosRepo = buscarArchivosRepo(usuarioO, usuarioO.centro)
             sqlArchivosApro = buscarAprovadosControl()
@@ -309,24 +317,24 @@ def volverInicioOrigen(usuario, password,origen):
                 sqlLiberados = buscarLiberadosC(usuarioO.id)
                 listaArchivos = sqlArchivosRepo
                 listaLiberados = sqlLiberados
-                return render_template('liberados.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, liberados = listaLiberados, repositorio = carpetaRepositorio, centros = centros)
-            return render_template(f'{origen}.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio, centros = centros)   
+                return render_template('liberados.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, liberados = listaLiberados, repositorio = carpetaRepositorio, centros = centros, proveedores = proveedores)
+            return render_template(f'{origen}.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio, centros = centros, proveedores = proveedores)   
         if usuarioO.roll == "PROVEEDORES":
             sqlArchivosRepo = buscarArchivosRepo(usuarioO, usuarioO.centro)
             sqlArchivosApro = buscarLiberadosP()
             listaArchivos = sqlArchivosRepo
             listaArchivosA = sqlArchivosApro
-            return render_template('proveedores.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio, centros = centros)
+            return render_template('proveedores.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio, centros = centros, proveedores = proveedores)
         if usuarioO.roll == "SERVICIOS":
             sqlArchivosApro = buscarLiberadosS()
           
             listaArchivosA = sqlArchivosApro
-            return render_template('proveedores.html',usuario = usuarioO,id=usuarioO.id, archivosA = listaArchivosA, repositorio = carpetaRepositorio, centros = centros)   
+            return render_template('proveedores.html',usuario = usuarioO,id=usuarioO.id, archivosA = listaArchivosA, repositorio = carpetaRepositorio, centros = centros, proveedores = proveedores)   
         if usuarioO.roll == "DIRECTO":
             sqlArchivosApro = buscarLiberadosD()
             
             listaArchivosA = sqlArchivosApro
-            return render_template('proveedores.html',usuario = usuarioO,id=usuarioO.id, archivosA = listaArchivosA, repositorio = carpetaRepositorio, centros = centros)         
+            return render_template('proveedores.html',usuario = usuarioO,id=usuarioO.id, archivosA = listaArchivosA, repositorio = carpetaRepositorio, centros = centros, proveedores = proveedores)         
     else:
                 flash('Error.')
     return redirect('/')
@@ -620,6 +628,33 @@ def centrosForm():
     
     return render_template('centro.html', centros = centros)
 
+@app.route('/proveedores' , methods=['POST'])
+def proveedoresForm():
+    centros = buscarCentros()
+    cursor = conexion.cursor()
+    cursor.execute("SELECT * FROM `proveedores`;")
+    proveedores = cursor.fetchall()
+    conexion.commit()
+    try:
+        usuario = request.form['usuario']
+        print(usuario)
+        password = request.form['contrasenia']
+        print(password)
+        sqlUsuario = buscarUsuarioPass(usuario,password)
+    except:
+        print("Voy por aca")
+        return redirect('/noLogin')
+    
+    if str(sqlUsuario) != "()" and str(sqlUsuario) != "[]":
+        usuarioO = Usuario(sqlUsuario[0][0],sqlUsuario[0][1],sqlUsuario[0][2],sqlUsuario[0][3],sqlUsuario[0][4],sqlUsuario[0][5],sqlUsuario[0][6],sqlUsuario[0][7])
+    else:
+        usuarioO = None
+    
+    if usuarioO:
+        return render_template('proveedoresM.html', proveedores = proveedores,usuario = usuarioO, repositorio = carpetaRepositorio, id = usuarioO.id,centros = centros)
+                    
+    
+
 @app.route('/agregar_usuario', methods=['POST'])
 def agregar_usuario():
     nombre = request.form['nombre'].capitalize()
@@ -646,10 +681,57 @@ def agregar_centro():
     conexion.commit()
     return redirect('/centro')
 
+def buscarProveedor(cuit):
+    encontrado = True
+    cursor = conexion.cursor()
+    cursor.execute(f"SELECT * FROM `proveedores` where `cuit`= {cuit};")
+    proveedores = cursor.fetchall()
+    conexion.commit()
+    if len(proveedores)>0:
+        print("Cantidad de registros: "+str(len(proveedores)))
+        encontrado = False
+    return encontrado
+
+@app.route('/agregar_proveedor', methods=['POST'])
+def agregar_proveedor():
+    
+    cuit = request.form['cuit']
+    detalle = request.form['detalleP'].upper()
+    if buscarProveedor(cuit):
+        cursor = conexion.cursor()
+        sqlUsuario = f"INSERT INTO `proveedores` (`id_proveedor`, `cuit`, `detalle`) VALUES (NULL, '{cuit}', '{detalle}');"
+        cursor.execute(sqlUsuario)
+        conexion.commit()
+        flash("Se cargo el proveedor correctamente!")
+    else:
+        flash("No se pudo cargar el proveedor, cuit ya cargado!")
+    cursor = conexion.cursor()
+    cursor.execute("SELECT * FROM `proveedores`;")
+    proveedores = cursor.fetchall()
+    conexion.commit()
+    try:
+        usuario = request.form['usuario']
+        print(usuario)
+        password = request.form['contrasenia']
+        print(password)
+        sqlUsuario = buscarUsuarioPass(usuario,password)
+    except:
+        print("Voy por aca")
+        return redirect('/noLogin')
+    
+    if str(sqlUsuario) != "()" and str(sqlUsuario) != "[]":
+        usuarioO = Usuario(sqlUsuario[0][0],sqlUsuario[0][1],sqlUsuario[0][2],sqlUsuario[0][3],sqlUsuario[0][4],sqlUsuario[0][5],sqlUsuario[0][6],sqlUsuario[0][7])
+    else:
+        usuarioO = None
+    
+    
+    return render_template('proveedoresM.html', proveedores = proveedores,usuario = usuarioO)
+    
 
 @app.route('/repositorio', methods=['GET','POST'])
 def verificarUsuario():
     centros = buscarCentros()
+    proveedores = buscarProveedores()
     try:
         usuario = request.form['usuario']
         print(usuario)
@@ -672,31 +754,31 @@ def verificarUsuario():
             sqlArchivosApro = buscarArchivosApro(usuarioO.centro)
             listaArchivos = sqlArchivosRepo
             listaArchivosA = sqlArchivosApro
-            return render_template('repo.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio, centros = centros)
+            return render_template('repo.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio, centros = centros, proveedores = proveedores)
         if usuarioO.roll == "CONTROL":
             sqlArchivosRepo = buscarArchivosRepo(usuarioO, usuarioO.centro)
             sqlArchivosApro = buscarAprovadosControl()
             listaArchivos = sqlArchivosRepo
             listaArchivosA = sqlArchivosApro
-            return render_template('aprobados.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio, centros = centros)
+            return render_template('aprobados.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio, centros = centros, proveedores = proveedores)
         if usuarioO.roll == "PROVEEDORES":
             sqlArchivosRepo = buscarArchivosRepo(usuarioO, usuarioO.centro)
             sqlArchivosApro = buscarLiberadosP()
             listaArchivos = sqlArchivosRepo
             listaArchivosA = sqlArchivosApro
-            return render_template('proveedores.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio, centros = centros)
+            return render_template('proveedores.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio, centros = centros, proveedores = proveedores)
         if usuarioO.roll == "SERVICIOS":
             sqlArchivosRepo = buscarArchivosRepo(usuarioO, usuarioO.centro)
             sqlArchivosApro = buscarLiberadosS()
             listaArchivos = sqlArchivosRepo
             listaArchivosA = sqlArchivosApro
-            return render_template('proveedores.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio, centros = centros)  
+            return render_template('proveedores.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio, centros = centros, proveedores = proveedores)  
         if usuarioO.roll == "DIRECTO":
             sqlArchivosRepo = buscarArchivosRepo(usuarioO, usuarioO.centro)
             sqlArchivosApro = buscarLiberadosD()
             listaArchivos = sqlArchivosRepo
             listaArchivosA = sqlArchivosApro
-            return render_template('proveedores.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio, centros = centros)            
+            return render_template('proveedores.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio, centros = centros, proveedores = proveedores)            
     else:
                 flash('Error.')
     return redirect('/')
@@ -704,6 +786,7 @@ def verificarUsuario():
 @app.route('/aprobados', methods=['GET','POST'])
 def verificarUsuarioAprobados():
     centros = buscarCentros()
+    proveedores = buscarProveedores()
     try:
         
         usuario = request.form['usuario']
@@ -724,7 +807,7 @@ def verificarUsuarioAprobados():
             sqlArchivosApro = buscarArchivosApro(usuarioO.centro)
             listaArchivos = sqlArchivosRepo
             listaArchivosA = sqlArchivosApro
-            return render_template('aprobados.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio, centros = centros)
+            return render_template('aprobados.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio, centros = centros, proveedores = proveedores)
                  
     else:
                 flash('Error.')
@@ -733,6 +816,7 @@ def verificarUsuarioAprobados():
 @app.route('/liberados', methods=['GET','POST'])
 def verificarUsuarioLiberado():
     centros = buscarCentros()
+    proveedores = buscarProveedores()
     try:
         
         usuario = request.form['usuario']
@@ -753,7 +837,7 @@ def verificarUsuarioLiberado():
             sqlLiberados = buscarLiberadosC(usuarioO.id)
             listaArchivos = sqlArchivosRepo
             listaLiberados = sqlLiberados
-            return render_template('liberados.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, liberados = listaLiberados, repositorio = carpetaRepositorio, centros = centros)
+            return render_template('liberados.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, liberados = listaLiberados, repositorio = carpetaRepositorio, centros = centros, proveedores = proveedores)
           
     else:
                 flash('Error.')
@@ -763,6 +847,7 @@ def verificarUsuarioLiberado():
 @app.route('/liberadosCentro', methods=['GET','POST'])
 def verificarUsuarioLiberadoCentro():
     centros = buscarCentros()
+    proveedores = buscarProveedores()
     try:
         
         usuario = request.form['usuario']
@@ -780,7 +865,7 @@ def verificarUsuarioLiberadoCentro():
     if usuarioO:
         sqlLiberados = buscarLiberadosCentro(usuarioO.centro)
         listaLiberados = sqlLiberados
-        return render_template('liberadosCentro.html',usuario = usuarioO,id=usuarioO.id, liberados = listaLiberados, repositorio = carpetaRepositorio , centros = centros)
+        return render_template('liberadosCentro.html',usuario = usuarioO,id=usuarioO.id, liberados = listaLiberados, repositorio = carpetaRepositorio , centros = centros, proveedores = proveedores)
           
     else:
                 flash('Error.')
@@ -789,6 +874,7 @@ def verificarUsuarioLiberadoCentro():
 @app.route('/repositorioC', methods=['GET','POST'])
 def verificarUsuarioRepositorio():
     centros = buscarCentros()
+    proveedores = buscarProveedores()
     try:
         
         usuario = request.form['usuario']
@@ -809,7 +895,7 @@ def verificarUsuarioRepositorio():
             
             listaArchivos = sqlArchivosRepo
             
-            return render_template('control.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, repositorio = carpetaRepositorio, centros = centros)
+            return render_template('control.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, repositorio = carpetaRepositorio, centros = centros, proveedores = proveedores)
           
     else:
                 flash('Error.')
@@ -834,7 +920,7 @@ def subirA():
     
     if usuarioO:
 
-        if request.method == 'POST':
+        if request.method == 'POST' and request.form['proveedor'] != "0":
             if buscarArchivo(request.form['nro'],request.form['proveedor']) == 0:
 
                 if usuarioO.roll == 'PROVEEDORES':
@@ -859,7 +945,8 @@ def subirA():
                         
             else:
                 flash('Ya existe un archivo con número de factura: '+request.form['nro']+' del proveedor: '+request.form['proveedor']+'.\nNo se cargo el archivo!')
-           
+        else:
+            flash("No se eligio proveedor!.")   
         return volverInicioOrigen(usuarioO.mail,usuarioO.contraseña,origen)            
     else:
                 flash('Error.')        
@@ -1136,4 +1223,4 @@ def actualizar_estado():
 #-------------------------------------------------------------------------------------------------------
 #Se debe modificar la ip que corresponda al equipo en donde se esta corriendo
 if __name__ == "__main__":
-    app.run(host= servidorIp )
+    app.run(host= servidorIp ,debug=True)
