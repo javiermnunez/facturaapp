@@ -35,7 +35,7 @@
             <select name="proveedor" class="form-control">
               <option value="0">Seleccione...</option>
               {% for p in proveedores %}
-              <option value="{{p[1]}} - {{p[2]}}">{{p[2]}} - {{p[1]}}</option>
+              <option value="{{p[1]}}@{{p[2]}}">{{p[2]}} - {{p[1]}}</option>
               {% endfor %}
             </select>
           </div>

@@ -44,7 +44,7 @@ def buscarProveedores():
     return proveedores
 
 def enviarMail(asunto,destinatario, mensaje):
-    #destinatario = "jmn@betalab.com.ar"
+    destinatario = "jmn@betalab.com.ar"
     try:
         em = EmailMessage()
         em["To"] = destinatario
@@ -116,12 +116,12 @@ def buscarArchivoId(id_archivo):
     conexion.commit()
     return archivo
 
-def buscarArchivo(nro,proveedor):
+def buscarArchivo(nro,cuit):
     salida = 1
     print("numero "+nro)
-    print("proveedor "+proveedor)
+    print("proveedor "+cuit)
     cursor = conexion.cursor()
-    sqlArchivo = f"select * from archivos where `nro` = '{nro}' AND `proveedor` = '{proveedor}'"
+    sqlArchivo = f"select * from archivos where `nro` = '{nro}' AND `cuit` = '{cuit}'"
     cursor.execute(sqlArchivo)
     archivo = cursor.fetchall()
     conexion.commit()
@@ -171,7 +171,8 @@ def buscarAprovadosControl():
         fechaFC = registro[9]
         detalle = registro[10]
         aprobado = registro[12]
-        aprobadosC.append([id,ruta,fecha,usuario,proveedor,centro,cae,estado,nombre,fechaFC,detalle,aprobado])
+        cuit = registro[13]
+        aprobadosC.append([id,ruta,fecha,usuario,proveedor,centro,cae,estado,nombre,fechaFC,detalle,aprobado,cuit])
 
     return aprobadosC
 
@@ -193,7 +194,8 @@ def buscarLiberadosP():
         nombre = registro[8]
         fechaFC = registro[9]
         detalle = registro[10]
-        aprobadosC.append([id,ruta,fecha,usuario,proveedor,centro,cae,estado,nombre,fechaFC,detalle])
+        cuit = registro[13]
+        aprobadosC.append([id,ruta,fecha,usuario,proveedor,centro,cae,estado,nombre,fechaFC,detalle,cuit])
 
     return aprobadosC
 
@@ -215,7 +217,8 @@ def buscarLiberadosS():
         nombre = registro[8]
         fechaFC = registro[9]
         detalle = registro[10]
-        aprobadosC.append([id,ruta,fecha,usuario,proveedor,centro,cae,estado,nombre,fechaFC,detalle])
+        cuit = registro[13]
+        aprobadosC.append([id,ruta,fecha,usuario,proveedor,centro,cae,estado,nombre,fechaFC,detalle,cuit])
 
     return aprobadosC
 
@@ -237,7 +240,8 @@ def buscarLiberadosD():
         nombre = registro[8]
         fechaFC = registro[9]
         detalle = registro[10]
-        aprobadosC.append([id,ruta,fecha,usuario,proveedor,centro,cae,estado,nombre,fechaFC,detalle])
+        cuit = registro[13]
+        aprobadosC.append([id,ruta,fecha,usuario,proveedor,centro,cae,estado,nombre,fechaFC,detalle,cuit])
 
     return aprobadosC
 
@@ -260,7 +264,8 @@ def buscarLiberadosC(idU):
         fechaFC = registro[9]
         detalle = registro[10]
         liberado = registro[11]
-        aprobadosC.append([id,ruta,fecha,usuario,proveedor,centro,cae,estado,nombre,fechaFC,detalle,liberado])
+        cuit = registro[13]
+        aprobadosC.append([id,ruta,fecha,usuario,proveedor,centro,cae,estado,nombre,fechaFC,detalle,liberado,cuit])
 
     return aprobadosC
 
@@ -284,7 +289,8 @@ def buscarLiberadosCentro(centro):
         fechaFC = registro[9]
         detalle = registro[10]
         liberado = registro[11]
-        aprobadosC.append([id,ruta,fecha,usuario,proveedor,centro,cae,estado,nombre,fechaFC,detalle,liberado])
+        cuit = registro[13]
+        aprobadosC.append([id,ruta,fecha,usuario,proveedor,centro,cae,estado,nombre,fechaFC,detalle,liberado,cuit])
 
     return aprobadosC
 
@@ -369,8 +375,9 @@ def buscarArchivosRepo(usuario,centro):
         nombre = registro[8]
         fechaFC = registro[9]
         detalle = registro[10]
+        cuit = registro[13]
         
-        repositorio.append([id,ruta,fecha,usuario,proveedor,centro,cae,estado,nombre,fechaFC,detalle])
+        repositorio.append([id,ruta,fecha,usuario,proveedor,centro,cae,estado,nombre,fechaFC,detalle,cuit])
     
     return repositorio
 
@@ -393,7 +400,8 @@ def buscarArchivosApro(centro):
         fechaFC = registro[9]
         detalle = registro[10]
         aprobado = registro[12]
-        aprobados.append([id,ruta,fecha,usuario,proveedor,centro,cae,estado,nombre,fechaFC,detalle,aprobado])
+        cuit = registro[13]
+        aprobados.append([id,ruta,fecha,usuario,proveedor,centro,cae,estado,nombre,fechaFC,detalle,aprobado,cuit])
 
     return aprobados
 @app.route('/noLogin')
@@ -684,27 +692,58 @@ def agregar_centro():
 def buscarProveedor(cuit):
     encontrado = True
     cursor = conexion.cursor()
-    cursor.execute(f"SELECT * FROM `proveedores` where `cuit`= {cuit};")
+    cursor.execute(f"SELECT * FROM `proveedores` where `cuit`= '{cuit}';")
     proveedores = cursor.fetchall()
     conexion.commit()
+    print(len(proveedores))
     if len(proveedores)>0:
         print("Cantidad de registros: "+str(len(proveedores)))
         encontrado = False
     return encontrado
 
+
+def verificarCuit(cuit):
+    # validaciones minimas
+    if len(cuit) != 13 or cuit[2] != "-" or cuit[11] != "-":
+        return False
+
+    base = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2]
+    cuit = cuit.replace("-", "")  # remuevo las barras
+
+    # calculo el digito verificador:
+    aux = 0
+    for i in range(10):
+        aux += int(cuit[i]) * base[i]
+
+    aux = 11 - (aux - (int(aux / 11) * 11))
+    if aux == 11:
+        aux = 0
+    if aux == 10:
+        aux = 9
+
+    return aux == int(cuit[10])
+
 @app.route('/agregar_proveedor', methods=['POST'])
 def agregar_proveedor():
     
     cuit = request.form['cuit']
+    cuit = cuit.replace("-","")
+    cuit = cuit.replace(" ","")
+    cuit = cuit[:2]+"-"+cuit[2:10]+"-"+cuit[-1]
     detalle = request.form['detalleP'].upper()
-    if buscarProveedor(cuit):
-        cursor = conexion.cursor()
-        sqlUsuario = f"INSERT INTO `proveedores` (`id_proveedor`, `cuit`, `detalle`) VALUES (NULL, '{cuit}', '{detalle}');"
-        cursor.execute(sqlUsuario)
-        conexion.commit()
-        flash("Se cargo el proveedor correctamente!")
+    existe = buscarProveedor(cuit)
+    print(existe)
+    if verificarCuit(cuit):
+        if existe:
+            cursor = conexion.cursor()
+            sqlUsuario = f"INSERT INTO `proveedores` (`id_proveedor`, `cuit`, `detalle`) VALUES (NULL, '{cuit}', '{detalle}');"
+            cursor.execute(sqlUsuario)
+            conexion.commit()
+            flash("Se cargo el proveedor correctamente!")
+        else:
+            flash("No se pudo cargar el proveedor, cuit ya cargado!")
     else:
-        flash("No se pudo cargar el proveedor, cuit ya cargado!")
+        flash("El CUIT no es válido!")
     cursor = conexion.cursor()
     cursor.execute("SELECT * FROM `proveedores`;")
     proveedores = cursor.fetchall()
@@ -921,18 +960,19 @@ def subirA():
     if usuarioO:
 
         if request.method == 'POST' and request.form['proveedor'] != "0":
-            if buscarArchivo(request.form['nro'],request.form['proveedor']) == 0:
+            cuit, proveedor = request.form['proveedor'].split("@")
+            if buscarArchivo(request.form['nro'],cuit) == 0:
 
                 if usuarioO.roll == 'PROVEEDORES':
                     
-                    s = subirArchivoProveedores(usuarioO.id,carpetaLiberados ,request.form['proveedor'],request.form['centro'],request.form['nro'],request.form['fecha'],request.form['detalle'])
+                    s = subirArchivoProveedores(usuarioO.id,carpetaLiberados ,proveedor ,cuit ,request.form['centro'],request.form['nro'],request.form['fecha'],request.form['detalle'])
                     if s == False:
                         flash("Algo salio mal, no se cargo el archivo o demasiado grande(10mb max)!")
                     
                         
                     
                 else:
-                    s = subirArchivo(usuarioO.id,carpetaRepositorio ,request.form['proveedor'],request.form['centro'],request.form['nro'],request.form['fecha'],request.form['detalle'])
+                    s = subirArchivo(usuarioO.id,carpetaRepositorio ,proveedor ,cuit ,request.form['centro'],request.form['nro'],request.form['fecha'],request.form['detalle'])
                     if s == False:
                         flash("Algo salio mal, no se cargo el archivo o demasiado grande(10mb max)!")
                     #activar mail
@@ -944,7 +984,7 @@ def subirA():
                     
                         
             else:
-                flash('Ya existe un archivo con número de factura: '+request.form['nro']+' del proveedor: '+request.form['proveedor']+'.\nNo se cargo el archivo!')
+                flash('Ya existe un archivo con número de factura: '+request.form['nro']+' del proveedor: '+proveedor+'.\nNo se cargo el archivo!')
         else:
             flash("No se eligio proveedor!.")   
         return volverInicioOrigen(usuarioO.mail,usuarioO.contraseña,origen)            
@@ -993,7 +1033,7 @@ def decodificar(codificada):
 
 
 
-def subirArchivo(id_usuario, ruta_repo, proveedor, centro, nro, fechaFactura, detalle):
+def subirArchivo(id_usuario, ruta_repo, proveedor,cuit , centro, nro, fechaFactura, detalle):
     subio = False
     # Comprobar si la solicitud de publicación tiene la parte del archivo
     if 'file' not in request.files:
@@ -1027,13 +1067,13 @@ def subirArchivo(id_usuario, ruta_repo, proveedor, centro, nro, fechaFactura, de
         # Se redirecciona a la página principal
         cursor = conexion.cursor()
         fechaActual = datetime.now()
-        sqlUsuario = f"INSERT INTO `archivos` (`id_archivo`, `ruta`, `fecha`, `usuario`, `proveedor`,`centro`,`nro`,`estado`,`nombre`,`fecha_factura`,`detalle`) VALUES (NULL, '{ruta_codificada}', '{fechaActual}', '{id_usuario}', '{proveedor}', '{centro}','{nro}','NO_APROBADO','{nuevo_nombre}', '{fechaFactura}', '{detalle}');"
+        sqlUsuario = f"INSERT INTO `archivos` (`id_archivo`, `ruta`, `fecha`, `usuario`, `proveedor`,`centro`,`nro`,`estado`,`nombre`,`fecha_factura`,`detalle`,`cuit`) VALUES (NULL, '{ruta_codificada}', '{fechaActual}', '{id_usuario}', '{proveedor}', '{centro}','{nro}','NO_APROBADO','{nuevo_nombre}', '{fechaFactura}', '{detalle}','{cuit}');"
         cursor.execute(sqlUsuario)
         conexion.commit()
     return subio
 
 
-def subirArchivoProveedores(id_usuario, ruta_repo, proveedor, centro, nro, fechaFactura, detalle):
+def subirArchivoProveedores(id_usuario, ruta_repo, proveedor, cuit, centro, nro, fechaFactura, detalle):
     subio = False
     # Comprobar si la solicitud de publicación tiene la parte del archivo
     if 'file' not in request.files:
@@ -1065,7 +1105,7 @@ def subirArchivoProveedores(id_usuario, ruta_repo, proveedor, centro, nro, fecha
         # Se redirecciona a la página principal
         cursor = conexion.cursor()
         fechaActual = datetime.now()
-        sqlUsuario = f"INSERT INTO `archivos` (`id_archivo`, `ruta`, `fecha`, `usuario`, `proveedor`,`centro`,`nro`,`estado`,`nombre`,`fecha_factura`, `detalle`, `destino`,`aprobado_por`) VALUES (NULL, '{ruta_codificada}', '{fechaActual}', '{id_usuario}', '{proveedor}', '{centro}','{nro}','LIBERADO','{nuevo_nombre}', '{fechaFactura}', '{detalle}', 'PROVEEDORES', 'PROVEEDORES');"
+        sqlUsuario = f"INSERT INTO `archivos` (`id_archivo`, `ruta`, `fecha`, `usuario`, `proveedor`,`centro`,`nro`,`estado`,`nombre`,`fecha_factura`, `detalle`, `destino`,`aprobado_por`,`cuit`) VALUES (NULL, '{ruta_codificada}', '{fechaActual}', '{id_usuario}', '{proveedor}', '{centro}','{nro}','LIBERADO','{nuevo_nombre}', '{fechaFactura}', '{detalle}', 'PROVEEDORES', 'PROVEEDORES', '{cuit}');"
         cursor.execute(sqlUsuario)
         conexion.commit()
     return subio

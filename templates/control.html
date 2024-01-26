@@ -77,6 +77,7 @@
             <thead class="thead-dark">
               <tr>
                 <th style="text-align: center;"><i class="fas fa-globe"></i> Centro</th>
+                <th style="text-align: center;"><i class="fas fa-industry"></i> Cuit</th>
                 <th style="text-align: center;"><i class="fas fa-truck"></i> Proveedor</th>
 
                 <th style="text-align: center;"><i class="fas fa-file"></i> Nro factura</th>
@@ -90,6 +91,7 @@
               {% for archivo in archivos %}
               <tr>
                 <td>{{ archivo[5] }}</td>
+                <td>{{ archivo[11] }}</td>
                 <td>{{ archivo[4] }}</td>
 
                 <td>{{ archivo[6] }}</td>
