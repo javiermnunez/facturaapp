@@ -52,7 +52,68 @@
 </head>
 
 <body style="background-color: rgb(204, 201, 201);">
-
+    <style>
+        .spinner-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(128, 115, 115, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+    
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top: 4px solid #3498db;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+        }
+    
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+    
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+    
+    <!-- Spinner -->
+    <div class="spinner-container" id="spinnerContainer">
+        <div class="spinner"></div>
+    </div>
+    
+    <script>
+        //spinner
+            // Función para mostrar el spinner
+            function showSpinner() {
+                document.getElementById('spinnerContainer').style.display = 'flex';
+            }
+    
+            // Función para ocultar el spinner
+            function hideSpinner() {
+                document.getElementById('spinnerContainer').style.display = 'none';
+            }
+    
+            // Simula la construcción de la página durante 3 segundos
+            setTimeout(function () {
+                hideSpinner(); // Oculta el spinner después de 3 segundos
+            }, 1000);
+    
+            // Llama a la función para mostrar el spinner cuando la página comienza a cargarse
+            document.addEventListener('DOMContentLoaded', showSpinner);
+    
+    
+            //--------------------------------------------------------------------------------
+    </script>
 
     <header>
         <section class="wrapper">
@@ -166,7 +227,7 @@
                                 hidden>
                             <input type="password" class="form-control" id="password" name="contrasenia"
                                 value="{{usuario.contraseña}}" hidden>
-                            <button type="submit" class="btn btn-dark">Proveedores</button>
+                            <button id="conSpinner" type="submit" class="btn btn-dark">Proveedores</button>
                         </form>
                     </li>
                     <li>

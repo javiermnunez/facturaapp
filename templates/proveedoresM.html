@@ -1,5 +1,6 @@
 {% include 'cabecera.html' %}
 
+
 <div class="container mt-5">
 
     <div class="container">
@@ -85,6 +86,7 @@
     </div>
 
     <script>
+        
 
         // Obtener el elemento input por su ID
         var miInput = document.getElementById('miOrigen');
@@ -150,19 +152,7 @@
                 ]
             });
         });
-        function toggleSpinner() {
-            var spinner = document.querySelector('.spinner');
-            spinner.style.display = spinner.style.display === 'none' ? 'block' : 'none';
-        }
-
-        // Muestra el spinner al inicio
-        toggleSpinner();
-
-        // Agrega un evento de carga a la ventana
-        window.addEventListener('load', function () {
-            // Oculta el spinner cuando la página está completamente cargada
-            toggleSpinner();
-        });
+        
     </script>
 
     </html>
