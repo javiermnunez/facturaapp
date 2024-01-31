@@ -20,27 +20,6 @@
 
 </body>
 
-
-
-<script type="text/javascript">
-  var Global = {
-    data: null
-  };
-
-  $(document).on("click", ".open-Modal", function () {
-    var myDNI = $(this).data('id');
-    Global.data = myDNI
-    console.log(myDNI);
-    $(".modal-body #DNI").val(myDNI);
-  });
-
-  function a() {
-    dato = Global.data;
-    console.log(Global.data);
-    return location.href = "/removefile/" + dato;
-  }
-</script>
-
 <script src="{{ url_for('static', filename='js/custom-file-input.js')}}"></script>
 <script src="{{ url_for('static', filename='js/jquery.custom-file-input.js')}}"></script>
 <script src="https://cdn.datatables.net/v/bs5/dt-1.13.8/datatables.min.js"></script>
@@ -119,8 +98,10 @@
         // Puedes ocultar el modal y el spinner después de enviar el formulario
         // Aquí, he dejado el código para simular el envío del formulario después de 3 segundos
         document.getElementById('miFormularioSubir').submit();
-      }, 1000); // Simulación de 3 segundos, ajusta según sea necesario
+      }, 3000); // Simulación de 3 segundos, ajusta según sea necesario
+      window.close();
     }
+    
 </script>
 
 </html>

@@ -1,0 +1,131 @@
+{% include 'cabeceraBloqueada.html' %}
+<div class="container mt-5">
+
+  <div class="container">
+    <form action="/repositorioSubir" method="post" enctype="multipart/form-data" id="miFormularioSubir">
+      <input id="miOrigen" name="origen" type="text" value="proveedoresM" hidden>
+      <input id="ruta" type="text" value="{{repositorio}}" hidden>
+      <input name="id" type="text" value="{{id}}" hidden>
+      <input name="usuario" type="text" value="{{usuario.mail}}" hidden>
+      <input name="contrasenia" type="text" value="{{usuario.contraseña}}" hidden>
+
+      <div class="mb-3">
+        <label for="file" class="form-label">
+          <h4>Alta de documento:</h4>
+        </label>
+        
+        <div class="row">
+          
+          <div class="col-2">
+            <label for="file" class="col-form-label">Archivo</label>
+          </div>
+          <div class="col-10">
+            <input type="file" name="file" id="file" class="form-control"
+              accept=".pdf, .doc, .docx, .jpg, .jpeg, .gif, .tif" autofocus />
+          </div>
+
+        </div>
+
+
+      </div>
+
+      <div class="row mb-3">
+        <label for="proveedor" class="col-sm-2 col-form-label">Proveedor</label>
+        <div class="col-lg-10">
+          {% for p in proveedores %}
+          <input id="miProveedor" name="proveedor" type="text" value="{{p[1]}}@{{p[2]}}" hidden>
+          <input class="form-control" type="text" value="{{p[1]}} - {{p[2]}}" disabled>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <label for="centro" class="col-sm-2 col-form-label">Centro</label>
+        <div class="col-lg-10">
+          <select class="form-control" name="centro">
+            <option value="{{usuario.centro}}">{{usuario.centro}}</option>
+            {% for centro in centros %}
+            <option value="{{centro[1]}}">{{centro[1]}} - {{centro[2]}}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <label for="nro" class="col-sm-2 col-form-label">Nro fac.</label>
+        <div class="col-lg-10">
+          <input type="number" class="form-control" name="nro" placeholder="Nro factura"   required>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <label for="fecha" class="col-sm-2 col-form-label">Fecha factura</label>
+        <div class="col-lg-10">
+          <input type="date" class="form-control" name="fecha" required>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <label for="detalle" class="col-sm-2 col-form-label">Detalle</label>
+        <div class="col-lg-10">
+          <textarea id="detalle" name="detalle" rows="2" class="form-control"></textarea>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <label for="opcionesSelect" class="col-2 col-form-label">Agreg. Centro</label>
+        <div class="col-6">
+          <select id="opcionesSelect" class="form-control">
+            {% for centro in centros %}
+            <option value="{{centro[1]}}">{{centro[2]}}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-4">
+          <button type="button" class="btn btn-secondary" onclick="agregarOpcion()">Agregar</button>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-4"></div>
+        <div class="col-2">
+          <button type="button" class="btn btn-outline-danger" data-dismiss="modal"
+            onclick="window.close();">Cancelar</button>
+        </div>
+        <div class="col-2">
+          <button type="submit" class="btn btn-outline-success" onclick="cargarPaginaSubir()">Enviar</button>
+        </div>
+        <div class="col-4"></div>
+
+      </div>
+  </div>
+
+  </form>
+  <br><br>
+</div>
+</div>
+
+<script>
+  // Función para manejar el clic del botón
+  function agregarOpcion() {
+    // Obtener el valor seleccionado del select
+    var opcionSeleccionada = $('#opcionesSelect').val();
+
+    // Obtener el valor actual del textarea
+    var valorTextarea = $('#detalle').val();
+
+    // Agregar la opción seleccionada al textarea, separada por una coma (o como prefieras)
+    $('#detalle').val(valorTextarea + (valorTextarea ? '\n' : '') + opcionSeleccionada);
+  }
+
+  document.getElementById('file').addEventListener('change', function () {
+    const fileSize = this.files[0].size; // Tamaño del archivo en bytes
+    const maxSize = 10 * 1024 * 1024; // 10 MB
+
+    if (fileSize > maxSize) {
+      alert('El archivo es demasiado grande. El tamaño máximo permitido es 10 MB.');
+      this.value = ''; // Limpiar el campo de entrada para que el usuario pueda seleccionar otro archivo
+    }
+  });
+</script>
+{% include 'pie.html' %}

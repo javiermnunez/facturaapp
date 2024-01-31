@@ -88,7 +88,7 @@
                                 hidden>
                             <input type="password" class="form-control" id="password" name="contrasenia"
                                 value="{{usuario.contraseña}}" hidden>
-                            <button type="submit" class="btn btn-dark">Inicio</button>
+                            <button type="submit" class="btn btn-dark" disabled>Inicio</button>
                         </form>
                         
                     </li>
@@ -99,7 +99,7 @@
                                 hidden>
                             <input type="password" class="form-control" id="password" name="contrasenia"
                                 value="{{usuario.contraseña}}" hidden>
-                            <button type="submit" class="btn btn-dark">Repositorio</button>
+                            <button type="submit" class="btn btn-dark" disabled>Repositorio</button>
                         </form>
                         {% endif %}
                     </li>
@@ -111,7 +111,7 @@
                             <input type="password" class="form-control" id="password" name="contrasenia"
                                 value="{{usuario.contraseña}}" hidden>
 
-                            <button type="submit" class="btn btn-dark">Aprobados</button>
+                            <button type="submit" class="btn btn-dark" disabled>Aprobados</button>
 
 
                         </form>
@@ -123,7 +123,7 @@
                             <input type="password" class="form-control" id="password" name="contrasenia"
                                 value="{{usuario.contraseña}}" hidden>
 
-                            <button type="submit" class="btn btn-dark">Repositorio</button>
+                            <button type="submit" class="btn btn-dark" disabled>Repositorio</button>
 
 
                         </form>
@@ -135,7 +135,7 @@
                                 hidden>
                             <input type="password" class="form-control" id="password" name="contrasenia"
                                 value="{{usuario.contraseña}}" hidden>
-                            <button type="submit" class="btn btn-dark">Liberados</button>
+                            <button type="submit" class="btn btn-dark" disabled>Liberados</button>
                         </form>
                         {% endif %}
                         {% if usuario.roll == "JEFE" or usuario.roll == "EMPLEADO" %}
@@ -144,7 +144,7 @@
                                 hidden>
                             <input type="password" class="form-control" id="password" name="contrasenia"
                                 value="{{usuario.contraseña}}" hidden>
-                            <button type="submit" class="btn btn-dark">Aprobados</button>
+                            <button type="submit" class="btn btn-dark"disabled>Aprobados</button>
                         </form>
 
                         {% endif %}
@@ -156,7 +156,7 @@
                                 hidden>
                             <input type="password" class="form-control" id="password" name="contrasenia"
                                 value="{{usuario.contraseña}}" hidden>
-                            <button type="submit" class="btn btn-dark">Liberados</button>
+                            <button type="submit" class="btn btn-dark" disabled>Liberados</button>
                         </form>
                     </li>
                     {% endif %}
@@ -166,13 +166,13 @@
                                 hidden>
                             <input type="password" class="form-control" id="password" name="contrasenia"
                                 value="{{usuario.contraseña}}" hidden>
-                            <button type="submit" class="btn btn-dark">Proveedores</button>
+                            <button type="submit" class="btn btn-dark" disabled>Proveedores</button>
                         </form>
                     </li>
                     <li>
                         <form action="/" style="margin-left: auto;">
 
-                            <button type="submit" class="btn btn-dark">Salir</button>
+                            <button type="submit" class="btn btn-dark" disabled>Salir</button>
                         </form>
                     </li>
                 </ul>

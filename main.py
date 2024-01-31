@@ -15,6 +15,7 @@ import mysql.connector #nuevo
 from datetime import datetime
 from email.message import EmailMessage
 import smtplib
+import pandas as pd
 
 
 servidorIp = "89.0.0.28"
@@ -29,6 +30,10 @@ carpetaLiberados = current_dir+"\\datos\\beta\\liberados"
 
 max_size = 10485760 #10mb
 
+
+
+
+
 def buscarCentros():
     cursor = conexion.cursor()
     cursor.execute("SELECT * FROM `centro`;")
@@ -38,10 +43,17 @@ def buscarCentros():
 
 def buscarProveedores():
     cursor = conexion.cursor()
-    cursor.execute("SELECT * FROM `proveedores`;")
+    cursor.execute("SELECT * FROM `proveedores` order by `detalle`;")
     proveedores = cursor.fetchall()
     conexion.commit()
     return proveedores
+
+def buscarProveedoresId(id):
+    cursor = conexion.cursor()
+    cursor.execute(f"SELECT * FROM `proveedores` where `id_proveedor` = {id};")
+    proveedor = cursor.fetchall()
+    conexion.commit()
+    return proveedor
 
 def enviarMail(asunto,destinatario, mensaje):
     destinatario = "jmn@betalab.com.ar"
@@ -422,10 +434,65 @@ def noLogin():
     </div>
      </body> """
 
+
+def leer_archivo_xlsx(): #busca el archivo y lo ingresa a la base de datos
+    nombre_archivo = "proveedores.xlsx"
+    try:
+        # Leer el archivo Excel
+        df = pd.read_excel(nombre_archivo)
+
+        # Obtener los registros como una lista de diccionarios
+        registros = df.to_dict(orient='records')
+        
+        contador = 0
+        
+        for r in registros:
+            cuit = str(r['CUIT'])
+            cuit = cuit[:2]+"-"+cuit[2:10]+"-"+cuit[-1:]
+            cursor = conexion.cursor()
+            sqlUsuario = f"INSERT INTO `proveedores` (`id_proveedor`, `cuit`, `detalle`, `cod`) VALUES (NULL, '{cuit}', '{r['DETALLE']}', {r['COD']});"
+            cursor.execute(sqlUsuario)
+            conexion.commit()
+            contador = contador+1
+        print(contador)    
+        return registros      
+
+    except Exception as e:
+        print(f"Error al leer el archivo {nombre_archivo}: {e}")
+        
+
+@app.route('/actualizar_bd_proveedores')
+def actualizarProveedoresBD():
+    cursor = conexion.cursor()
+    sqlUsuario = "delete from proveedores"
+    cursor.execute(sqlUsuario)
+    conexion.commit()
+    unaLista = []
+    unaLista = leer_archivo_xlsx()
+    salida = str(len(unaLista))       
+    return f"""
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    </head>
+    <body>
+    <div class="container-fluid">
+    <dic class="row">
+    <div class=" col-md-6 offset-md-3 text-center">
+    <h1>¿Se envió mail?</h1>
+    <h1>Se actualizaron: </h1>
+    <h3>{salida}</h3>
+    <a class="btn btn-primary" href="/">Volver</a>
+    </div>
+    </div>
+     </body> """
+
+
 @app.route('/mail')
 def mail():
-    
-    resultado = enviarMail("jmn@betalab.com.ar", "Hola, este es el mensaje.")
+
+    resultado = enviarMail("Prueba","jmn@betalab.com.ar", "Hola, este es el mensaje.")
         
     return f"""
     <!DOCTYPE html>
@@ -439,6 +506,7 @@ def mail():
     <div class=" col-md-6 offset-md-3 text-center">
     <h1>¿Se envió mail?</h1>
     <h2>{resultado}</h2>
+   
     <a class="btn btn-primary" href="/">Volver</a>
     </div>
     </div>
@@ -493,6 +561,7 @@ def buscarUsuarioPass(usuario,contrasenia): #nuevo
     conexion.commit()
     
     return usuario
+
 def borrar_archivo(ruta_completa):
     try:
         os.remove(ruta_completa)
@@ -518,6 +587,28 @@ def borrar_archivo_SQL(ruta):
 
     except Exception as e:
         print(f"Error al borrar el archivo SQL: {e}")
+
+    finally:
+        cursor.close()
+
+
+
+
+def borrar_proveedor(id):
+    
+    cursor = conexion.cursor()
+    
+    try:
+        cursor.execute(f"DELETE FROM `proveedores` WHERE `id_proveedor` = '{id}';")
+        conexion.commit()
+        # Obtener el número de filas afectadas
+        num_filas_afectadas = cursor.rowcount
+        print(f"Número de filas afectadas: {num_filas_afectadas}")
+        return True
+
+    except Exception as e:
+        print(f"Error al borrar el archivo SQL: {e}")
+        return False
 
     finally:
         cursor.close()
@@ -661,7 +752,30 @@ def proveedoresForm():
     if usuarioO:
         return render_template('proveedoresM.html', proveedores = proveedores,usuario = usuarioO, repositorio = carpetaRepositorio, id = usuarioO.id,centros = centros)
                     
+@app.route('/eliminarProveedor' , methods=['POST'])
+def eliminarP():
     
+    id_proveedor = request.form['id_proveedor']
+    pudo = borrar_proveedor(id_proveedor)
+    print("Borro?: "+str(pudo))
+    centros = buscarCentros()
+    cursor = conexion.cursor()
+    cursor.execute("SELECT * FROM `proveedores`;")
+    proveedores = cursor.fetchall()
+    conexion.commit()
+    id = request.form['id']
+    sqlUsuario = buscarUsuario(id)
+    if str(sqlUsuario) != "()" and str(sqlUsuario) != "[]":
+        usuarioO = Usuario(sqlUsuario[0][0],sqlUsuario[0][1],sqlUsuario[0][2],sqlUsuario[0][3],sqlUsuario[0][4],sqlUsuario[0][5],sqlUsuario[0][6],sqlUsuario[0][7])
+    else:
+        usuarioO = None
+    
+    if usuarioO:
+        if pudo:
+            flash("Se elimino el proveedor correctamente.")
+        else:
+            flash("El proveedor no se encontró o ya fue eliminado.")
+        return render_template('proveedoresM.html', proveedores = proveedores,usuario = usuarioO, repositorio = carpetaRepositorio, id = usuarioO.id,centros = centros)    
 
 @app.route('/agregar_usuario', methods=['POST'])
 def agregar_usuario():
@@ -821,6 +935,30 @@ def verificarUsuario():
     else:
                 flash('Error.')
     return redirect('/')
+
+@app.route('/subirAP', methods=['GET','POST'])
+def subirAP():
+    id = request.form['id_proveedor']
+    centros = buscarCentros()
+    proveedores = buscarProveedoresId(id)
+    
+    try:
+        id = request.form['id']
+        sqlUsuario = buscarUsuario(id)
+    except:
+        print("Voy por aca")
+        return redirect('/noLogin')
+
+    
+    if str(sqlUsuario) != "()" and str(sqlUsuario) != "[]":
+        usuarioO = Usuario(sqlUsuario[0][0],sqlUsuario[0][1],sqlUsuario[0][2],sqlUsuario[0][3],sqlUsuario[0][4],sqlUsuario[0][5],sqlUsuario[0][6],sqlUsuario[0][7])
+    else:
+        usuarioO = None
+    
+    
+    return render_template('subirProveedor.html',usuario = usuarioO,id=usuarioO.id, repositorio = carpetaRepositorio, centros = centros, proveedores = proveedores)            
+    
+
 
 @app.route('/aprobados', methods=['GET','POST'])
 def verificarUsuarioAprobados():
