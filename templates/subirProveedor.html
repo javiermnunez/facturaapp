@@ -1,7 +1,7 @@
 {% include 'cabeceraBloqueada.html' %}
 <div class="container mt-5">
 
-  <div class="container">
+  <div class="container" style="background-color: white; border-radius: 10px;padding: 10px;margin: 10px; min-width: 710px;">
     <form action="/repositorioSubir" method="post" enctype="multipart/form-data" id="miFormularioSubir">
       <input id="miOrigen" name="origen" type="text" value="proveedoresM" hidden>
       <input id="ruta" type="text" value="{{repositorio}}" hidden>
