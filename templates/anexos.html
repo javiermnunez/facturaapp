@@ -1,0 +1,77 @@
+{% include 'cabeceraBloqueada.html' %}
+<div class="container mt-5">
+
+  <div class="container" style="background-color: white; border-radius: 10px;padding: 10px;margin: 10px; min-width: 710px;">
+    <div>
+        <div class="container mt-4">
+            <!-- Título "Adjuntos" estilizado con Bootstrap -->
+            <h2 class="text-center text-uppercase font-weight-bold">Adjuntos</h2>
+          </div>
+        {% if anexos %}
+        <div class="container mt-4">
+                     
+            <!-- Lista estilizada con Bootstrap -->
+            <ul class="list-group">
+              <li class="list-group-item"><h3>Cuit: {{anexos[0][2]}}</h3></li>
+              <li class="list-group-item"><h3>Proveedor: {{anexos[0][3]}}</h3></li>
+              <li class="list-group-item"><h3>Número FC: {{anexos[0][4]}}</h3></li>
+            </ul>
+          </div>
+        {% endif %}
+        <!-- Tabla para mostrar la cantidad de usuarios -->
+        <table id="centroTable" class="table  table-bordered text-center table-hover">
+            <thead class="bg-info">
+                <tr>
+
+                    <th>Detalle</th>
+                    <th>Opciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for anexo in anexos %}
+                <tr>
+                    <td>{{anexo[7]}}</td>
+                    <td>
+                        <div class="col">
+                            <form action="/verAnexo" method="post" enctype=multipart/form-data target="_blank">
+                              <input type="text" name="id_archivo" value="{{anexo[0]}}" hidden>
+                              <button type="submit" class="btn  btn-outline-info btn-sm" title="Ver Adjunto"><i
+                                  class="fas fa-eye" fa-lg></i></button>
+                            </form>
+                          </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+  <br><br>
+</div>
+</div>
+
+<script>
+  // Función para manejar el clic del botón
+  function agregarOpcion() {
+    // Obtener el valor seleccionado del select
+    var opcionSeleccionada = $('#opcionesSelect').val();
+
+    // Obtener el valor actual del textarea
+    var valorTextarea = $('#detalle').val();
+
+    // Agregar la opción seleccionada al textarea, separada por una coma (o como prefieras)
+    $('#detalle').val(valorTextarea + (valorTextarea ? '\n' : '') + opcionSeleccionada);
+  }
+
+  document.getElementById('file').addEventListener('change', function () {
+    const fileSize = this.files[0].size; // Tamaño del archivo en bytes
+    const maxSize = 10 * 1024 * 1024; // 10 MB
+
+    if (fileSize > maxSize) {
+      alert('El archivo es demasiado grande. El tamaño máximo permitido es 10 MB.');
+      this.value = ''; // Limpiar el campo de entrada para que el usuario pueda seleccionar otro archivo
+    }
+  });
+</script>
+{% include 'pie.html' %}
+    
+

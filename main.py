@@ -70,7 +70,24 @@ def enviarMail(asunto,destinatario, mensaje):
     except Exception as e:
         return (f"Error al enviar el correo: {e}")
         
+def buscar_duplicados(registros):
+    # Diccionario para almacenar los registros únicos basados en el campo 'cuit'
+    registros_unicos = {}
+    # Lista para almacenar los registros duplicados
+    duplicados = []
 
+    for registro in registros:
+        cuit = registro[1]
+
+        # Verificar si ya existe un registro con el mismo 'cuit'
+        if cuit in registros_unicos:
+            # Agregar a la lista de duplicados si ya existe
+            duplicados.append(registro)
+        else:
+            # Agregar al diccionario de registros únicos si es el primero
+            registros_unicos[cuit] = registro
+
+    return duplicados
 
 def generarCarpetas():
     try:
@@ -120,6 +137,17 @@ def rutaArchivo(id_archivo):
 
     return ruta
     
+def rutaArchivoAnexo(id_archivo):
+    cursor = conexion.cursor()
+    sqlArchivo = f"select * from comprobantes where id_anexo = {id_archivo};"
+    cursor.execute(sqlArchivo)
+    archivo = cursor.fetchall()
+    conexion.commit()
+    ruta = rf'{decodificar(archivo[0][5])}'
+    return ruta
+
+
+
 def buscarArchivoId(id_archivo):
     cursor = conexion.cursor()
     sqlArchivo = f"select * from archivos where id_archivo = {id_archivo};"
@@ -751,7 +779,36 @@ def proveedoresForm():
     
     if usuarioO:
         return render_template('proveedoresM.html', proveedores = proveedores,usuario = usuarioO, repositorio = carpetaRepositorio, id = usuarioO.id,centros = centros)
-                    
+
+@app.route('/proveedoresDuplicados')
+def proveedoresFormD():
+    centros = buscarCentros()
+    cursor = conexion.cursor()
+    cursor.execute("SELECT * FROM `proveedores`;")
+    proveedores = cursor.fetchall()
+    conexion.commit()
+
+    proveedoresd = buscar_duplicados(proveedores)
+    sqlUsuario = buscarUsuario(1)
+    """
+    try:
+        usuario = request.form['usuario']
+        print(usuario)
+        password = request.form['contrasenia']
+        print(password)
+        sqlUsuario = buscarUsuarioPass(usuario,password)
+    except:
+        print("Voy por aca")
+        return redirect('/noLogin')
+    """
+    if str(sqlUsuario) != "()" and str(sqlUsuario) != "[]":
+        usuarioO = Usuario(sqlUsuario[0][0],sqlUsuario[0][1],sqlUsuario[0][2],sqlUsuario[0][3],sqlUsuario[0][4],sqlUsuario[0][5],sqlUsuario[0][6],sqlUsuario[0][7])
+    else:
+        usuarioO = None
+    
+    if usuarioO:
+        return render_template('proveedoresDuplicados.html', proveedores = proveedoresd,usuario = usuarioO, repositorio = carpetaRepositorio, id = usuarioO.id,centros = centros)                  
+
 @app.route('/eliminarProveedor' , methods=['POST'])
 def eliminarP():
     
@@ -858,6 +915,7 @@ def agregar_proveedor():
             flash("No se pudo cargar el proveedor, cuit ya cargado!")
     else:
         flash("El CUIT no es válido!")
+    centros = buscarCentros()
     cursor = conexion.cursor()
     cursor.execute("SELECT * FROM `proveedores`;")
     proveedores = cursor.fetchall()
@@ -878,7 +936,7 @@ def agregar_proveedor():
         usuarioO = None
     
     
-    return render_template('proveedoresM.html', proveedores = proveedores,usuario = usuarioO)
+    return render_template('proveedoresM.html', proveedores = proveedores,usuario = usuarioO, repositorio = carpetaRepositorio, id = usuarioO.id,centros = centros)
     
 
 @app.route('/repositorio', methods=['GET','POST'])
@@ -958,7 +1016,27 @@ def subirAP():
     
     return render_template('subirProveedor.html',usuario = usuarioO,id=usuarioO.id, repositorio = carpetaRepositorio, centros = centros, proveedores = proveedores)            
     
+@app.route('/subirAnexo', methods=['GET','POST'])
+def subirAnexo():
+    id_archivo = request.form['id_archivo']
+    print(id_archivo)
+    archivo = buscarArchivoId(id_archivo)
+    
+    try:
+        id = request.form['id']
+        sqlUsuario = buscarUsuario(id)
+    except:
+        print("Voy por aca")
+        return redirect('/noLogin')
 
+    
+    if str(sqlUsuario) != "()" and str(sqlUsuario) != "[]":
+        usuarioO = Usuario(sqlUsuario[0][0],sqlUsuario[0][1],sqlUsuario[0][2],sqlUsuario[0][3],sqlUsuario[0][4],sqlUsuario[0][5],sqlUsuario[0][6],sqlUsuario[0][7])
+    else:
+        usuarioO = None
+    
+    
+    return render_template('subirAnexo.html',usuario = usuarioO,id=usuarioO.id, repositorio = carpetaRepositorio, archivo = archivo)   
 
 @app.route('/aprobados', methods=['GET','POST'])
 def verificarUsuarioAprobados():
@@ -1125,10 +1203,55 @@ def subirA():
                 flash('Ya existe un archivo con número de factura: '+request.form['nro']+' del proveedor: '+proveedor+'.\nNo se cargo el archivo!')
         else:
             flash("No se eligio proveedor!.")   
-        return volverInicioOrigen(usuarioO.mail,usuarioO.contraseña,origen)            
+        #return volverInicioOrigen(usuarioO.mail,usuarioO.contraseña,origen)
+        return """
+                <!DOCTYPE html>
+                <html>
+                    <head>
+                        <title>Se cargo el archivo.</title>
+                    </head>
+                    <body>
+                    <script>
+                        // Cierra la ventana después de 3 segundos
+                            setTimeout(function() {
+                            window.close();
+                            }, 1000);
+                    </script>
+                    </body>
+                </html>
+                """            
     else:
                 flash('Error.')        
     return redirect('/')
+
+@app.route('/repositorioSubirAnexo', methods=['GET','POST'])
+def subirAnexoRegistro():
+        id_archivo = request.form['id_archivo']
+        proveedor = request.form['proveedor']
+        print(proveedor)
+        cuit = request.form['cuit']
+        print(cuit)
+        nro = request.form['nro']
+        fechaPago = request.form['fechaPago']
+        detalle = request.form['detalle']
+        subirArchivoAnexo(id_archivo,carpetaRepositorio,proveedor,cuit,nro,fechaPago,detalle)
+        #return volverInicioOrigen(usuarioO.mail,usuarioO.contraseña,origen)
+        return """
+                <!DOCTYPE html>
+                <html>
+                    <head>
+                        <title>Se cargo el archivo.</title>
+                    </head>
+                    <body>
+                    <script>
+                        // Cierra la ventana después de 3 segundos
+                            setTimeout(function() {
+                            window.close();
+                            }, 1000);
+                    </script>
+                    </body>
+                </html>
+                """
 
 def listaAvisoEmpleado(centro):
     lista = []
@@ -1248,6 +1371,58 @@ def subirArchivoProveedores(id_usuario, ruta_repo, proveedor, cuit, centro, nro,
         conexion.commit()
     return subio
 
+
+def subirArchivoAnexo(id_archivo,ruta_repo, proveedor, cuit, nro, fechaPago, detalle):
+    
+    # Comprobar si la solicitud de publicación tiene la parte del archivo
+    if 'file' not in request.files:
+        print('No se cargó ningún archivo')
+        return subio
+    
+    file = request.files['file']
+
+    # Si el usuario no selecciona un archivo
+    if file.filename == '':
+        print('No se cargó ningún archivo')
+        return subio
+    else:
+        filename = secure_filename(file.filename)
+
+        # Agregar el valor de cae como un prefijo al nombre del archivo
+        nombre_base, extension = os.path.splitext(filename)
+        nuevo_nombre = f"{proveedor}_{nro}_{nombre_base}_{extension}"
+        filename = nuevo_nombre
+        
+        # Guardar el archivo en la ubicación de destino
+        file.save(os.path.join(ruta_repo, filename))
+        rutaBd = os.path.join(ruta_repo, filename)
+        ruta_codificada = codificar(rutaBd)
+        print(f"Archivo guardado con éxito como {filename}")
+        subio = True
+        # Se redirecciona a la página principal
+        cursor = conexion.cursor()
+        fechaActual = datetime.now()
+        sqlUsuario = f"INSERT INTO comprobantes (`id_anexo`,`id_archivo`, `cuit`, `proveedor`, `nro_fac`, `ruta`,`fechaPago`,`detalle`,`fecha`) VALUES (NULL, '{id_archivo}', '{cuit}', '{proveedor}', '{nro}', '{ruta_codificada}','{fechaPago}', '{detalle}', '{fechaActual}');"
+        cursor.execute(sqlUsuario)
+        conexion.commit()
+
+def buscarAnexos(id_archivo):
+    cursor = conexion.cursor()
+    sqlUsuario = f"Select * from comprobantes where id_archivo = {id_archivo}"
+    cursor.execute(sqlUsuario)
+    anexos = cursor.fetchall()
+    conexion.commit()
+    return anexos
+
+@ app.route('/anexos', methods=['POST'])
+def ver_A():
+    rutas = []
+    id = request.form['id']
+    usuario = buscarUsuario(id)
+    id_archivo = request.form['id_archivo']
+    rutas = buscarAnexos(id_archivo)
+
+    return render_template("anexos.html" , anexos = rutas, usuario = usuario)
     
 @ app.route('/verPdf', methods=['POST'])
 def ver_pdf():
@@ -1256,7 +1431,11 @@ def ver_pdf():
 
     return send_file(ruta, as_attachment=False)
 
-
+@ app.route('/verAnexo', methods=['POST'])
+def ver_Anexo():
+    id_archivo = request.form['id_archivo']
+    ruta = rutaArchivoAnexo(id_archivo)
+    return send_file(ruta, as_attachment=False)
 
 @app.route('/noAprobar', methods=['POST'])#recuperar archivo
 def moverArchivoNoAprobado():
