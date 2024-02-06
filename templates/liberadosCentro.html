@@ -57,7 +57,7 @@
       <div class="col-12 col-md-10 ">
         
         <div class="table-responsive" style="background-color: white; border-radius: 10px;padding: 10px;margin: 10px;min-width: 710px;">
-          <h3>Ver liberados</h3>
+          <h3>Facturas en circuito.</h3>
           <table class="table  table-bordered text-center table-hover" id="miTabla2">
             <thead class="thead-dark">
               <tr>
@@ -97,6 +97,17 @@
                             class="fas fa-eye fa-lg" title="Ver"></i></button>
                       </form>
                     </div>
+                    <div class="col">
+
+                      <form action="/anexos" method="post" enctype=multipart/form-data target="_blank"
+                          rel="noopener noreferrer">
+                          <input type="text" name="id" value="{{id}}" hidden>
+                          <input type="text" name="id_archivo" value="{{liberado[0]}}" hidden>
+                          
+                          <button type="submit" class="btn  btn-outline-secondary btn-sm" title="Ver Adjuntos"><i
+                                  class="fas fa-book fa-lg" 
+                                  style="color: rgb(96, 102, 104);"></i></button>
+                      </form> 
                     
 
                   </div>

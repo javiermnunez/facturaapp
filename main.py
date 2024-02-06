@@ -313,7 +313,7 @@ def buscarLiberadosCentro(centro):
 
     aprobadosC = []
     cursor = conexion.cursor()
-    cursor.execute(f"SELECT * FROM archivos WHERE (estado='LIBERADO' OR estado='PAGADO') AND(centro='{centro}');")
+    cursor.execute(f"SELECT * FROM archivos WHERE (estado='LIBERADO' OR estado='PAGADO' OR estado= 'IMPUESTOS') AND(centro='{centro}');")
     apro = cursor.fetchall()
     conexion.commit()
     for registro in apro:
@@ -1560,10 +1560,14 @@ def actualizar_estado():
     id_archivo = request.form['id_archivo']
     nuevo_estado = request.form['estado']
     # Aquí deberías realizar la actualización en tu base de datos o en tu sistema de almacenamiento
-    cursor = conexion.cursor()
-    sqlUsuario = f"UPDATE `archivos` SET `estado` = '{nuevo_estado}' WHERE `id_archivo` = '{id_archivo}';"
-    cursor.execute(sqlUsuario)
-    conexion.commit()
+    if nuevo_estado == "PAGADO":
+        if len(buscarAnexos(id_archivo))>0:
+            cursor = conexion.cursor()
+            sqlUsuario = f"UPDATE `archivos` SET `estado` = '{nuevo_estado}' WHERE `id_archivo` = '{id_archivo}';"
+            cursor.execute(sqlUsuario)
+            conexion.commit()
+        else:
+            flash("No se puede marcar como 'PAGADO', no se adjuntó documento.")
     sql_usuario = buscarUsuario(id_usuario)
     usuario = ""
     contrasenia = ""
