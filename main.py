@@ -18,7 +18,7 @@ import smtplib
 import pandas as pd
 
 
-servidorIp = "89.0.0.28"
+servidorIp = "192.168.1.4"
 
 # Obtener la ruta al directorio actual del script
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -497,7 +497,7 @@ def actualizarProveedoresBD():
     conexion.commit()
     unaLista = []
     unaLista = leer_archivo_xlsx()
-    salida = str(len(unaLista))       
+    salida = "" 
     return f"""
     <!DOCTYPE html>
     <html lang="es">
@@ -565,6 +565,27 @@ def eliminarArchivo():
     redirect('/repositorio')
     return volverInicioOrigen(usuario,contrasenia,origen)
 
+#Función para la eliminacion de archivos 
+@app.route('/eliminarAnexo', methods=['POST'])
+def eliminarAnexo():
+    borrar_anexo_SQL(request.form['anexo'])
+    flash("Se elimino el anexo correctamente.")
+    return """
+                <!DOCTYPE html>
+                <html>
+                    <head>
+                        <title>Se cargo el archivo.</title>
+                    </head>
+                    <body>
+                    <script>
+                        // Cierra la ventana después de 3 segundos
+                            setTimeout(function() {
+                            window.close();
+                            }, 1000);
+                    </script>
+                    </body>
+                </html>
+                """
 
 #Funcion para la descarga de archivos
 @app.route('/download_file/<filename>')
@@ -619,6 +640,22 @@ def borrar_archivo_SQL(ruta):
     finally:
         cursor.close()
 
+def borrar_anexo_SQL(id_anexo):
+    
+    cursor = conexion.cursor()
+    
+    try:
+        cursor.execute(f"DELETE FROM `comprobantes` WHERE `id_anexo` = '{id_anexo}';")
+        conexion.commit()
+        # Obtener el número de filas afectadas
+        num_filas_afectadas = cursor.rowcount
+        print(f"Número de filas afectadas: {num_filas_afectadas}")
+
+    except Exception as e:
+        print(f"Error al borrar el anexo SQL: {e}")
+
+    finally:
+        cursor.close()
 
 
 
@@ -1559,15 +1596,24 @@ def actualizar_estado():
     id_usuario = request.form['id_usuario']
     id_archivo = request.form['id_archivo']
     nuevo_estado = request.form['estado']
+    mensajeOk = "Se actualizó correctamente."
     # Aquí deberías realizar la actualización en tu base de datos o en tu sistema de almacenamiento
     if nuevo_estado == "PAGADO":
         if len(buscarAnexos(id_archivo))>0:
             cursor = conexion.cursor()
-            sqlUsuario = f"UPDATE `archivos` SET `estado` = '{nuevo_estado}' WHERE `id_archivo` = '{id_archivo}';"
-            cursor.execute(sqlUsuario)
+            sql = f"UPDATE `archivos` SET `estado` = '{nuevo_estado}' WHERE `id_archivo` = '{id_archivo}';"
+            cursor.execute(sql)
             conexion.commit()
+            flash(mensajeOk)
         else:
             flash("No se puede marcar como 'PAGADO', no se adjuntó documento.")
+    if nuevo_estado != "PAGADO":
+        cursor = conexion.cursor()
+        sql = f"UPDATE `archivos` SET `estado` = '{nuevo_estado}' WHERE `id_archivo` = '{id_archivo}';"
+        cursor.execute(sql)
+        conexion.commit()
+        flash(mensajeOk)
+
     sql_usuario = buscarUsuario(id_usuario)
     usuario = ""
     contrasenia = ""
