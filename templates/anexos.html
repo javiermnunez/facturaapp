@@ -47,6 +47,7 @@
                         fa-lg></i></button>
                   </form>
                 </div>
+                {% if usuario.roll == "PROVEEDORES" %}
                 <!--Modal Eliminar-->
                 <div class="col">
                   <!-- Botón para abrir el modal de confirmación -->
@@ -67,7 +68,7 @@
                           </button>
                         </div>
                         <div class="modal-body">
-                          ¿Estás seguro de que deseas eliminar este registro "{{anexo[7]}}"?
+                          ¿Estás seguro de que deseas eliminar: "{{anexo[7]}}"?
                         </div>
                         <div class="modal-footer">
                           <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
@@ -75,6 +76,8 @@
                           <form action="/eliminarAnexo" method="post" enctype=multipart/form-data>
                             
                             <input type="text" name="anexo" value="{{anexo[0]}}" hidden>
+                            <input type="text" name="id_archivo" value="{{anexo[1]}}" hidden>
+                            <input type="text" name="id" value="{{usuario[0][0]}}" hidden>
                             <button type="submit" class="btn btn-danger">Eliminar</button>
                           </form>
                         </div>
@@ -83,6 +86,7 @@
                   </div>
                   <!-- Fin del modal de confirmación -->
                 </div>
+                {% endif %}
               </div>
             </td>
           </tr>

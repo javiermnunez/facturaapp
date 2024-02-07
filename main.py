@@ -17,8 +17,10 @@ from email.message import EmailMessage
 import smtplib
 import pandas as pd
 
-
-servidorIp = "192.168.1.4"
+#Beta
+servidorIp = "89.0.0.28"
+#Casa
+#servidorIp = "192.168.1.4"
 
 # Obtener la ruta al directorio actual del script
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -570,22 +572,14 @@ def eliminarArchivo():
 def eliminarAnexo():
     borrar_anexo_SQL(request.form['anexo'])
     flash("Se elimino el anexo correctamente.")
-    return """
-                <!DOCTYPE html>
-                <html>
-                    <head>
-                        <title>Se cargo el archivo.</title>
-                    </head>
-                    <body>
-                    <script>
-                        // Cierra la ventana después de 3 segundos
-                            setTimeout(function() {
-                            window.close();
-                            }, 1000);
-                    </script>
-                    </body>
-                </html>
-                """
+    rutas = []
+    id = request.form['id']
+    print("usuario id: "+id)
+    usuario = buscarUsuario(id)
+    id_archivo = request.form['id_archivo']
+    rutas = buscarAnexos(id_archivo)
+
+    return render_template("anexos.html" , anexos = rutas, usuario = usuario)
 
 #Funcion para la descarga de archivos
 @app.route('/download_file/<filename>')
