@@ -171,7 +171,12 @@
                   </div>
                   </td>
                   <td>
+                    {% if usuario.roll == "PROVEEDORES" %}
                     {% include 'modalProveedoresLP.html' %}
+                    {% endif %}
+                    {% if usuario.roll == "IMPUESTOS" %}
+                    {% include 'modalImpuestosLP.html' %}
+                    {% endif %}
 
                 </td>
               </tr>

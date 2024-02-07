@@ -8,92 +8,109 @@
         <!-- Título "Adjuntos" estilizado con Bootstrap -->
         <h2 class="text-center text-uppercase font-weight-bold">Adjuntos</h2>
       </div>
-      {% if anexos %}
-      <div class="container mt-4">
+      {% if anexos|length > 0 %}
+      <div class="row">
+        <div class="col-4">
+          <div class="container mt-4">
 
-        <!-- Lista estilizada con Bootstrap -->
-        <ul class="list-group">
-          <li class="list-group-item">
-            <h5>Cuit: {{anexos[0][2]}}</h5>
-          </li>
-          <li class="list-group-item">
-            <h5>Proveedor: {{anexos[0][3]}}</h5>
-          </li>
-          <li class="list-group-item">
-            <h5>Número FC: {{anexos[0][4]}}</h5>
-          </li>
-        </ul>
-      </div>
-      {% endif %}
-      <!-- Tabla para mostrar la cantidad de usuarios -->
-      <table id="centroTable" class="table  table-bordered text-center table-hover">
-        <thead class="bg-info">
-          <tr>
+            <!-- Lista estilizada con Bootstrap -->
+            <ul class="list-group">
+              <li class="list-group-item">
+                <h5>Cuit: {{anexos[0][2]}}</h5>
+              </li>
+              <li class="list-group-item">
+                <h5>Proveedor: {{anexos[0][3]}}</h5>
+              </li>
+              <li class="list-group-item">
+                <h5>Número FC: {{anexos[0][4]}}</h5>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-8">
+          <!-- Tabla para mostrar la cantidad de usuarios -->
+          <table id="centroTable" class="table  table-bordered text-center table-hover">
+            <thead class="bg-info">
+              <tr>
+                <th>Id</th>
+                <th>Detalle</th>
+                <th>Fecha</th>
+                <th>Opciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for anexo in anexos %}
+              <tr>
+                <td>{{anexo[0]}}</td>
+                <td>{{anexo[7]}}</td>
+                <td>{{anexo[8]}}</td>
+                <td>
+                  <div class="row">
+                    <div class="col">
+                      <form action="/verAnexo" method="post" enctype=multipart/form-data target="_blank">
+                        <input type="text" name="id_archivo" value="{{anexo[0]}}" hidden>
+                        <button type="submit" class="btn  btn-outline-info btn-sm" title="Ver Adjunto"><i
+                            class="fas fa-eye" fa-lg></i></button>
+                      </form>
+                    </div>
+                    {% if usuario.roll == "PROVEEDORES" %}
+                    <!--Modal Eliminar-->
+                    <div class="col">
+                      <!-- Botón para abrir el modal de confirmación -->
+                      <button type="button" class="btn btn-outline-danger btn-sm" data-toggle="modal"
+                        data-target="#eliminarModal{{ anexo[0] }}">
+                        <i class="fas fa-trash fa-lg"></i>
+                      </button>
 
-            <th>Detalle</th>
-            <th>Opciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for anexo in anexos %}
-          <tr>
-            <td>{{anexo[7]}}</td>
-            <td>
-              <div class="row">
-                <div class="col">
-                  <form action="/verAnexo" method="post" enctype=multipart/form-data target="_blank">
-                    <input type="text" name="id_archivo" value="{{anexo[0]}}" hidden>
-                    <button type="submit" class="btn  btn-outline-info btn-sm" title="Ver Adjunto"><i class="fas fa-eye"
-                        fa-lg></i></button>
-                  </form>
-                </div>
-                {% if usuario.roll == "PROVEEDORES" %}
-                <!--Modal Eliminar-->
-                <div class="col">
-                  <!-- Botón para abrir el modal de confirmación -->
-                  <button type="button" class="btn btn-outline-danger btn-sm" data-toggle="modal"
-                    data-target="#eliminarModal{{ anexo[0] }}">
-                    <i class="fas fa-trash fa-lg"></i>
-                  </button>
+                      <!-- Modal de confirmación -->
+                      <div class="modal fade" id="eliminarModal{{ anexo[0] }}" tabindex="-1" role="dialog"
+                        aria-labelledby="eliminarModalLabel{{ anexo[0] }}" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <h5 class="modal-title" id="eliminarModalLabel{{ anexo[0] }}">Confirmar Eliminación</h5>
+                              <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                                <span aria-hidden="true">&times;</span>
+                              </button>
+                            </div>
+                            <div class="modal-body">
+                              ¿Estás seguro de que deseas eliminar: "{{anexo[7]}}"?
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                              <!-- Botón para confirmar la eliminación -->
+                              <form action="/eliminarAnexo" method="post" enctype=multipart/form-data>
 
-                  <!-- Modal de confirmación -->
-                  <div class="modal fade" id="eliminarModal{{ anexo[0] }}" tabindex="-1" role="dialog"
-                    aria-labelledby="eliminarModalLabel{{ anexo[0] }}" aria-hidden="true">
-                    <div class="modal-dialog" role="document">
-                      <div class="modal-content">
-                        <div class="modal-header">
-                          <h5 class="modal-title" id="eliminarModalLabel{{ anexo[0] }}">Confirmar Eliminación</h5>
-                          <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
-                            <span aria-hidden="true">&times;</span>
-                          </button>
-                        </div>
-                        <div class="modal-body">
-                          ¿Estás seguro de que deseas eliminar: "{{anexo[7]}}"?
-                        </div>
-                        <div class="modal-footer">
-                          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                          <!-- Botón para confirmar la eliminación -->
-                          <form action="/eliminarAnexo" method="post" enctype=multipart/form-data>
-                            
-                            <input type="text" name="anexo" value="{{anexo[0]}}" hidden>
-                            <input type="text" name="id_archivo" value="{{anexo[1]}}" hidden>
-                            <input type="text" name="id" value="{{usuario[0][0]}}" hidden>
-                            <button type="submit" class="btn btn-danger">Eliminar</button>
-                          </form>
+                                <input type="text" name="anexo" value="{{anexo[0]}}" hidden>
+                                <input type="text" name="id_archivo" value="{{anexo[1]}}" hidden>
+                                <input type="text" name="id" value="{{usuario[0][0]}}" hidden>
+                                <button type="submit" class="btn btn-danger">Eliminar</button>
+                              </form>
+                            </div>
+                          </div>
                         </div>
                       </div>
+                      <!-- Fin del modal de confirmación -->
                     </div>
+                    {% endif %}
                   </div>
-                  <!-- Fin del modal de confirmación -->
-                </div>
-                {% endif %}
-              </div>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
 
+      </div>
+
+
+
+      {% else %}
+      <div class="container text-center mt-4">
+        <h5>No se cargaron adjuntos.</h5>
+      </div>
+
+      {% endif %}
       <div class="container text-center mt-4">
         <button type="button" class="btn btn-dark" onclick="window.close();">Salir</button>
       </div>

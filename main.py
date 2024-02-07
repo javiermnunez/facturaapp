@@ -221,7 +221,7 @@ def buscarAprovadosControl():
 def buscarLiberadosP():
     aprobadosC = []
     cursor = conexion.cursor()
-    cursor.execute("SELECT * FROM archivos WHERE (estado='LIBERADO' OR estado='PAGADO') AND destino='PROVEEDORES';")
+    cursor.execute("SELECT * FROM archivos WHERE (estado='LIBERADO' OR estado='PAGADO' OR estado='Ok_IMPUESTOS') AND destino='PROVEEDORES';")
     apro = cursor.fetchall()
     conexion.commit()
     for registro in apro:
@@ -311,11 +311,34 @@ def buscarLiberadosC(idU):
 
     return aprobadosC
 
+def buscarLiberadosI():
+    aprobadosC = []
+    cursor = conexion.cursor()
+    cursor.execute("SELECT * FROM archivos WHERE estado='IMPUESTOS';")
+    apro = cursor.fetchall()
+    conexion.commit()
+    for registro in apro:
+        id = registro[0]
+        ruta = decodificar(registro[1])
+        fecha = registro[2]
+        usuario = registro[3]
+        proveedor =registro[4]
+        centro = registro[5]
+        cae = registro[6]
+        estado = registro[7]
+        nombre = registro[8]
+        fechaFC = registro[9]
+        detalle = registro[10]
+        cuit = registro[13]
+        aprobadosC.append([id,ruta,fecha,usuario,proveedor,centro,cae,estado,nombre,fechaFC,detalle,cuit])
+
+    return aprobadosC
+
 def buscarLiberadosCentro(centro):
 
     aprobadosC = []
     cursor = conexion.cursor()
-    cursor.execute(f"SELECT * FROM archivos WHERE (estado='LIBERADO' OR estado='PAGADO' OR estado= 'IMPUESTOS') AND(centro='{centro}');")
+    cursor.execute(f"SELECT * FROM archivos WHERE (estado='LIBERADO' OR estado='PAGADO' OR estado= 'IMPUESTOS' OR estado= 'OK_IMPUESTOS') AND(centro='{centro}');")
     apro = cursor.fetchall()
     conexion.commit()
     for registro in apro:
@@ -373,6 +396,7 @@ def volverInicioOrigen(usuario, password,origen):
             listaArchivos = sqlArchivosRepo
             listaArchivosA = sqlArchivosApro
             return render_template('proveedores.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio, centros = centros, proveedores = proveedores)
+        
         if usuarioO.roll == "SERVICIOS":
             sqlArchivosApro = buscarLiberadosS()
           
@@ -383,6 +407,12 @@ def volverInicioOrigen(usuario, password,origen):
             
             listaArchivosA = sqlArchivosApro
             return render_template('proveedores.html',usuario = usuarioO,id=usuarioO.id, archivosA = listaArchivosA, repositorio = carpetaRepositorio, centros = centros, proveedores = proveedores)         
+        if usuarioO.roll == "IMPUESTOS":
+            sqlArchivosRepo = buscarArchivosRepo(usuarioO, usuarioO.centro)
+            sqlArchivosApro = buscarLiberadosI()
+            listaArchivos = sqlArchivosRepo
+            listaArchivosA = sqlArchivosApro
+            return render_template('proveedores.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio, centros = centros, proveedores = proveedores) 
     else:
                 flash('Error.')
     return redirect('/')
@@ -402,6 +432,8 @@ def buscarArchivosRepo(usuario,centro):
     if usuario.roll == "SERVICIOS":
         cursor.execute(f"SELECT * FROM archivos where `centro`='{centro}' AND (usuario='{usuario.id}')AND (estado='NO_APROBADO');")
     if usuario.roll == "DIRECTO":
+        cursor.execute(f"SELECT * FROM archivos where `centro`='{centro}' AND (usuario='{usuario.id}')AND (estado='NO_APROBADO');")
+    if usuario.roll == "IMPUESTOS":
         cursor.execute(f"SELECT * FROM archivos where `centro`='{centro}' AND (usuario='{usuario.id}')AND (estado='NO_APROBADO');")
     repo = cursor.fetchall()
     conexion.commit()
@@ -1020,6 +1052,12 @@ def verificarUsuario():
             sqlArchivosApro = buscarLiberadosD()
             listaArchivos = sqlArchivosRepo
             listaArchivosA = sqlArchivosApro
+            return render_template('proveedores.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio, centros = centros, proveedores = proveedores)
+        if usuarioO.roll == "IMPUESTOS":
+            sqlArchivosRepo = buscarArchivosRepo(usuarioO, usuarioO.centro)
+            sqlArchivosApro = buscarLiberadosI()
+            listaArchivos = sqlArchivosRepo
+            listaArchivosA = sqlArchivosApro
             return render_template('proveedores.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio, centros = centros, proveedores = proveedores)            
     else:
                 flash('Error.')
@@ -1592,6 +1630,7 @@ def actualizar_estado():
     nuevo_estado = request.form['estado']
     mensajeOk = "Se actualizó correctamente."
     # Aquí deberías realizar la actualización en tu base de datos o en tu sistema de almacenamiento
+    print(nuevo_estado)
     if nuevo_estado == "PAGADO":
         if len(buscarAnexos(id_archivo))>0:
             cursor = conexion.cursor()
@@ -1607,7 +1646,7 @@ def actualizar_estado():
         cursor.execute(sql)
         conexion.commit()
         flash(mensajeOk)
-
+    
     sql_usuario = buscarUsuario(id_usuario)
     usuario = ""
     contrasenia = ""

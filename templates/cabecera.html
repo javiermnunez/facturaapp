@@ -142,7 +142,7 @@
                             {% endif %}
                         </p>
                     </li>
-                    {% if usuario.roll == "PROVEEDORES" or usuario.roll == "SERVICIOS" or usuario.roll == "DIRECTO"%}
+                    {% if usuario.roll == "PROVEEDORES" or usuario.roll == "SERVICIOS" or usuario.roll == "DIRECTO" or usuario.roll == "IMPUESTOS"%}
                     <li>
                         <form action="/repositorio" method="POST" style="margin-left: auto;">
                             <input type="email" class="form-control" id="email" name="usuario" value="{{usuario.mail}}"

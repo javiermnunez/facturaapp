@@ -57,7 +57,7 @@
       <div class="col-12 col-md-10 ">
         
         <div class="table-responsive" style="background-color: white; border-radius: 10px;padding: 10px;margin: 10px;min-width: 710px;">
-          <h3>Facturas en circuito.</h3>
+          <h3>Documentos:</h3>
           <table class="table  table-bordered text-center table-hover" id="miTabla2">
             <thead class="thead-dark">
               <tr>
@@ -99,6 +99,18 @@
                     </div>
                     <div class="col">
 
+                      <form action="/subirAnexo" method="post" enctype=multipart/form-data target="_blank"
+                          rel="noopener noreferrer">
+                          
+                          <input type="text" name="id_archivo" value="{{liberado[0]}}" hidden>
+                          <input type="text" name="id" value="{{id}}" hidden>
+                          <button type="submit" class="btn  btn-outline-secondary btn-sm" title="Adjuntar"><i
+                                  class="fas fa-paperclip fa-lg" 
+                                  style="color: rgb(96, 102, 104);"></i></button>
+                      </form>
+                  </div>
+                    <div class="col">
+
                       <form action="/anexos" method="post" enctype=multipart/form-data target="_blank"
                           rel="noopener noreferrer">
                           <input type="text" name="id" value="{{id}}" hidden>
@@ -111,6 +123,7 @@
                     
 
                   </div>
+
                 </td>
                 <td>
                   {% if liberado[7] == "PAGADO" %}<p style="color: rgb(15, 180, 15);">{{ liberado[7] }} </p>{% endif %}
