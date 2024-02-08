@@ -18,10 +18,10 @@ import smtplib
 import pandas as pd
 
 #Beta
-servidorIp = "89.0.0.28"
+#servidorIp = "89.0.0.28"
 #Casa
 #servidorIp = "192.168.1.4"
-
+servidorIp='localhost'
 # Obtener la ruta al directorio actual del script
 current_dir = os.path.dirname(os.path.abspath(__file__))
 # Agregar el directorio al sys.path
