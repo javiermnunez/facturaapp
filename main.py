@@ -38,7 +38,7 @@ max_size = 10485760 #10mb
 
 def buscarCentros():
     cursor = conexion.cursor()
-    cursor.execute("SELECT * FROM `centro`;")
+    cursor.execute("SELECT * FROM `centro` order by `detalle`;")
     centros = cursor.fetchall()
     conexion.commit()
     return centros
@@ -122,7 +122,7 @@ app = Flask(__name__, template_folder='templates')
 app.debug = True
 app.config['FILE_CONTAINER'] = FILE_CONTAINER
 app.secret_key = "vigoray"
-conexion = mysql.connector.connect(host="localhost", user="root", passwd="",database="personas") #nuevo
+conexion = mysql.connector.connect(host="localhost",port="3307", user="root", passwd="vigoray",database="personas") #nuevo
 
 def rutaArchivo(id_archivo):
     cursor = conexion.cursor()
@@ -221,7 +221,7 @@ def buscarAprovadosControl():
 def buscarLiberadosP():
     aprobadosC = []
     cursor = conexion.cursor()
-    cursor.execute("SELECT * FROM archivos WHERE (estado='LIBERADO' OR estado='PAGADO' OR estado='Ok_IMPUESTOS') AND destino='PROVEEDORES';")
+    cursor.execute("SELECT * FROM archivos WHERE (estado='LIBERADO' OR estado='FINALIZADO' OR estado='Ok_IMPUESTOS') AND destino='PROVEEDORES';")
     apro = cursor.fetchall()
     conexion.commit()
     for registro in apro:
@@ -244,7 +244,7 @@ def buscarLiberadosP():
 def buscarLiberadosS():
     aprobadosC = []
     cursor = conexion.cursor()
-    cursor.execute(f"SELECT * FROM archivos where (estado='LIBERADO' OR estado='PAGADO') AND(destino='SERVICIOS');")
+    cursor.execute(f"SELECT * FROM archivos where (estado='LIBERADO' OR estado='FINALIZADO') AND(destino='SERVICIOS');")
     apro = cursor.fetchall()
     conexion.commit()
     for registro in apro:
@@ -267,7 +267,7 @@ def buscarLiberadosS():
 def buscarLiberadosD():
     aprobadosC = []
     cursor = conexion.cursor()
-    cursor.execute(f"SELECT * FROM archivos where (estado='LIBERADO' OR estado='PAGADO') AND(destino='DIRECTO');")
+    cursor.execute(f"SELECT * FROM archivos where (estado='LIBERADO' OR estado='FINALIZADO') AND(destino='DIRECTO');")
     apro = cursor.fetchall()
     conexion.commit()
     for registro in apro:
@@ -338,7 +338,7 @@ def buscarLiberadosCentro(centro):
 
     aprobadosC = []
     cursor = conexion.cursor()
-    cursor.execute(f"SELECT * FROM archivos WHERE (estado='LIBERADO' OR estado='PAGADO' OR estado= 'IMPUESTOS' OR estado= 'OK_IMPUESTOS') AND(centro='{centro}');")
+    cursor.execute(f"SELECT * FROM archivos WHERE (estado='LIBERADO' OR estado='FINALIZADO' OR estado= 'IMPUESTOS' OR estado= 'OK_IMPUESTOS') AND(centro='{centro}');")
     apro = cursor.fetchall()
     conexion.commit()
     for registro in apro:
@@ -497,30 +497,56 @@ def noLogin():
      </body> """
 
 
-def leer_archivo_xlsx(): #busca el archivo y lo ingresa a la base de datos
-    nombre_archivo = "proveedores.xlsx"
-    try:
-        # Leer el archivo Excel
-        df = pd.read_excel(nombre_archivo)
+def leer_archivo_xlsx(archivo): #busca el archivo y lo ingresa a la base de datos
+    if archivo == "proveedores":
+        nombre_archivo = "proveedores.xlsx"
+    
+        try:
+            # Leer el archivo Excel
+            df = pd.read_excel(nombre_archivo)
 
-        # Obtener los registros como una lista de diccionarios
-        registros = df.to_dict(orient='records')
+            # Obtener los registros como una lista de diccionarios
+            registros = df.to_dict(orient='records')
         
-        contador = 0
+            contador = 0
         
-        for r in registros:
-            cuit = str(r['CUIT'])
-            cuit = cuit[:2]+"-"+cuit[2:10]+"-"+cuit[-1:]
-            cursor = conexion.cursor()
-            sqlUsuario = f"INSERT INTO `proveedores` (`id_proveedor`, `cuit`, `detalle`, `cod`) VALUES (NULL, '{cuit}', '{r['DETALLE']}', {r['COD']});"
-            cursor.execute(sqlUsuario)
-            conexion.commit()
-            contador = contador+1
-        print(contador)    
-        return registros      
+            for r in registros:
+                cuit = str(r['CUIT'])
+                cuit = cuit[:2]+"-"+cuit[2:10]+"-"+cuit[-1:]
+                cursor = conexion.cursor()
+                sqlUsuario = f"INSERT INTO `proveedores` (`id_proveedor`, `cuit`, `detalle`, `cod`) VALUES (NULL, '{cuit}', '{r['DETALLE']}', {r['COD']});"
+                cursor.execute(sqlUsuario)
+                conexion.commit()
+                contador = contador+1
+            print(contador)    
+            return registros
+        except Exception as e:
+            print(f"Error al leer el archivo {nombre_archivo}: {e}")
 
-    except Exception as e:
-        print(f"Error al leer el archivo {nombre_archivo}: {e}")
+    if archivo == "centros":
+        nombre_archivo = "centros.xlsx"
+        try:
+            # Leer el archivo Excel
+            df = pd.read_excel(nombre_archivo)
+
+            # Obtener los registros como una lista de diccionarios
+            registros = df.to_dict(orient='records')
+        
+            contador = 0
+        
+            for r in registros:
+                codigo = str(r['codigo'])
+                detalle = str(r['detalle'])
+                cursor = conexion.cursor()
+                sqlUsuario = f"INSERT INTO `centro` (`id_centro`, `cod`, `detalle`) VALUES (NULL, '{codigo}', '{detalle}');"
+                cursor.execute(sqlUsuario)
+                conexion.commit()
+                contador = contador+1
+            print(contador)    
+            return registros      
+
+        except Exception as e:
+            print(f"Error al leer el archivo {nombre_archivo}: {e}")
         
 
 @app.route('/actualizar_bd_proveedores')
@@ -530,7 +556,7 @@ def actualizarProveedoresBD():
     cursor.execute(sqlUsuario)
     conexion.commit()
     unaLista = []
-    unaLista = leer_archivo_xlsx()
+    unaLista = leer_archivo_xlsx("proveedores")
     salida = "" 
     return f"""
     <!DOCTYPE html>
@@ -550,6 +576,32 @@ def actualizarProveedoresBD():
     </div>
      </body> """
 
+@app.route('/actualizar_bd_centros')
+def actualizarCentrosBD():
+    cursor = conexion.cursor()
+    sqlUsuario = "delete from centro"
+    cursor.execute(sqlUsuario)
+    conexion.commit()
+    unaLista = []
+    unaLista = leer_archivo_xlsx("centros")
+    salida = "" 
+    return f"""
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    </head>
+    <body>
+    <div class="container-fluid">
+    <dic class="row">
+    <div class=" col-md-6 offset-md-3 text-center">
+    <h1>¿Se envió mail?</h1>
+    <h1>Se actualizaron: </h1>
+    <h3>{salida}</h3>
+    <a class="btn btn-primary" href="/">Volver</a>
+    </div>
+    </div>
+     </body> """
 
 @app.route('/mail')
 def mail():
@@ -1631,7 +1683,7 @@ def actualizar_estado():
     mensajeOk = "Se actualizó correctamente."
     # Aquí deberías realizar la actualización en tu base de datos o en tu sistema de almacenamiento
     print(nuevo_estado)
-    if nuevo_estado == "PAGADO":
+    if nuevo_estado == "FINALIZADO":
         if len(buscarAnexos(id_archivo))>0:
             cursor = conexion.cursor()
             sql = f"UPDATE `archivos` SET `estado` = '{nuevo_estado}' WHERE `id_archivo` = '{id_archivo}';"
@@ -1639,8 +1691,8 @@ def actualizar_estado():
             conexion.commit()
             flash(mensajeOk)
         else:
-            flash("No se puede marcar como 'PAGADO', no se adjuntó documento.")
-    if nuevo_estado != "PAGADO":
+            flash("No se puede marcar como 'FINALIZADO', no se adjuntó documento.")
+    if nuevo_estado != "FINALIZADO":
         cursor = conexion.cursor()
         sql = f"UPDATE `archivos` SET `estado` = '{nuevo_estado}' WHERE `id_archivo` = '{id_archivo}';"
         cursor.execute(sql)

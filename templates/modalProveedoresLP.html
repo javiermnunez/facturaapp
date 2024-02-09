@@ -1,12 +1,12 @@
 <div class="col">
     <!-- Botón para abrir el modal de confirmación -->
-    {% if archivoA[7] == "PAGADO" %}
+    {% if archivoA[7] == "FINALIZADO" %}
     <button type="button" class="btn btn-success btn-sm" data-toggle="modal"
         data-target="#cambiarEstadoModal{{ archivoA[0] }}">
         {{archivoA[7]}}
     </button>
     {% endif %}
-    {% if archivoA[7] != "PAGADO" %}
+    {% if archivoA[7] != "FINALIZADO" %}
     <button type="button" class="btn-outline-success btn-sm" data-toggle="modal"
         data-target="#cambiarEstadoModal{{ archivoA[0] }}">
         {{archivoA[7]}}
@@ -24,14 +24,14 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <!--¿Desea cambiar el estado a {% if archivoA[7] == "PAGADO" %}'LIBERADO'{% endif %}{% if archivoA[7] != "PAGADO" %}'PAGADO'{% endif %}?-->
+                    <!--¿Desea cambiar el estado a {% if archivoA[7] == "FINALIZADO" %}'LIBERADO'{% endif %}{% if archivoA[7] != "FINALIZADO" %}'FINALIZADO'{% endif %}?-->
                     ¿Desea cambiar el estado al documento {{archivoA[4]}} {{archivoA[6]}} ?
                 </div>
                 <form action="/actualizar_estado" method="post" enctype=multipart/form-data>
                     <select name="estado">
                         <option value="LIBERADO" title="A procesar">LIBERADO</option>
                         <option value="IMPUESTOS" title="Derivar a impuestos">IMPUESTOS</option>
-                        <option value="PAGADO" title="Marcar como PAGADO">PAGADO</option>
+                        <option value="FINALIZADO" title="Marcar como FINALIZADO">FINALIZADO</option>
                     </select>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
@@ -46,7 +46,7 @@
                     </div>
                     <!-- Botón para confirmar la eliminación -->
                     <!--
-                    {% if archivoA[7] == "PAGADO" %}
+                    {% if archivoA[7] == "FINALIZADO" %}
                     <div class="form-check form-switch">
                         <form action="/actualizar_estado" method="post" enctype=multipart/form-data>
                             <input type="text" value="LIBERADO" name="estado" hidden>
@@ -56,10 +56,10 @@
                         </form>
                     </div>
                     {% endif %}
-                    {% if archivoA[7] != "PAGADO" %}
+                    {% if archivoA[7] != "FINALIZADO" %}
                     <div class="form-check form-switch">
                         <form action="/actualizar_estado" method="post" enctype=multipart/form-data>
-                            <input type="text" value="PAGADO" name="estado" hidden>
+                            <input type="text" value="FINALIZADO" name="estado" hidden>
                             <input type="text" value="{{archivoA[0]}}" name="id_archivo" hidden>
                             <input type="text" value="{{usuario.id}}" name="id_usuario" hidden>
                             <button type="submit" class="btn btn-info">Aceptar</button>
