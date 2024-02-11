@@ -1,12 +1,12 @@
 <div class="col">
     <!-- Botón para abrir el modal de confirmación -->
-    {% if archivoA[7] == "PAGADO" %}
+    {% if archivoA[7] == "FINALIZADO" %}
     <button type="button" class="btn btn-success btn-sm" data-toggle="modal"
         data-target="#cambiarEstadoModal{{ archivoA[0] }}">
         {{archivoA[7]}}
     </button>
     {% endif %}
-    {% if archivoA[7] != "PAGADO" %}
+    {% if archivoA[7] != "FINALIZADO" %}
     <button type="button" class="btn-outline-success btn-sm" data-toggle="modal"
         data-target="#cambiarEstadoModal{{ archivoA[0] }}">
         {{archivoA[7]}}
@@ -24,7 +24,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <!--¿Desea cambiar el estado a {% if archivoA[7] == "PAGADO" %}'LIBERADO'{% endif %}{% if archivoA[7] != "PAGADO" %}'PAGADO'{% endif %}?-->
+                    <!--¿Desea cambiar el estado a {% if archivoA[7] == "FINALIZADO" %}'LIBERADO'{% endif %}{% if archivoA[7] != "FINALIZADO" %}'FINALIZADO'{% endif %}?-->
                     ¿Desea cambiar el estado al documento {{archivoA[4]}} {{archivoA[6]}} ?
                 </div>
                 <form action="/actualizar_estado" method="post" enctype=multipart/form-data>

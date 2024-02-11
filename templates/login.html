@@ -39,7 +39,7 @@
     }
     </style>
 </head>
-
+{% include 'cabeceraLogin.html' %}
 <body style="background-color: rgb(204, 201, 201);">
 
   <div class="container mt-5 ">
@@ -77,7 +77,44 @@
               </div>
             </form>
           </div>
+          <div class="text-center">
+          <!--Modal Eliminar-->
+          <div class="col">
+            <!-- Botón para abrir el modal de confirmación -->
+            <button type="button" class="btn btn-outline-dark btn-sm" data-toggle="modal" data-target="#eliminarModal">
+                Recuperar contraseña
+            </button>
+            <div class="row"><br></div>
+            <!-- Modal de confirmación -->
+            <div class="modal fade" id="eliminarModal" tabindex="-1" role="dialog" aria-labelledby="eliminarModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="eliminarModalLabel">Recuperar contraseña:</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            Se enviará un mail con la contraseña actual.
+                            <form action="/enviarContrasenia" method="post" enctype=multipart/form-data>
+                              <input type="email" name="mail" placeholder="Correo">
+                              
+                              <button type="submit" class="btn btn-info">Enviar</button>
+                          </form>
+                        </div>
+                        <div class="modal-footer">
+                        
+                            <!-- Botón para confirmar la eliminación -->
+                            
+                        </div>
+                      
+                    </div>
+                </div>
+            </div>
+            <!-- Fin del modal de confirmación -->
         </div>
+      </div>
       </div>
     </div>
   </div>
