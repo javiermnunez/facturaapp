@@ -1748,4 +1748,4 @@ def actualizar_estado():
 #-------------------------------------------------------------------------------------------------------
 #Se debe modificar la ip que corresponda al equipo en donde se esta corriendo
 if __name__ == "__main__":
-    app.run(host= servidorIp ,debug=True)
+    app.run(host= servidorIp ,debug=False)
