@@ -97,7 +97,7 @@
                     <th>Sector</th>
                     <th>Centro</th>
                     <th>Correo</th>
-                    <th hidden>Contraseña</th>
+                    <th>Contraseña</th>
                     <th>Rol</th>
                 </tr>
             </thead>
@@ -109,8 +109,16 @@
                     <td>{{usuario[3]}}</td>
                     <td>{{usuario[4]}}</td>
                     <td>{{usuario[5]}}</td>
-                    <td hidden>{{usuario[6]}}</td>
+                    <td>{{usuario[6]}}</td>
+                    {% if usuario[7] == "EMPLEADO" %}
+                    <td>USUARIO</td>
+                    {% endif %}
+                    {% if usuario[7] == "JEFE" %}
+                    <td>RESPONSABLE</td>
+                    {% endif %}
+                    {% if usuario[7] != "EMPLEADO" and usuario[7] != "JEFE" %}
                     <td>{{usuario[7]}}</td>
+                    {% endif %}
                 </tr>
                 {% endfor %}
             </tbody>
