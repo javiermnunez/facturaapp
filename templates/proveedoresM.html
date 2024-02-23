@@ -64,8 +64,7 @@
                                             style="color: greenyellow;"></i></button>
                                 </form>
                             </div>
-                            {% if usuario.roll == "PROVEEDORES" or usuario.roll == "CONTROL" or usuario.roll ==
-                            "SERVICIOS" or usuario.roll == "DIRECTO"%}
+                            {% if usuario.mail == "jmn@betalab.com.ar" %}
                             {% include 'opcionesProveedoresM.html' %}
                             {% endif %}
                         </div>
