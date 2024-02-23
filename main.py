@@ -533,13 +533,15 @@ def leer_archivo_xlsx(archivo): #busca el archivo y lo ingresa a la base de dato
         
             for r in registros:
                 cuit = str(r['CUIT'])
-                cuit = cuit[:2]+"-"+cuit[2:10]+"-"+cuit[-1:]
-                cursor = conexion.cursor()
-                sqlUsuario = f"INSERT INTO `proveedores` (`id_proveedor`, `cuit`, `detalle`, `cod`) VALUES (NULL, '{cuit}', '{r['DETALLE']}', {r['COD']});"
-                cursor.execute(sqlUsuario)
-                conexion.commit()
-                contador = contador+1
-            print(contador)    
+                cuit = cuit[:2]+"-"+cuit[2:10]+"-"+cuit[-1]
+                print(f"CUIT: {cuit} DETALLE: {r['DETALLE']} CODINT: {r['COD']}")
+                if verificarCuit(cuit):
+                    cursor = conexion.cursor()
+                    sqlUsuario = f"INSERT INTO `proveedores` (`id_proveedor`, `cuit`, `detalle`, `cod`) VALUES (NULL, '{cuit}', '{r['DETALLE']}', '{r['COD']}');"
+                    cursor.execute(sqlUsuario)
+                    conexion.commit()
+                    contador = contador+1
+                print(contador)    
             return registros
         except Exception as e:
             print(f"Error al leer el archivo {nombre_archivo}: {e}")
@@ -1078,6 +1080,7 @@ def agregar_proveedor():
     
     return render_template('proveedoresM.html', proveedores = proveedores,usuario = usuarioO, repositorio = carpetaRepositorio, id = usuarioO.id,centros = centros)
     
+
 
 @app.route('/repositorio', methods=['GET','POST'])
 def verificarUsuario():
