@@ -10,10 +10,12 @@ from werkzeug.utils import secure_filename
 from flask import Flask,flash,request,redirect,send_file,render_template, jsonify
 from flask import redirect, url_for
 #from flask.globals import session
+from flask_profiler import Profiler
 from clases.Usuario import Usuario
 import mysql.connector #nuevo
 from datetime import datetime
 from email.message import EmailMessage
+from gevent.pywsgi import WSGIServer
 import smtplib
 import pandas as pd
 
@@ -91,6 +93,22 @@ def buscar_duplicados(registros):
 
     return duplicados
 
+def buscar_duplicados_y_borrar(registros):
+    # Diccionario para almacenar los registros únicos basados en el campo 'cuit'
+    registros_unicos = {}
+    # Lista para almacenar los registros duplicados
+    duplicados = []
+
+    for registro in registros:
+        cuit = registro[1]
+
+        # Verificar si ya existe un registro con el mismo 'cuit'
+        if cuit in registros_unicos:
+            # Agregar a la lista de duplicados si ya existe
+            borrar_proveedor(registro[0])
+        else:
+            # Agregar al diccionario de registros únicos si es el primero
+            registros_unicos[cuit] = registro
 
 
     
@@ -127,6 +145,22 @@ FILE_CONTAINER = './cont/'
 app = Flask(__name__, template_folder='templates')
 app.debug = True
 app.config['FILE_CONTAINER'] = FILE_CONTAINER
+app.config['flask_profiler'] = {
+    "enabled": app.config.get("DEBUG"),
+    "storage": {
+        "engine": "sqlite"
+    },
+    "basicAuth":{
+        "enabled": True,
+        "username": "admin",
+        "password": "admin"
+    },
+    "ignore": [
+        "^/static/.*"
+    ]
+}
+profiler = Profiler()
+profiler.init_app(app)
 app.secret_key = "vigoray"
 conexion = mysql.connector.connect(host="localhost",port="3306", user="root", passwd="",database="personas") #nuevo
 
@@ -951,6 +985,36 @@ def proveedoresFormD():
     if usuarioO:
         return render_template('proveedoresDuplicados.html', proveedores = proveedoresd,usuario = usuarioO, repositorio = carpetaRepositorio, id = usuarioO.id,centros = centros)                  
 
+
+@app.route('/proveedoresDuplicadosBorrar')
+def proveedoresFormDe():
+    centros = buscarCentros()
+    cursor = conexion.cursor()
+    cursor.execute("SELECT * FROM `proveedores`;")
+    proveedores = cursor.fetchall()
+    conexion.commit()
+
+    buscar_duplicados_y_borrar(proveedores)
+    sqlUsuario = buscarUsuario(1)
+    """
+    try:
+        usuario = request.form['usuario']
+        print(usuario)
+        password = request.form['contrasenia']
+        print(password)
+        sqlUsuario = buscarUsuarioPass(usuario,password)
+    except:
+        print("Voy por aca")
+        return redirect('/noLogin')
+    """
+    if str(sqlUsuario) != "()" and str(sqlUsuario) != "[]":
+        usuarioO = Usuario(sqlUsuario[0][0],sqlUsuario[0][1],sqlUsuario[0][2],sqlUsuario[0][3],sqlUsuario[0][4],sqlUsuario[0][5],sqlUsuario[0][6],sqlUsuario[0][7])
+    else:
+        usuarioO = None
+    
+    if usuarioO:
+        return render_template('proveedoresDuplicados.html', proveedores = proveedores,usuario = usuarioO, repositorio = carpetaRepositorio, id = usuarioO.id,centros = centros)                  
+
 @app.route('/eliminarProveedor' , methods=['POST'])
 def eliminarP():
     
@@ -1750,5 +1814,11 @@ def actualizar_estado():
     return volverInicioOrigen(usuario,contrasenia, "proveedores")
 #-------------------------------------------------------------------------------------------------------
 #Se debe modificar la ip que corresponda al equipo en donde se esta corriendo
+
 if __name__ == "__main__":
-    app.run(host= servidorIp ,debug=False)
+    app.run(host= servidorIp ,debug=True)
+"""
+if __name__ == "__main__":
+    http_server = WSGIServer((servidorIp, 5000), app)
+    http_server.serve_forever()
+"""
