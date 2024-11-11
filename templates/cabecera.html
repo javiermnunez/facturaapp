@@ -86,7 +86,7 @@
         }
     </style>
     
-    <!-- Spinner -->
+    <!-- Spinner 
     <div class="spinner-container" id="spinnerContainer">
         <div class="spinner"></div>
     </div>
@@ -114,7 +114,7 @@
     
             //--------------------------------------------------------------------------------
     </script>
-
+-->
     <header>
         <section class="wrapper">
             <!-- Inicia Navbar-->
@@ -221,6 +221,13 @@
                         </form>
                     </li>
                     {% endif %}
+                    <li>
+                        <form action="/proveedoresR" method="POST" style="margin-left: auto;">
+                            <input type="number" class="form-control" id="usuario" name="usuario" value="{{usuario.id}}" hidden>
+                            
+                            <button id="conSpinner" type="submit" class="btn btn-dark">Recientes</button>
+                        </form>
+                    </li>
                     <li>
                         <form action="/proveedores" method="POST" style="margin-left: auto;">
                             <input type="email" class="form-control" id="email" name="usuario" value="{{usuario.mail}}"

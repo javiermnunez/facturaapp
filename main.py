@@ -10,15 +10,18 @@ from werkzeug.utils import secure_filename
 from flask import Flask,flash,request,redirect,send_file,render_template, jsonify
 from flask import redirect, url_for
 #from flask.globals import session
+from flask_profiler import Profiler
 from clases.Usuario import Usuario
 import mysql.connector #nuevo
 from datetime import datetime
 from email.message import EmailMessage
+from gevent.pywsgi import WSGIServer
 import smtplib
-import pandas as pd
+#import pandas as pd
+import time
 
 #Beta
-servidorIp = "89.0.0.10"
+servidorIp = "89.0.0.86"
 #Casa
 #servidorIp = "192.168.1.4"
 #servidorIp='localhost'
@@ -31,8 +34,45 @@ carpetaAprobados = current_dir+"\\datos\\beta\\aprobados"
 carpetaLiberados = current_dir+"\\datos\\beta\\liberados"
 
 max_size = 10485760 #10mb
+#Declaración  de variable que hace referencia a la carpeta contenedora para alojar los archivos
+FILE_CONTAINER = './cont/'
+
+app = Flask(__name__, template_folder='templates')
+app.debug = False
+app.config['FILE_CONTAINER'] = FILE_CONTAINER
+app.config['flask_profiler'] = {
+    "enabled": app.config.get("DEBUG"),
+    "storage": {
+        "engine": "sqlite"
+    },
+    "basicAuth":{
+        "enabled": True,
+        "username": "admin",
+        "password": "admin"
+    },
+    "ignore": [
+        "^/static/.*"
+    ]
+}
+profiler = Profiler()
+profiler.init_app(app)
+app.secret_key = "vigoray"
 
 
+max_intentos = 3
+intentos = 0
+conexion = None
+
+while intentos < max_intentos:
+    try:
+        conexion = mysql.connector.connect(host="localhost",port="3307", user="root", passwd="vigoray",database="personas") #nuevo
+        print("¡Conexión exitosa!")
+        break  # Si la conexión es exitosa, sal del bucle
+    except mysql.connector.Error as err:
+        print(f"Error al conectar a la base de datos: {err}")
+        intentos += 1
+        print(f"Intento {intentos} de {max_intentos}.")
+        time.sleep(1)  # Espera un segundo antes de intentar nuevamente
 
 
 
@@ -58,7 +98,7 @@ def buscarProveedoresId(id):
     return proveedor
 
 def enviarMail(asunto,destinatario, mensaje):
-    destinatario = "jmn@betalab.com.ar"
+    #destinatario = "jmn@betalab.com.ar"
     try:
         em = EmailMessage()
         em["To"] = destinatario
@@ -91,6 +131,28 @@ def buscar_duplicados(registros):
 
     return duplicados
 
+def buscar_duplicados_y_borrar(registros):
+    # Diccionario para almacenar los registros únicos basados en el campo 'cuit'
+    registros_unicos = {}
+    # Lista para almacenar los registros duplicados
+    duplicados = []
+
+    for registro in registros:
+        cuit = registro[1]
+
+        # Verificar si ya existe un registro con el mismo 'cuit'
+        if cuit in registros_unicos:
+            # Agregar a la lista de duplicados si ya existe
+            borrar_proveedor(registro[0])
+        else:
+            # Agregar al diccionario de registros únicos si es el primero
+            registros_unicos[cuit] = registro
+
+
+    
+
+
+
 def generarCarpetas():
     try:
         os.makedirs(carpetaRepositorio, exist_ok=True)
@@ -114,15 +176,6 @@ def generarCarpetas():
     except Exception as e:
         print(f'Error al crear la carpeta: {e}')
 generarCarpetas()
-
-#Declaración  de variable que hace referencia a la carpeta contenedora para alojar los archivos
-FILE_CONTAINER = './cont/'
-
-app = Flask(__name__, template_folder='templates')
-app.debug = True
-app.config['FILE_CONTAINER'] = FILE_CONTAINER
-app.secret_key = "vigoray"
-conexion = mysql.connector.connect(host="localhost",port="3307", user="root", passwd="vigoray",database="personas") #nuevo
 
 def rutaArchivo(id_archivo):
     cursor = conexion.cursor()
@@ -490,13 +543,29 @@ def noLogin():
     <div class="container-fluid">
     <dic class="row">
     <div class=" col-md-6 offset-md-3 text-center">
-    <h1>Debes iniciar sesión.</h1>
+    <h1>Requiere inicio de sesión.</h1>
     <a class="btn btn-primary" href="/">Volver</a>
     </div>
     </div>
      </body> """
 
+@app.route('/enviarContrasenia', methods=['POST'])
+def enviarContrasenia():
+    mail = request.form['mail']
+    cursor = conexion.cursor()
+    cursor.execute(f"SELECT * FROM `usuarios` where `mail` = '{mail}';")
+    usuario = cursor.fetchall()
+    conexion.commit()
+    if len(usuario) == 0:
+        mensaje = "Usuario no encontrado."
+    else:
+        enviarMail(f"Recuperar contraseña usuario: {usuario[0][5]}",mail,f"Contraseña: {usuario[0][6]}")
+        mensaje = "Se envío mail con la contraseña actual."
+    flash(mensaje)
+    return redirect("/")
 
+#para importar archivos xlsx de proveedores (deshabilitado).
+"""
 def leer_archivo_xlsx(archivo): #busca el archivo y lo ingresa a la base de datos
     if archivo == "proveedores":
         nombre_archivo = "proveedores.xlsx"
@@ -512,13 +581,15 @@ def leer_archivo_xlsx(archivo): #busca el archivo y lo ingresa a la base de dato
         
             for r in registros:
                 cuit = str(r['CUIT'])
-                cuit = cuit[:2]+"-"+cuit[2:10]+"-"+cuit[-1:]
-                cursor = conexion.cursor()
-                sqlUsuario = f"INSERT INTO `proveedores` (`id_proveedor`, `cuit`, `detalle`, `cod`) VALUES (NULL, '{cuit}', '{r['DETALLE']}', {r['COD']});"
-                cursor.execute(sqlUsuario)
-                conexion.commit()
-                contador = contador+1
-            print(contador)    
+                cuit = cuit[:2]+"-"+cuit[2:10]+"-"+cuit[-1]
+                print(f"CUIT: {cuit} DETALLE: {r['DETALLE']} CODINT: {r['COD']}")
+                if verificarCuit(cuit):
+                    cursor = conexion.cursor()
+                    sqlUsuario = f"INSERT INTO `proveedores` (`id_proveedor`, `cuit`, `detalle`, `cod`) VALUES (NULL, '{cuit}', '{r['DETALLE']}', '{r['COD']}');"
+                    cursor.execute(sqlUsuario)
+                    conexion.commit()
+                    contador = contador+1
+                print(contador)    
             return registros
         except Exception as e:
             print(f"Error al leer el archivo {nombre_archivo}: {e}")
@@ -548,7 +619,8 @@ def leer_archivo_xlsx(archivo): #busca el archivo y lo ingresa a la base de dato
         except Exception as e:
             print(f"Error al leer el archivo {nombre_archivo}: {e}")
         
-
+"""
+"""
 @app.route('/actualizar_bd_proveedores')
 def actualizarProveedoresBD():
     cursor = conexion.cursor()
@@ -558,7 +630,8 @@ def actualizarProveedoresBD():
     unaLista = []
     unaLista = leer_archivo_xlsx("proveedores")
     salida = "" 
-    return f"""
+    
+    return f...
     <!DOCTYPE html>
     <html lang="es">
     <head>
@@ -574,7 +647,7 @@ def actualizarProveedoresBD():
     <a class="btn btn-primary" href="/">Volver</a>
     </div>
     </div>
-     </body> """
+     </body> ...
 
 @app.route('/actualizar_bd_centros')
 def actualizarCentrosBD():
@@ -585,7 +658,7 @@ def actualizarCentrosBD():
     unaLista = []
     unaLista = leer_archivo_xlsx("centros")
     salida = "" 
-    return f"""
+    return f...
     <!DOCTYPE html>
     <html lang="es">
     <head>
@@ -601,7 +674,8 @@ def actualizarCentrosBD():
     <a class="btn btn-primary" href="/">Volver</a>
     </div>
     </div>
-     </body> """
+     </body> 
+"""
 
 @app.route('/mail')
 def mail():
@@ -855,11 +929,15 @@ def mover_archivo_Liberar(id,ruta_completa, destino):
 @app.route('/usuarios')
 def usuariosForm():
     cursor = conexion.cursor()
-    cursor.execute("SELECT * FROM `usuarios`;")
+    cursor.execute("SELECT * FROM `usuarios` order by 'sector';")
     usuarios = cursor.fetchall()
     conexion.commit()
+    cursor = conexion.cursor()
+    cursor.execute("SELECT * FROM `centro` order by 'detalle';")
+    centro = cursor.fetchall()
+    conexion.commit()
     
-    return render_template('usuarios.html', usuarios = usuarios)
+    return render_template('usuarios.html', usuarios = usuarios, centros = centro)
 
 @app.route('/centro')
 def centrosForm():
@@ -895,6 +973,25 @@ def proveedoresForm():
     if usuarioO:
         return render_template('proveedoresM.html', proveedores = proveedores,usuario = usuarioO, repositorio = carpetaRepositorio, id = usuarioO.id,centros = centros)
 
+@app.route('/proveedoresR' , methods=['POST'])
+def proveedoresFormR():
+    centros = buscarCentros()
+    usuario = request.form['usuario']
+    cursor = conexion.cursor()
+    cursor.execute(f"SELECT * FROM `recientes` where id_usuario = {usuario};")
+    print("Request: "+usuario)
+    proveedoresR = cursor.fetchall()
+    conexion.commit()
+    sqlUsuario = buscarUsuario(usuario)
+    
+    if str(sqlUsuario) != "()" and str(sqlUsuario) != "[]":
+        usuarioO = Usuario(sqlUsuario[0][0],sqlUsuario[0][1],sqlUsuario[0][2],sqlUsuario[0][3],sqlUsuario[0][4],sqlUsuario[0][5],sqlUsuario[0][6],sqlUsuario[0][7])
+    else:
+        usuarioO = None
+    
+    if usuarioO:
+        return render_template('proveedoresR.html', proveedores = proveedoresR,usuario = usuarioO, repositorio = carpetaRepositorio, id = usuarioO.id,centros = centros)
+
 @app.route('/proveedoresDuplicados')
 def proveedoresFormD():
     centros = buscarCentros()
@@ -923,6 +1020,36 @@ def proveedoresFormD():
     
     if usuarioO:
         return render_template('proveedoresDuplicados.html', proveedores = proveedoresd,usuario = usuarioO, repositorio = carpetaRepositorio, id = usuarioO.id,centros = centros)                  
+
+
+@app.route('/proveedoresDuplicadosBorrar')
+def proveedoresFormDe():
+    centros = buscarCentros()
+    cursor = conexion.cursor()
+    cursor.execute("SELECT * FROM `proveedores`;")
+    proveedores = cursor.fetchall()
+    conexion.commit()
+
+    buscar_duplicados_y_borrar(proveedores)
+    sqlUsuario = buscarUsuario(1)
+    """
+    try:
+        usuario = request.form['usuario']
+        print(usuario)
+        password = request.form['contrasenia']
+        print(password)
+        sqlUsuario = buscarUsuarioPass(usuario,password)
+    except:
+        print("Voy por aca")
+        return redirect('/noLogin')
+    """
+    if str(sqlUsuario) != "()" and str(sqlUsuario) != "[]":
+        usuarioO = Usuario(sqlUsuario[0][0],sqlUsuario[0][1],sqlUsuario[0][2],sqlUsuario[0][3],sqlUsuario[0][4],sqlUsuario[0][5],sqlUsuario[0][6],sqlUsuario[0][7])
+    else:
+        usuarioO = None
+    
+    if usuarioO:
+        return render_template('proveedoresDuplicados.html', proveedores = proveedores,usuario = usuarioO, repositorio = carpetaRepositorio, id = usuarioO.id,centros = centros)                  
 
 @app.route('/eliminarProveedor' , methods=['POST'])
 def eliminarP():
@@ -987,6 +1114,17 @@ def buscarProveedor(cuit):
         encontrado = False
     return encontrado
 
+def buscarProveedorReciente(cuit):
+    encontrado = False
+    cursor = conexion.cursor()
+    cursor.execute(f"SELECT * FROM `recientes` where `cuit`= '{cuit}';")
+    proveedores = cursor.fetchall()
+    conexion.commit()
+    print(len(proveedores))
+    if len(proveedores)>0:
+        print("Cantidad de registros: "+str(len(proveedores)))
+        encontrado = True
+    return encontrado
 
 def verificarCuit(cuit):
     # validaciones minimas
@@ -1008,6 +1146,21 @@ def verificarCuit(cuit):
         aux = 9
 
     return aux == int(cuit[10])
+
+
+def agregar_proveedor_reciente(cuit,detalle,usuario):
+    
+    cuit = cuit.replace("-","")
+    cuit = cuit.replace(" ","")
+    cuit = cuit[:2]+"-"+cuit[2:10]+"-"+cuit[-1]
+    
+    if(buscarProveedorReciente(cuit) == False):
+        cursor = conexion.cursor()
+        sqlUsuario = f"INSERT INTO `recientes` (`id_proveedor`, `cuit`, `detalle`, `id_usuario`) VALUES (NULL, '{cuit}', '{detalle}', {usuario});"
+        cursor.execute(sqlUsuario)
+        conexion.commit()
+    print("Se agrego reciente?"+str(buscarProveedorReciente(cuit)))
+
 
 @app.route('/agregar_proveedor', methods=['POST'])
 def agregar_proveedor():
@@ -1053,6 +1206,7 @@ def agregar_proveedor():
     
     return render_template('proveedoresM.html', proveedores = proveedores,usuario = usuarioO, repositorio = carpetaRepositorio, id = usuarioO.id,centros = centros)
     
+
 
 @app.route('/repositorio', methods=['GET','POST'])
 def verificarUsuario():
@@ -1305,13 +1459,17 @@ def subirA():
                     s = subirArchivoProveedores(usuarioO.id,carpetaLiberados ,proveedor ,cuit ,request.form['centro'],request.form['nro'],request.form['fecha'],request.form['detalle'])
                     if s == False:
                         flash("Algo salio mal, no se cargo el archivo o demasiado grande(10mb max)!")
-                    
+                    if s:
+                        agregar_proveedor_reciente(cuit,proveedor,usuarioO.id)
                         
                     
                 else:
                     s = subirArchivo(usuarioO.id,carpetaRepositorio ,proveedor ,cuit ,request.form['centro'],request.form['nro'],request.form['fecha'],request.form['detalle'])
                     if s == False:
                         flash("Algo salio mal, no se cargo el archivo o demasiado grande(10mb max)!")
+                    if s:
+                        print(usuarioO.id)
+                        agregar_proveedor_reciente(cuit,proveedor,usuarioO.id)
                     #activar mail
                     if usuarioO.roll == "EMPLEADO" and s:
                         asunto = "Notificación de Carga Factura"
@@ -1552,11 +1710,19 @@ def ver_pdf():
 
     return send_file(ruta, as_attachment=False)
 
+@ app.route('/verPdfCarga', methods=['POST'])
+def ver_pdf_carga():
+    
+    ruta = "./carga.pdf"
+
+    return send_file(ruta, as_attachment=False)
+
 @ app.route('/verAnexo', methods=['POST'])
 def ver_Anexo():
     id_archivo = request.form['id_archivo']
     ruta = rutaArchivoAnexo(id_archivo)
     return send_file(ruta, as_attachment=False)
+
 
 @app.route('/noAprobar', methods=['POST'])#recuperar archivo
 def moverArchivoNoAprobado():
@@ -1714,5 +1880,10 @@ def actualizar_estado():
     return volverInicioOrigen(usuario,contrasenia, "proveedores")
 #-------------------------------------------------------------------------------------------------------
 #Se debe modificar la ip que corresponda al equipo en donde se esta corriendo
+"""
 if __name__ == "__main__":
     app.run(host= servidorIp ,debug=True)
+"""
+if __name__ == "__main__":
+    http_server = WSGIServer((servidorIp, 5000), app)
+    http_server.serve_forever()
