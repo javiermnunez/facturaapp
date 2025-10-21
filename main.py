@@ -11,8 +11,10 @@ from flask import Flask,flash,request,redirect,send_file,render_template, jsonif
 from flask import redirect, url_for
 #from flask.globals import session
 from flask_profiler import Profiler
+#import DatabaseConnection
 from clases.Usuario import Usuario
 import mysql.connector #nuevo
+from flaskext.mysql import MySQL
 from datetime import datetime
 from email.message import EmailMessage
 from gevent.pywsgi import WSGIServer
@@ -21,7 +23,7 @@ import smtplib
 import time
 
 #Beta
-servidorIp = "89.0.0.86"
+servidorIp = "0.0.0.0"
 #Casa
 #servidorIp = "192.168.1.4"
 #servidorIp='localhost'
@@ -57,26 +59,24 @@ app.config['flask_profiler'] = {
 profiler = Profiler()
 profiler.init_app(app)
 app.secret_key = "vigoray"
+#Base de datos de Microsoft MSQL SERVER:
+#conexion = mysql.connector.connect(host="localhost",port="3307", user="root", passwd="vigoray",database="personas") #print("¡Conexión exitosa!")
+
+#Base de datos Xampp:
+#conexion = mysql.connector.connect(host="localhost",port="3306", user="root", passwd="",database="personas") #print("¡Conexión exitosa!")
+
+mysql = MySQL()
 
 
-max_intentos = 3
-intentos = 0
-conexion = None
-
-while intentos < max_intentos:
-    try:
-        conexion = mysql.connector.connect(host="localhost",port="3307", user="root", passwd="vigoray",database="personas") #nuevo
-        print("¡Conexión exitosa!")
-        break  # Si la conexión es exitosa, sal del bucle
-    except mysql.connector.Error as err:
-        print(f"Error al conectar a la base de datos: {err}")
-        intentos += 1
-        print(f"Intento {intentos} de {max_intentos}.")
-        time.sleep(1)  # Espera un segundo antes de intentar nuevamente
-
-
+app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+app.config['MYSQL_DATABASE_USER'] = 'root'
+app.config['MYSQL_DATABASE_PASSWORD'] = 'vigoray'
+app.config['MYSQL_DATABASE_DB'] = 'personas'
+app.config['MYSQL_DATABASE_PORT'] = 3307
+mysql.init_app(app)
 
 def buscarCentros():
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     cursor.execute("SELECT * FROM `centro` order by `detalle`;")
     centros = cursor.fetchall()
@@ -84,6 +84,7 @@ def buscarCentros():
     return centros
 
 def buscarProveedores():
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     cursor.execute("SELECT * FROM `proveedores` order by `detalle`;")
     proveedores = cursor.fetchall()
@@ -91,23 +92,34 @@ def buscarProveedores():
     return proveedores
 
 def buscarProveedoresId(id):
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     cursor.execute(f"SELECT * FROM `proveedores` where `id_proveedor` = {id};")
     proveedor = cursor.fetchall()
     conexion.commit()
     return proveedor
 
+def buscarProveedoresRecientesId(id):
+    conexion = mysql.connect()
+    cursor = conexion.cursor()
+    cursor.execute(f"SELECT * FROM `recientes` where `id_proveedor` = {id};")
+    proveedor = cursor.fetchall()
+    conexion.commit()
+    return proveedor
+
+
 def enviarMail(asunto,destinatario, mensaje):
-    #destinatario = "jmn@betalab.com.ar"
+    destinatario = "jmn@betalab.com.ar"
     try:
         em = EmailMessage()
         em["To"] = destinatario
         em["Subject"] = asunto
         em.set_content(mensaje)
         
-        with smtplib.SMTP("mail.laboratoriosbeta.com.ar", 26) as smtp:
-            smtp.login("sistemas@laboratoriosbeta.com.ar", "Sanjuan2266")
-            smtp.sendmail("sistemas@laboratoriosbeta.com.ar", destinatario, em.as_string())
+        with smtplib.SMTP("outlook.office365.com", 587) as smtp:
+            smtp.starttls()
+            smtp.login("beta@betalab.com.ar", "Sanjuan2266")
+            smtp.sendmail("beta@betalab.com.ar", destinatario, em.as_string())
             return True
     except Exception as e:
         return (f"Error al enviar el correo: {e}")
@@ -148,11 +160,6 @@ def buscar_duplicados_y_borrar(registros):
             # Agregar al diccionario de registros únicos si es el primero
             registros_unicos[cuit] = registro
 
-
-    
-
-
-
 def generarCarpetas():
     try:
         os.makedirs(carpetaRepositorio, exist_ok=True)
@@ -178,6 +185,7 @@ def generarCarpetas():
 generarCarpetas()
 
 def rutaArchivo(id_archivo):
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     sqlArchivo = f"select * from archivos where id_archivo = {id_archivo};"
     cursor.execute(sqlArchivo)
@@ -193,6 +201,7 @@ def rutaArchivo(id_archivo):
     return ruta
     
 def rutaArchivoAnexo(id_archivo):
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     sqlArchivo = f"select * from comprobantes where id_anexo = {id_archivo};"
     cursor.execute(sqlArchivo)
@@ -204,6 +213,7 @@ def rutaArchivoAnexo(id_archivo):
 
 
 def buscarArchivoId(id_archivo):
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     sqlArchivo = f"select * from archivos where id_archivo = {id_archivo};"
     cursor.execute(sqlArchivo)
@@ -215,6 +225,7 @@ def buscarArchivo(nro,cuit):
     salida = 1
     print("numero "+nro)
     print("proveedor "+cuit)
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     sqlArchivo = f"select * from archivos where `nro` = '{nro}' AND `cuit` = '{cuit}'"
     cursor.execute(sqlArchivo)
@@ -226,6 +237,7 @@ def buscarArchivo(nro,cuit):
     return salida
 
 def buscarArchivoPorRuta(ruta):
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     sqlArchivo = f"select * from archivos where ruta = '{ruta}';"
     cursor.execute(sqlArchivo)
@@ -249,6 +261,7 @@ def renombrarArchivo(rutaArchivoOriginal,nombreNuevo):
 
 def buscarAprovadosControl():
     aprobadosC = []
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     cursor.execute(f"SELECT * FROM archivos where estado='APROBADO';")
     apro = cursor.fetchall()
@@ -273,6 +286,7 @@ def buscarAprovadosControl():
 
 def buscarLiberadosP():
     aprobadosC = []
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     cursor.execute("SELECT * FROM archivos WHERE (estado='LIBERADO' OR estado='FINALIZADO' OR estado='Ok_IMPUESTOS') AND destino='PROVEEDORES';")
     apro = cursor.fetchall()
@@ -296,6 +310,7 @@ def buscarLiberadosP():
 
 def buscarLiberadosS():
     aprobadosC = []
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     cursor.execute(f"SELECT * FROM archivos where (estado='LIBERADO' OR estado='FINALIZADO') AND(destino='SERVICIOS');")
     apro = cursor.fetchall()
@@ -319,6 +334,7 @@ def buscarLiberadosS():
 
 def buscarLiberadosD():
     aprobadosC = []
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     cursor.execute(f"SELECT * FROM archivos where (estado='LIBERADO' OR estado='FINALIZADO') AND(destino='DIRECTO');")
     apro = cursor.fetchall()
@@ -342,8 +358,10 @@ def buscarLiberadosD():
 
 def buscarLiberadosC(idU):
     aprobadosC = []
+    conexion = mysql.connect()
     cursor = conexion.cursor()
-    cursor.execute(f"SELECT * FROM archivos where estado='LIBERADO' AND(usuario='{idU}');")
+    #cursor.execute(f"SELECT * FROM archivos where estado='LIBERADO' AND(usuario='{idU}');")
+    cursor.execute(f"SELECT * FROM archivos where estado='LIBERADO';")
     apro = cursor.fetchall()
     conexion.commit()
     for registro in apro:
@@ -366,6 +384,7 @@ def buscarLiberadosC(idU):
 
 def buscarLiberadosI():
     aprobadosC = []
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     cursor.execute("SELECT * FROM archivos WHERE estado='IMPUESTOS';")
     apro = cursor.fetchall()
@@ -390,6 +409,7 @@ def buscarLiberadosI():
 def buscarLiberadosCentro(centro):
 
     aprobadosC = []
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     cursor.execute(f"SELECT * FROM archivos WHERE (estado='LIBERADO' OR estado='FINALIZADO' OR estado= 'IMPUESTOS' OR estado= 'OK_IMPUESTOS') AND(centro='{centro}');")
     apro = cursor.fetchall()
@@ -431,7 +451,7 @@ def volverInicioOrigen(usuario, password,origen):
             listaArchivos = sqlArchivosRepo
             listaArchivosA = sqlArchivosApro
             return render_template(f'{origen}.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio, centros = centros, proveedores = proveedores)
-        if usuarioO.roll == "CONTROL":
+        if usuarioO.roll == "CONTROL"or (usuarioO.roll == "JEFE" and usuarioO.centro == "O510"):
             sqlArchivosRepo = buscarArchivosRepo(usuarioO, usuarioO.centro)
             sqlArchivosApro = buscarAprovadosControl()
             listaArchivos = sqlArchivosRepo
@@ -473,6 +493,7 @@ def volverInicioOrigen(usuario, password,origen):
 def buscarArchivosRepo(usuario,centro):
     print(centro)
     repositorio = []
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     if usuario.roll == "EMPLEADO":
         cursor.execute(f"SELECT * FROM archivos where `centro`='{centro}' AND (usuario='{usuario.id}')AND (estado='NO_APROBADO');")
@@ -503,13 +524,15 @@ def buscarArchivosRepo(usuario,centro):
         fechaFC = registro[9]
         detalle = registro[10]
         cuit = registro[13]
+        na = registro[14]
         
-        repositorio.append([id,ruta,fecha,usuario,proveedor,centro,cae,estado,nombre,fechaFC,detalle,cuit])
-    
+        repositorio.append([id,ruta,fecha,usuario,proveedor,centro,cae,estado,nombre,fechaFC,detalle,cuit,na])
+    print(repo)
     return repositorio
 
 def buscarArchivosApro(centro):
     aprobados = []
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     cursor.execute(f"SELECT * FROM archivos where `centro`='{centro}' AND (estado='APROBADO');")
     apro = cursor.fetchall()
@@ -528,9 +551,13 @@ def buscarArchivosApro(centro):
         detalle = registro[10]
         aprobado = registro[12]
         cuit = registro[13]
-        aprobados.append([id,ruta,fecha,usuario,proveedor,centro,cae,estado,nombre,fechaFC,detalle,aprobado,cuit])
+        na = registro[14]
+        aprobados.append([id,ruta,fecha,usuario,proveedor,centro,cae,estado,nombre,fechaFC,detalle,aprobado,cuit,na])
 
     return aprobados
+
+
+
 @app.route('/noLogin')
 def noLogin():
     return """
@@ -552,6 +579,7 @@ def noLogin():
 @app.route('/enviarContrasenia', methods=['POST'])
 def enviarContrasenia():
     mail = request.form['mail']
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     cursor.execute(f"SELECT * FROM `usuarios` where `mail` = '{mail}';")
     usuario = cursor.fetchall()
@@ -584,6 +612,7 @@ def leer_archivo_xlsx(archivo): #busca el archivo y lo ingresa a la base de dato
                 cuit = cuit[:2]+"-"+cuit[2:10]+"-"+cuit[-1]
                 print(f"CUIT: {cuit} DETALLE: {r['DETALLE']} CODINT: {r['COD']}")
                 if verificarCuit(cuit):
+                    conexion = mysql.connect()
                     cursor = conexion.cursor()
                     sqlUsuario = f"INSERT INTO `proveedores` (`id_proveedor`, `cuit`, `detalle`, `cod`) VALUES (NULL, '{cuit}', '{r['DETALLE']}', '{r['COD']}');"
                     cursor.execute(sqlUsuario)
@@ -608,6 +637,7 @@ def leer_archivo_xlsx(archivo): #busca el archivo y lo ingresa a la base de dato
             for r in registros:
                 codigo = str(r['codigo'])
                 detalle = str(r['detalle'])
+                conexion = mysql.connect()
                 cursor = conexion.cursor()
                 sqlUsuario = f"INSERT INTO `centro` (`id_centro`, `cod`, `detalle`) VALUES (NULL, '{codigo}', '{detalle}');"
                 cursor.execute(sqlUsuario)
@@ -619,10 +649,11 @@ def leer_archivo_xlsx(archivo): #busca el archivo y lo ingresa a la base de dato
         except Exception as e:
             print(f"Error al leer el archivo {nombre_archivo}: {e}")
         
-"""
-"""
+
+
 @app.route('/actualizar_bd_proveedores')
 def actualizarProveedoresBD():
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     sqlUsuario = "delete from proveedores"
     cursor.execute(sqlUsuario)
@@ -651,6 +682,7 @@ def actualizarProveedoresBD():
 
 @app.route('/actualizar_bd_centros')
 def actualizarCentrosBD():
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     sqlUsuario = "delete from centro"
     cursor.execute(sqlUsuario)
@@ -747,6 +779,7 @@ def return_files_tut(filename):
     return send_file(file_path, as_attachment=True, attachment_filename='')
 #-------------------------------------------------------------------------------------------------------
 def buscarUsuario(id): #nuevo
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     cursor.execute(f"SELECT * FROM `usuarios` where `id`={id}")
     usuario = cursor.fetchall()
@@ -755,13 +788,15 @@ def buscarUsuario(id): #nuevo
     return usuario
 
 def buscarUsuarioPass(usuario,contrasenia): #nuevo
+    
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     cursor.execute(f"SELECT * FROM `usuarios` where mail='{usuario}' AND (contrasenia='{contrasenia}')")
-    usuario = cursor.fetchall()
-    print(usuario)
+    usuarioT = cursor.fetchall()
+
     conexion.commit()
     
-    return usuario
+    return usuarioT
 
 def borrar_archivo(ruta_completa):
     try:
@@ -774,6 +809,7 @@ def borrar_archivo(ruta_completa):
 
 def borrar_archivo_SQL(ruta):
     unaRuta = codificar(ruta)
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     
     try:
@@ -793,7 +829,7 @@ def borrar_archivo_SQL(ruta):
         cursor.close()
 
 def borrar_anexo_SQL(id_anexo):
-    
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     
     try:
@@ -812,7 +848,7 @@ def borrar_anexo_SQL(id_anexo):
 
 
 def borrar_proveedor(id):
-    
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     
     try:
@@ -850,6 +886,7 @@ def mover_archivoA(id,ruta_completa):
             
             unaRuta = codificar(ruta_completa)
             otraRuta = codificar(ruta+"\\"+nombre_archivo+extension)
+            conexion = mysql.connect()
             cursor = conexion.cursor()
             cursor.execute(f"UPDATE `archivos` SET `ruta` = '{otraRuta}', `estado` = 'APROBADO', `usuario` = '{usuarioO.id}', `aprobado_por` = '{usuarioO.nombre} {usuarioO.apellido}' WHERE `archivos`.`ruta` = '{unaRuta}';")
             conexion.commit()
@@ -881,6 +918,7 @@ def mover_archivoNo(id,ruta_completa):
             nombre_archivo, extension = os.path.splitext(os.path.basename(ruta_completa))
             unaRuta = codificar(ruta_completa)
             otraRuta = codificar(ruta+"\\"+nombre_archivo+extension)
+            conexion = mysql.connect()
             cursor = conexion.cursor()
             cursor.execute(f"UPDATE `archivos` SET `ruta` = '{otraRuta}' , `estado` = 'NO_APROBADO', `usuario` = '{usuarioO.id}' WHERE `archivos`.`ruta` = '{unaRuta}';")
             conexion.commit()
@@ -915,6 +953,7 @@ def mover_archivo_Liberar(id,ruta_completa, destino):
             
             unaRuta = codificar(ruta_completa)
             otraRuta = codificar(ruta+"\\"+nombre_archivo+extension)
+            conexion = mysql.connect()
             cursor = conexion.cursor()
             cursor.execute(f"UPDATE `archivos` SET `ruta` = '{otraRuta}', `estado` = 'LIBERADO', `usuario` = '{usuarioO.id}', `destino` = '{destino}' WHERE `archivos`.`ruta` = '{unaRuta}';")
             conexion.commit()
@@ -926,21 +965,51 @@ def mover_archivo_Liberar(id,ruta_completa, destino):
             print(f"Error al aprobar el archivo en {ruta_completa}: {e}")
 
 
-@app.route('/usuarios')
+@app.route('/usuarios', methods=['POST'])
 def usuariosForm():
+    usuario = request.form['usuario']
+    password = request.form['contrasenia']
+    usuario = buscarUsuarioPass(usuario, password)
+    usuarioO = Usuario(usuario[0][0],usuario[0][1],usuario[0][2],usuario[0][3],usuario[0][4],usuario[0][5],usuario[0][6],usuario[0][7])
+    centro = usuario[0][4]
+    conexion = mysql.connect()
     cursor = conexion.cursor()
-    cursor.execute("SELECT * FROM `usuarios` order by 'sector';")
+    if usuarioO.roll == "ADMIN":
+        cursor.execute(f"SELECT * FROM `usuarios`;")
+    else:
+        cursor.execute(f"SELECT * FROM `usuarios` where `centro` = '{centro}';")
     usuarios = cursor.fetchall()
     conexion.commit()
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     cursor.execute("SELECT * FROM `centro` order by 'detalle';")
     centro = cursor.fetchall()
     conexion.commit()
     
-    return render_template('usuarios.html', usuarios = usuarios, centros = centro)
+    return render_template('usuarios.html', usuarios = usuarios, centros = centro,usuario = usuarioO)
+
+def usuariosPorID(id_usuario):
+    
+    usuario = buscarUsuario(id_usuario)
+    usuarioO = Usuario(usuario[0][0],usuario[0][1],usuario[0][2],usuario[0][3],usuario[0][4],usuario[0][5],usuario[0][6],usuario[0][7])
+    centro = usuario[0][4]
+    conexion = mysql.connect()
+    cursor = conexion.cursor()
+    cursor.execute(f"SELECT * FROM `usuarios` where `centro` = '{centro}';")
+    usuarios = cursor.fetchall()
+    conexion.commit()
+    conexion = mysql.connect()
+    cursor = conexion.cursor()
+    cursor.execute("SELECT * FROM `centro` order by 'detalle';")
+    centro = cursor.fetchall()
+    conexion.commit()
+    
+    return render_template('usuarios.html', usuarios = usuarios, centros = centro,usuario = usuarioO)
+
 
 @app.route('/centro')
 def centrosForm():
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     cursor.execute("SELECT * FROM `centro`;")
     centros = cursor.fetchall()
@@ -951,15 +1020,16 @@ def centrosForm():
 @app.route('/proveedores' , methods=['POST'])
 def proveedoresForm():
     centros = buscarCentros()
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     cursor.execute("SELECT * FROM `proveedores`;")
     proveedores = cursor.fetchall()
     conexion.commit()
     try:
         usuario = request.form['usuario']
-        print(usuario)
+       
         password = request.form['contrasenia']
-        print(password)
+        
         sqlUsuario = buscarUsuarioPass(usuario,password)
     except:
         print("Voy por aca")
@@ -977,6 +1047,7 @@ def proveedoresForm():
 def proveedoresFormR():
     centros = buscarCentros()
     usuario = request.form['usuario']
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     cursor.execute(f"SELECT * FROM `recientes` where id_usuario = {usuario};")
     print("Request: "+usuario)
@@ -995,6 +1066,7 @@ def proveedoresFormR():
 @app.route('/proveedoresDuplicados')
 def proveedoresFormD():
     centros = buscarCentros()
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     cursor.execute("SELECT * FROM `proveedores`;")
     proveedores = cursor.fetchall()
@@ -1025,6 +1097,7 @@ def proveedoresFormD():
 @app.route('/proveedoresDuplicadosBorrar')
 def proveedoresFormDe():
     centros = buscarCentros()
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     cursor.execute("SELECT * FROM `proveedores`;")
     proveedores = cursor.fetchall()
@@ -1058,6 +1131,7 @@ def eliminarP():
     pudo = borrar_proveedor(id_proveedor)
     print("Borro?: "+str(pudo))
     centros = buscarCentros()
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     cursor.execute("SELECT * FROM `proveedores`;")
     proveedores = cursor.fetchall()
@@ -1075,27 +1149,128 @@ def eliminarP():
         else:
             flash("El proveedor no se encontró o ya fue eliminado.")
         return render_template('proveedoresM.html', proveedores = proveedores,usuario = usuarioO, repositorio = carpetaRepositorio, id = usuarioO.id,centros = centros)    
-
+"""
 @app.route('/agregar_usuario', methods=['POST'])
 def agregar_usuario():
+    
     nombre = request.form['nombre'].capitalize()
     apellido = request.form['apellido'].capitalize()
-    sector = request.form['sector'].lower()
-    centro = request.form['centro'].upper()
+    sector = request.form['sector']
+    centro = request.form['centro']
     mail = request.form['mail'].lower()
     contrasenia = request.form['contrasenia'].replace("\n","")
     roll = request.form['roll'].upper()
-    usuario = Usuario("",nombre,apellido,sector,centro,mail,contrasenia,roll)
+    usuarioO = Usuario("",nombre,apellido,sector,centro,mail,contrasenia,roll)
+    print(usuarioO.id)
+    conexion = mysql.connect()
     cursor = conexion.cursor()
-    sqlUsuario = f"INSERT INTO `usuarios` (`id`, `nombre`, `apellido`, `sector`, `centro`, `mail`, `contrasenia`, `roll`) VALUES (NULL, '{usuario.nombre}', '{usuario.apellido}', '{usuario.sector}', '{usuario.centro}', '{usuario.mail}', '{usuario.contraseña}', '{usuario.roll}');"
+    sqlUsuario = f"INSERT INTO `usuarios` (`id`, `nombre`, `apellido`, `sector`, `centro`, `mail`, `contrasenia`, `roll`) VALUES (NULL, '{usuarioO.nombre}', '{usuarioO.apellido}', '{usuarioO.sector}', '{usuarioO.centro}', '{usuarioO.mail}', '{usuarioO.contraseña}', '{usuarioO.roll}');"
     cursor.execute(sqlUsuario)
     conexion.commit()
-    return redirect('/usuarios')
+    #busqueda de usuario para devolver su perfil de usuario.
+    usuario = request.form['usuarioM']
+    password = request.form['contraseniaM']
+
+    usuario = buscarUsuarioPass(usuario, password)
+    
+    
+    conexion = mysql.connect()
+    cursor = conexion.cursor()
+    cursor.execute(f"SELECT * FROM `usuarios` where `centro` = '{centro}';")
+    usuarios = cursor.fetchall()
+    conexion.commit()
+    conexion = mysql.connect()
+    cursor = conexion.cursor()
+    cursor.execute("SELECT * FROM `centro` order by 'detalle';")
+    centro = cursor.fetchall()
+    conexion.commit()
+    
+    return render_template('usuarios.html', usuarios = usuarios, centros = centro,usuario = usuarioO)
+"""
+@app.route('/agregar_usuario', methods=['POST'])
+def agregar_usuario():
+    # Datos del nuevo usuario a agregar
+    nombre = request.form['nombre'].capitalize()
+    apellido = request.form['apellido'].capitalize()
+    sector = request.form['sector']
+    centro = request.form['centro']
+    mail = request.form['mail'].lower()
+    contrasenia = request.form['contrasenia'].strip()
+    roll = request.form['roll'].upper()
+    
+    # Crear objeto Usuario para el nuevo usuario
+    nuevo_usuario = Usuario("", nombre, apellido, sector, centro, mail, contrasenia, roll)
+
+    # Conexión para insertar el nuevo usuario
+    conexion = mysql.connect()
+    cursor = conexion.cursor()
+    sqlUsuario = (
+        "INSERT INTO `usuarios` (`id`, `nombre`, `apellido`, `sector`, `centro`, `mail`, `contrasenia`, `roll`) "
+        f"VALUES (NULL, '{nuevo_usuario.nombre}', '{nuevo_usuario.apellido}', "
+        f"'{nuevo_usuario.sector}', '{nuevo_usuario.centro}', '{nuevo_usuario.mail}', "
+        f"'{nuevo_usuario.contraseña}', '{nuevo_usuario.roll}');"
+    )
+    cursor.execute(sqlUsuario)
+    conexion.commit()
+
+    # Autenticación del usuario original (que ya estaba logueado)
+    usuario = request.form['usuarioM']
+    password = request.form['contraseniaM']
+    usuario_autenticado = buscarUsuarioPass(usuario, password)
+
+    # Crear objeto Usuario para el usuario autenticado original
+    usuarioO = Usuario(
+        usuario_autenticado[0][0], usuario_autenticado[0][1], usuario_autenticado[0][2],
+        usuario_autenticado[0][3], usuario_autenticado[0][4], usuario_autenticado[0][5],
+        usuario_autenticado[0][6], usuario_autenticado[0][7]
+    )
+
+    # Recuperar lista de usuarios por el mismo centro
+    cursor.execute(f"SELECT * FROM `usuarios` WHERE `centro` = '{usuarioO.centro}';")
+    usuarios = cursor.fetchall()
+
+    # Recuperar lista de centros
+    cursor.execute("SELECT * FROM `centro` ORDER BY `detalle`;")
+    centros = cursor.fetchall()
+    conexion.commit()
+
+    # Renderizar la plantilla con los mismos datos originales
+    return render_template('usuarios.html', usuarios=usuarios, centros=centros, usuario=usuarioO)
+
+@app.route('/eliminarUsuario', methods=['POST'])
+def eliminar_usuario():
+    id_usuario = request.form['id']
+    # Conexión a la base de datos
+    conexion = mysql.connect()
+    cursor = conexion.cursor()
+    # Eliminación segura usando parámetros
+    sql_eliminar = "DELETE FROM `usuarios` WHERE `id` = %s;"
+    cursor.execute(sql_eliminar, (id_usuario,))
+    conexion.commit()
+    flash("Se elimino el usuario correctamente.")
+    idPerfil = request.form['id_perfil']
+    usuario = buscarUsuario(idPerfil)
+    usuarioO = Usuario(usuario[0][0],usuario[0][1],usuario[0][2],usuario[0][3],usuario[0][4],usuario[0][5],usuario[0][6],usuario[0][7])
+    centro = usuario[0][4]
+    conexion = mysql.connect()
+    cursor = conexion.cursor()
+    cursor.execute(f"SELECT * FROM `usuarios` where `centro` = '{centro}';")
+    usuarios = cursor.fetchall()
+    conexion.commit()
+    conexion = mysql.connect()
+    cursor = conexion.cursor()
+    cursor.execute("SELECT * FROM `centro` order by 'detalle';")
+    centro = cursor.fetchall()
+    conexion.commit()
+    
+    return render_template('usuarios.html', usuarios = usuarios, centros = centro,usuario = usuarioO)
+
 
 @app.route('/agregar_centro', methods=['POST'])
 def agregar_centro():
     cod = request.form['cod'].capitalize()
     detalle = request.form['detalle'].capitalize()
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     sqlUsuario = f"INSERT INTO `centro` (`id_centro`, `cod`, `detalle`) VALUES (NULL, '{cod}', '{detalle}');"
     cursor.execute(sqlUsuario)
@@ -1104,6 +1279,7 @@ def agregar_centro():
 
 def buscarProveedor(cuit):
     encontrado = True
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     cursor.execute(f"SELECT * FROM `proveedores` where `cuit`= '{cuit}';")
     proveedores = cursor.fetchall()
@@ -1116,6 +1292,7 @@ def buscarProveedor(cuit):
 
 def buscarProveedorReciente(cuit):
     encontrado = False
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     cursor.execute(f"SELECT * FROM `recientes` where `cuit`= '{cuit}';")
     proveedores = cursor.fetchall()
@@ -1155,6 +1332,7 @@ def agregar_proveedor_reciente(cuit,detalle,usuario):
     cuit = cuit[:2]+"-"+cuit[2:10]+"-"+cuit[-1]
     
     if(buscarProveedorReciente(cuit) == False):
+        conexion = mysql.connect()
         cursor = conexion.cursor()
         sqlUsuario = f"INSERT INTO `recientes` (`id_proveedor`, `cuit`, `detalle`, `id_usuario`) VALUES (NULL, '{cuit}', '{detalle}', {usuario});"
         cursor.execute(sqlUsuario)
@@ -1174,6 +1352,7 @@ def agregar_proveedor():
     print(existe)
     if verificarCuit(cuit):
         if existe:
+            conexion = mysql.connect()
             cursor = conexion.cursor()
             sqlUsuario = f"INSERT INTO `proveedores` (`id_proveedor`, `cuit`, `detalle`) VALUES (NULL, '{cuit}', '{detalle}');"
             cursor.execute(sqlUsuario)
@@ -1184,15 +1363,16 @@ def agregar_proveedor():
     else:
         flash("El CUIT no es válido!")
     centros = buscarCentros()
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     cursor.execute("SELECT * FROM `proveedores`;")
     proveedores = cursor.fetchall()
     conexion.commit()
     try:
         usuario = request.form['usuario']
-        print(usuario)
+        
         password = request.form['contrasenia']
-        print(password)
+        
         sqlUsuario = buscarUsuarioPass(usuario,password)
     except:
         print("Voy por aca")
@@ -1214,9 +1394,9 @@ def verificarUsuario():
     proveedores = buscarProveedores()
     try:
         usuario = request.form['usuario']
-        print(usuario)
+       
         password = request.form['contrasenia']
-        print(password)
+       
         sqlUsuario = buscarUsuarioPass(usuario,password)
     except:
         print("Voy por aca")
@@ -1229,41 +1409,50 @@ def verificarUsuario():
         usuarioO = None
     
     if usuarioO:
-        if usuarioO.roll == "EMPLEADO" or usuarioO.roll == "JEFE":
+        if usuarioO.roll == "ADMIN":
+            return render_template('repo.html',usuario = usuarioO,id=usuarioO.id, repositorio = carpetaRepositorio, centros = centros, proveedores = proveedores)
+        
+        if usuarioO.centro != "O510" and (usuarioO.roll == "EMPLEADO" or usuarioO.roll == "JEFE") :
             sqlArchivosRepo = buscarArchivosRepo(usuarioO, usuarioO.centro)
             sqlArchivosApro = buscarArchivosApro(usuarioO.centro)
             listaArchivos = sqlArchivosRepo
             listaArchivosA = sqlArchivosApro
+            print("Repo")
             return render_template('repo.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio, centros = centros, proveedores = proveedores)
-        if usuarioO.roll == "CONTROL":
+        if usuarioO.centro == "O510": #ANTES ERA CONTROL
             sqlArchivosRepo = buscarArchivosRepo(usuarioO, usuarioO.centro)
             sqlArchivosApro = buscarAprovadosControl()
             listaArchivos = sqlArchivosRepo
             listaArchivosA = sqlArchivosApro
+            print("Control")
             return render_template('aprobados.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio, centros = centros, proveedores = proveedores)
         if usuarioO.roll == "PROVEEDORES":
             sqlArchivosRepo = buscarArchivosRepo(usuarioO, usuarioO.centro)
             sqlArchivosApro = buscarLiberadosP()
             listaArchivos = sqlArchivosRepo
             listaArchivosA = sqlArchivosApro
+            print("Proveedores")
             return render_template('proveedores.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio, centros = centros, proveedores = proveedores)
         if usuarioO.roll == "SERVICIOS":
             sqlArchivosRepo = buscarArchivosRepo(usuarioO, usuarioO.centro)
             sqlArchivosApro = buscarLiberadosS()
             listaArchivos = sqlArchivosRepo
             listaArchivosA = sqlArchivosApro
+            print("Servicios")
             return render_template('proveedores.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio, centros = centros, proveedores = proveedores)  
         if usuarioO.roll == "DIRECTO":
             sqlArchivosRepo = buscarArchivosRepo(usuarioO, usuarioO.centro)
             sqlArchivosApro = buscarLiberadosD()
             listaArchivos = sqlArchivosRepo
             listaArchivosA = sqlArchivosApro
+            print("Directo")
             return render_template('proveedores.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio, centros = centros, proveedores = proveedores)
         if usuarioO.roll == "IMPUESTOS":
             sqlArchivosRepo = buscarArchivosRepo(usuarioO, usuarioO.centro)
             sqlArchivosApro = buscarLiberadosI()
             listaArchivos = sqlArchivosRepo
             listaArchivosA = sqlArchivosApro
+            print("Impuestos")
             return render_template('proveedores.html',usuario = usuarioO,id=usuarioO.id, archivos = listaArchivos, archivosA = listaArchivosA, repositorio = carpetaRepositorio, centros = centros, proveedores = proveedores)            
     else:
                 flash('Error.')
@@ -1271,9 +1460,10 @@ def verificarUsuario():
 
 @app.route('/subirAP', methods=['GET','POST'])
 def subirAP():
-    id = request.form['id_proveedor']
+    idP = request.form['id_proveedor']
+    print(idP)
     centros = buscarCentros()
-    proveedores = buscarProveedoresId(id)
+    proveedores = buscarProveedoresId(idP)
     
     try:
         id = request.form['id']
@@ -1289,7 +1479,30 @@ def subirAP():
         usuarioO = None
     
     
-    return render_template('subirProveedor.html',usuario = usuarioO,id=usuarioO.id, repositorio = carpetaRepositorio, centros = centros, proveedores = proveedores)            
+    return render_template('subirProveedor.html',usuario = usuarioO,id=usuarioO.id, repositorio = carpetaRepositorio, centros = centros, proveedores = proveedores)    
+
+@app.route('/subirAPr', methods=['GET','POST'])
+def subirAPr():
+    idP = request.form['id_proveedor']
+    print("reciente: "+idP)
+    centros = buscarCentros()
+    proveedores = buscarProveedoresRecientesId(idP)
+    
+    try:
+        id = request.form['id']
+        sqlUsuario = buscarUsuario(id)
+    except:
+        print("Voy por aca")
+        return redirect('/noLogin')
+
+    
+    if str(sqlUsuario) != "()" and str(sqlUsuario) != "[]":
+        usuarioO = Usuario(sqlUsuario[0][0],sqlUsuario[0][1],sqlUsuario[0][2],sqlUsuario[0][3],sqlUsuario[0][4],sqlUsuario[0][5],sqlUsuario[0][6],sqlUsuario[0][7])
+    else:
+        usuarioO = None
+    
+    
+    return render_template('subirProveedor.html',usuario = usuarioO,id=usuarioO.id, repositorio = carpetaRepositorio, centros = centros, proveedores = proveedores)          
     
 @app.route('/subirAnexo', methods=['GET','POST'])
 def subirAnexo():
@@ -1362,7 +1575,7 @@ def verificarUsuarioLiberado():
         usuarioO = None
     
     if usuarioO:
-        if usuarioO.roll == "CONTROL":
+        if usuarioO.roll == "CONTROL" or (usuarioO.roll == "JEFE" and usuarioO.centro == "O510"):
             sqlArchivosRepo = buscarArchivosRepo(usuarioO, usuarioO.centro)
             sqlLiberados = buscarLiberadosC(usuarioO.id)
             listaArchivos = sqlArchivosRepo
@@ -1420,7 +1633,7 @@ def verificarUsuarioRepositorio():
         usuarioO = None
     
     if usuarioO:
-        if usuarioO.roll == "CONTROL":
+        if usuarioO.roll == "CONTROL" or (usuarioO.roll == "JEFE" and usuarioO.centro == "O510"):
             sqlArchivosRepo = buscarArchivosRepo(usuarioO, usuarioO.centro)
             
             listaArchivos = sqlArchivosRepo
@@ -1468,7 +1681,7 @@ def subirA():
                     if s == False:
                         flash("Algo salio mal, no se cargo el archivo o demasiado grande(10mb max)!")
                     if s:
-                        print(usuarioO.id)
+                        
                         agregar_proveedor_reciente(cuit,proveedor,usuarioO.id)
                     #activar mail
                     if usuarioO.roll == "EMPLEADO" and s:
@@ -1534,6 +1747,7 @@ def subirAnexoRegistro():
 
 def listaAvisoEmpleado(centro):
     lista = []
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     cursor.execute(f"SELECT * FROM `usuarios` where `centro`='{centro}' AND(`roll`='JEFE')")
     usuarioS = cursor.fetchall()
@@ -1545,6 +1759,7 @@ def listaAvisoEmpleado(centro):
 
 def listaAvisoJefe():
     lista = []
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     cursor.execute(f"SELECT * FROM `usuarios` where `roll`='CONTROL'")
     usuarioS = cursor.fetchall()
@@ -1555,6 +1770,7 @@ def listaAvisoJefe():
 
 def listaAvisoControl(destino):
     lista = []
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     cursor.execute(f"SELECT * FROM `usuarios` where `roll`='{destino}'")
     usuarioS = cursor.fetchall()
@@ -1574,6 +1790,8 @@ def decodificar(codificada):
 
 
 def subirArchivo(id_usuario, ruta_repo, proveedor,cuit , centro, nro, fechaFactura, detalle):
+    usuarioNombre = buscarUsuario(id_usuario)
+    
     subio = False
     # Comprobar si la solicitud de publicación tiene la parte del archivo
     if 'file' not in request.files:
@@ -1605,9 +1823,11 @@ def subirArchivo(id_usuario, ruta_repo, proveedor,cuit , centro, nro, fechaFactu
         print(f"Archivo guardado con éxito como {filename}")
         subio = True
         # Se redirecciona a la página principal
+        conexion = mysql.connect()
         cursor = conexion.cursor()
         fechaActual = datetime.now()
-        sqlUsuario = f"INSERT INTO `archivos` (`id_archivo`, `ruta`, `fecha`, `usuario`, `proveedor`,`centro`,`nro`,`estado`,`nombre`,`fecha_factura`,`detalle`,`cuit`) VALUES (NULL, '{ruta_codificada}', '{fechaActual}', '{id_usuario}', '{proveedor}', '{centro}','{nro}','NO_APROBADO','{nuevo_nombre}', '{fechaFactura}', '{detalle}','{cuit}');"
+        na = usuarioNombre[0][2]+" "+usuarioNombre[0][1]
+        sqlUsuario = f"INSERT INTO `archivos` (`id_archivo`, `ruta`, `fecha`, `usuario`, `proveedor`,`centro`,`nro`,`estado`,`nombre`,`fecha_factura`,`detalle`,`cuit`,`usuario_nombre`) VALUES (NULL, '{ruta_codificada}', '{fechaActual}', '{id_usuario}', '{proveedor}', '{centro}','{nro}','NO_APROBADO','{nuevo_nombre}', '{fechaFactura}', '{detalle}','{cuit}','{na}');"
         cursor.execute(sqlUsuario)
         conexion.commit()
     return subio
@@ -1615,6 +1835,7 @@ def subirArchivo(id_usuario, ruta_repo, proveedor,cuit , centro, nro, fechaFactu
 
 def subirArchivoProveedores(id_usuario, ruta_repo, proveedor, cuit, centro, nro, fechaFactura, detalle):
     subio = False
+    usuarioNombre = buscarUsuario(id_usuario)
     # Comprobar si la solicitud de publicación tiene la parte del archivo
     if 'file' not in request.files:
         print('No se cargó ningún archivo')
@@ -1643,9 +1864,11 @@ def subirArchivoProveedores(id_usuario, ruta_repo, proveedor, cuit, centro, nro,
         print(f"Archivo guardado con éxito como {filename}")
         subio = True
         # Se redirecciona a la página principal
+        conexion = mysql.connect()
         cursor = conexion.cursor()
         fechaActual = datetime.now()
-        sqlUsuario = f"INSERT INTO `archivos` (`id_archivo`, `ruta`, `fecha`, `usuario`, `proveedor`,`centro`,`nro`,`estado`,`nombre`,`fecha_factura`, `detalle`, `destino`,`aprobado_por`,`cuit`) VALUES (NULL, '{ruta_codificada}', '{fechaActual}', '{id_usuario}', '{proveedor}', '{centro}','{nro}','LIBERADO','{nuevo_nombre}', '{fechaFactura}', '{detalle}', 'PROVEEDORES', 'PROVEEDORES', '{cuit}');"
+        na = usuarioNombre[0][2]+" "+usuarioNombre[0][1]
+        sqlUsuario = f"INSERT INTO `archivos` (`id_archivo`, `ruta`, `fecha`, `usuario`, `proveedor`,`centro`,`nro`,`estado`,`nombre`,`fecha_factura`, `detalle`, `destino`,`aprobado_por`,`cuit`,`usuario_nombre`) VALUES (NULL, '{ruta_codificada}', '{fechaActual}', '{id_usuario}', '{proveedor}', '{centro}','{nro}','LIBERADO','{nuevo_nombre}', '{fechaFactura}', '{detalle}', 'PROVEEDORES', 'PROVEEDORES', '{cuit}','{na}');"
         cursor.execute(sqlUsuario)
         conexion.commit()
     return subio
@@ -1679,6 +1902,7 @@ def subirArchivoAnexo(id_archivo,ruta_repo, proveedor, cuit, nro, fechaPago, det
         print(f"Archivo guardado con éxito como {filename}")
         subio = True
         # Se redirecciona a la página principal
+        conexion = mysql.connect()
         cursor = conexion.cursor()
         fechaActual = datetime.now()
         sqlUsuario = f"INSERT INTO comprobantes (`id_anexo`,`id_archivo`, `cuit`, `proveedor`, `nro_fac`, `ruta`,`fechaPago`,`detalle`,`fecha`) VALUES (NULL, '{id_archivo}', '{cuit}', '{proveedor}', '{nro}', '{ruta_codificada}','{fechaPago}', '{detalle}', '{fechaActual}');"
@@ -1686,12 +1910,14 @@ def subirArchivoAnexo(id_archivo,ruta_repo, proveedor, cuit, nro, fechaPago, det
         conexion.commit()
 
 def buscarAnexos(id_archivo):
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     sqlUsuario = f"Select * from comprobantes where id_archivo = {id_archivo}"
     cursor.execute(sqlUsuario)
     anexos = cursor.fetchall()
     conexion.commit()
     return anexos
+
 
 @ app.route('/anexos', methods=['POST'])
 def ver_A():
@@ -1788,6 +2014,7 @@ def detalle_editar():
     id_usuario = request.form['usuario']
     id_archivo = request.form['id_archivo']
     detalle = request.form['detalle']
+    conexion = mysql.connect()
     cursor = conexion.cursor()
     sqlUsuario = f"UPDATE `archivos` SET `detalle` = '{detalle}' WHERE `id_archivo` = '{id_archivo}';"
     cursor.execute(sqlUsuario)
@@ -1851,6 +2078,7 @@ def actualizar_estado():
     print(nuevo_estado)
     if nuevo_estado == "FINALIZADO":
         if len(buscarAnexos(id_archivo))>0:
+            conexion = mysql.connect()
             cursor = conexion.cursor()
             sql = f"UPDATE `archivos` SET `estado` = '{nuevo_estado}' WHERE `id_archivo` = '{id_archivo}';"
             cursor.execute(sql)
@@ -1859,6 +2087,7 @@ def actualizar_estado():
         else:
             flash("No se puede marcar como 'FINALIZADO', no se adjuntó documento.")
     if nuevo_estado != "FINALIZADO":
+        conexion = mysql.connect()
         cursor = conexion.cursor()
         sql = f"UPDATE `archivos` SET `estado` = '{nuevo_estado}' WHERE `id_archivo` = '{id_archivo}';"
         cursor.execute(sql)
@@ -1880,10 +2109,12 @@ def actualizar_estado():
     return volverInicioOrigen(usuario,contrasenia, "proveedores")
 #-------------------------------------------------------------------------------------------------------
 #Se debe modificar la ip que corresponda al equipo en donde se esta corriendo
-"""
+
 if __name__ == "__main__":
     app.run(host= servidorIp ,debug=True)
 """
 if __name__ == "__main__":
     http_server = WSGIServer((servidorIp, 5000), app)
     http_server.serve_forever()
+"""    
+        

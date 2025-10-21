@@ -86,12 +86,13 @@
             <div class="row">
 
               <div class="col-4">
-                <label for="opcionesSelect">Agreg. Centro</label>
+                <label for="opcionesSelect">Agregc. Centro</label>
               </div>
               <div class="col-6">
+                
                 <select id="opcionesSelect" class="form-control">
                   {% for centro in centros %}
-                  <option value="{{centro[1]}}">{{centro[2]}}</option>
+                  <option value="{{centro[1]}}">{{centro[1]}} - {{centro[2]}}</option>
                   {% endfor %}
 
                 </select>
@@ -117,7 +118,7 @@
             }
             document.getElementById('file').addEventListener('change', function () {
               const fileSize = this.files[0].size; // Tamaño del archivo en bytes
-              const maxSize = 10 * 1024 * 1024; // 10 MB
+              const maxSize = 1 * 1024 * 1024; // 10 MB
 
               if (fileSize > maxSize) {
                 alert('El archivo es demasiado grande. El tamaño máximo permitido es 10 MB.');

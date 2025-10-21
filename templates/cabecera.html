@@ -130,7 +130,9 @@
                         </button>
                     </li>
                     <li>
+                        
                         <p style="color: rgb(58, 176, 255);padding: 8px 12px;">
+                            
                             {% if usuario.roll == "JEFE" %} 
                             RESPONSABLE
                             {% endif %}
@@ -221,6 +223,7 @@
                         </form>
                     </li>
                     {% endif %}
+                    
                     <li>
                         <form action="/proveedoresR" method="POST" style="margin-left: auto;">
                             <input type="number" class="form-control" id="usuario" name="usuario" value="{{usuario.id}}" hidden>
@@ -236,7 +239,38 @@
                                 value="{{usuario.contraseña}}" hidden>
                             <button id="conSpinner" type="submit" class="btn btn-dark">Proveedores</button>
                         </form>
+                        
                     </li>
+                    
+                    {% if usuario.roll == "ADMIN" %}
+                    <li>
+                        <form action="/centro"  style="margin-left: auto;">
+                            
+                            <button id="conSpinner" type="submit" class="btn btn-dark">Centros</button>
+                        </form>
+                    </li>
+                    {% endif %}
+                    
+                    {% if usuario.roll != "EMPLEADO"  %}
+                    <li>
+                        <form action="/usuarios" method="POST" style="margin-left: auto;">
+                            <input type="email" class="form-control" id="email" name="usuario" value="{{usuario.mail}}"
+                                hidden>
+                            <input type="password" class="form-control" id="password" name="contrasenia"
+                                value="{{usuario.contraseña}}" hidden>
+
+                            {% if usuario.roll == "ADMIN" %}  
+                            <button id="conSpinner" type="submit" class="btn btn-dark">Usuarios</button>
+                            {% endif %}
+
+                            {% if usuario.roll == "JEFE" or usuario.mail == "vidalg@betalab.com.ar" or usuario.mail == "gonzalezm@betalab.com.ar" or usuario.mail == "bravoj@betalab.com.ar" or usuario.mail == "minchillij@betalab.com.ar" %} 
+                            <!--HARCODEADO--> 
+                            <button id="conSpinner" type="submit" class="btn btn-dark">Usuarios a cargo</button>
+                            {% endif %}
+                        </form>
+                        
+                    </li>
+                    {% endif %}
                     <li>
                         <form action="/" style="margin-left: auto;">
 
@@ -246,6 +280,7 @@
                 </ul>
             </nav>
             <style>
+                
                 * {
                     padding: 0;
                     margin: 0;

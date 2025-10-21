@@ -6,6 +6,38 @@
 <div class="container-fluid" >
   {% for archivo in archivos %}
   <div class="modal fade" id="detalleModal{{ archivo[0] }}" tabindex="-1" role="dialog"
+      aria-labelledby="detalleModalLabel{{ archivo[0] }}" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="detalleModalLabel{{ archivo[0] }}">Detalle del Archivo</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <form action="/editarDetalle" method="post" enctype=multipart/form-data>
+            
+            <input name="origen" value="repo" hidden>
+            
+          <div class="modal-body">
+            
+            <textarea rows="5" cols="50" name="detalle">{{ archivo[10] }}</textarea>
+            
+            <input name="id_archivo" value="{{archivo[0]}}" hidden>
+            <input name="usuario" type="text" value={{usuario.id}} hidden>
+          </div>
+          <div class="modal-footer">
+            
+            <button type="submit" class="btn btn-info">Modificar</button>
+            
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+          </div>
+        </form>
+        </div>
+      </div>
+    </div>
+  <!--
+  <div class="modal fade" id="detalleModal{{ archivo[0] }}" tabindex="-1" role="dialog"
     aria-labelledby="detalleModalLabel{{ archivo[0] }}" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
@@ -23,9 +55,10 @@
         </div>
       </div>
     </div>
-  </div>
+  </div>-->
   {% endfor %}
   {% for archivoA in archivosA %}
+  
   <div class="modal fade" id="detalleModal{{ archivoA[0] }}" tabindex="-1" role="dialog"
     aria-labelledby="detalleModalLabel{{ archivoA[0] }}" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -75,6 +108,7 @@
         <table class="table  table-bordered text-center table-hover" id="miTabla">
           <thead class="thead-dark">
             <tr>
+              <th style="text-align: center;"><i class="fas fa-globe"></i> Usuario</th>
               <th style="text-align: center;"><i class="fas fa-globe"></i> Centro</th>
               <th style="text-align: center;"><i class="fas fa-industry"></i> Cuit</th>
               <th style="text-align: center;"><i class="fas fa-truck"></i> Proveedor</th>
@@ -88,6 +122,7 @@
           <tbody>
             {% for archivo in archivos %}
             <tr>
+              <td>{{ archivo[12] }}</td>
               <td>{{ archivo[5] }}</td>
               <td>{{ archivo[11] }}</td>
               <td>{{ archivo[4] }}</td>
@@ -97,7 +132,8 @@
               <td>
                 <p hidden>{{ archivo[10] }}</p>
                 <a href="#" data-toggle="modal" data-target="#detalleModal{{ archivo[0] }}"
-                  class="btn btn-outline-secondary btn-sm">Detalle</a></td>
+                  class="btn btn-outline-secondary btn-sm">Detalle</a>
+              </td>
               <td>
                 <div class="row">
                   <div class="col">
@@ -116,8 +152,8 @@
                       <input name="origen" type="text" value="repo" hidden>
                       <input type="text" name="id" value="{{id}}" hidden>
                       <input type="text" name="archivo" value="{{archivo[1]}}" hidden>
-                      <button type="submit" class="btn btn-outline-primary btn-sm" title="Aprobar" onclick="cargarPagina()"><i
-                          class="fas fa-plus fa-lg"></i>
+                      <button type="submit" class="btn btn-outline-success btn-sm" title="Aprobar" onclick="cargarPagina()"><i
+                          class="fas fa-check fa-lg"></i>
                       </button>
                       <div id="modalBackground">
                         <div id="modalSpinner" class="spinner"></div>
@@ -126,6 +162,7 @@
                   </div>
                   {% endif %}
                   <!--Modal Eliminar-->
+                  {% if usuario.roll == "EMPLEADO" or usuario.roll == "JEFE" %}
                   <div class="col">
                     <!-- Botón para abrir el modal de confirmación -->
                     <button type="button" class="btn btn-outline-danger btn-sm" data-toggle="modal" data-target="#eliminarModal{{ archivo[0] }}">
@@ -161,6 +198,7 @@
                     </div>
                     <!-- Fin del modal de confirmación -->
                 </div>
+                {% endif %}
                 </div>
               </td>
             </tr>

@@ -132,6 +132,7 @@
                                 style="color: rgb(96, 102, 104);"></i></button>
                     </form>
                 </div>
+                {% if usuario.roll == "JEFE" or usuario.roll == "EMPLEADO" %}
                     <div class="col">
                         <!-- Botón para abrir el modal de confirmación -->
                         {% if archivoA[7] != "FINALIZADO" %}
@@ -140,6 +141,8 @@
                         </button>
                         {% endif %}
                         <!-- Modal de confirmación -->
+                         
+                        
                         <div class="modal fade" id="eliminarModal{{ archivoA[0] }}" tabindex="-1" role="dialog" aria-labelledby="eliminarModalLabel{{ archivoA[0] }}" aria-hidden="true">
                             <div class="modal-dialog" role="document">
                                 <div class="modal-content">
@@ -155,6 +158,7 @@
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
                                         <!-- Botón para confirmar la eliminación -->
+                                        
                                         <form action="/eliminarArchivo" method="post" enctype=multipart/form-data>
                                           <input type="text" name="origen" value="proveedores" hidden>
                                             
@@ -162,12 +166,15 @@
                                             <input type="text" name="archivo" value="{{archivoA[1]}}" hidden>
                                             <button type="submit" class="btn btn-danger">Eliminar</button>
                                         </form>
+                                        
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        
                         <!-- Fin del modal de confirmación -->
                     </div>
+                    {% endif %}
                   </div>
                   </td>
                   <td>
@@ -177,6 +184,19 @@
                     {% if usuario.roll == "IMPUESTOS" %}
                     {% include 'modalImpuestosLP.html' %}
                     {% endif %}
+                    {% if usuario.roll == "DIRECTO" %}
+                    {% include 'modalDirecto.html' %}
+                    {% endif %}
+                    {% if usuario.roll == "SERVICIOS"  %}
+                      {% if archivoA[7] == "FINALIZADO" %}
+                      {{archivoA[7]}}
+                      {% endif %}
+                      {% if archivoA[7] != "FINALIZADO" %}
+                      {% include 'modalDirecto.html' %}
+                      {% endif %}
+                    
+                    {% endif %}
+                    
 
                 </td>
               </tr>

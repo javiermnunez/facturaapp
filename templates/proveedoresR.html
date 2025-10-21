@@ -20,6 +20,7 @@
 
                 </tr>
             </thead>
+            
             <tbody>
                 {% for p in proveedores %}
                 <tr>
@@ -30,16 +31,16 @@
 
                             <div class="col">
 
-                                <form action="/subirAP" method="post" enctype=multipart/form-data target="_blank"
+                                <form action="/subirAPr" method="post" enctype=multipart/form-data target="_blank"
                                     rel="noopener noreferrer">
-                                    <input type="text" name="id_proveedor" value="{{p[0]}}" hidden>
+                                    <input type="text" name="id_proveedor" value="{{p[0]}}" hidden >
                                     <input type="text" name="id" value="{{id}}" hidden>
                                     <button type="submit" class="btn  btn-outline-dark btn-sm" title="subir archivo"><i
                                             class="fas fa-arrow-up fa-lg" title="Subir archivo"
                                             style="color: greenyellow;"></i></button>
                                 </form>
                             </div>
-                            {% if usuario.mail == "jmn@betalab.com.ar" %}
+                            {% if usuario.mail == "admin@betalab.com.ar" or usuario.mail == "minchillij@betalab.com.ar" %}
                             {% include 'opcionesProveedoresM.html' %}
                             {% endif %}
                         </div>

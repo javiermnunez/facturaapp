@@ -1,180 +1,221 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <title>Gestión de Usuarios</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f0f5f9;
-            color: #333;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
+{% include 'cabecera.html' %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card mt-4 shadow">
+                <div class="card-body">
+                    <h2 class="text-center">Gestión de usuarios</h2>
 
-        h2 {
-            color: #2c3e50;
-        }
+                    <h4 class="mt-4">Usuarios: <span id="userCount">{{ usuarios|length }}</span></h4>
+                    <div class="row">
+                        <div class=" col-md-6 offset-md-3 text-center">
+                            {% with messages= get_flashed_messages() %}
+                            {% if messages %}
+                            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                    aria-label="Close"></button>
+                                {% for message in messages %}{{ message }}{% endfor %}
+                            </div>
+                            {% endif %}
+                            {% endwith %}
 
-        h3 {
-            color: #2980b9;
-        }
 
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            margin-top: 20px;
-        }
 
-        th, td {
-            border: 1px solid #bdc3c7;
-            text-align: left;
-            padding: 8px;
-        }
 
-        th {
-            background-color: #ecf0f1;
-        }
+                        </div>
+                    </div>
+                    <!-- Tabla de usuarios -->
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover text-center">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Apellido</th>
+                                    <th>Sector</th>
+                                    <th>Centro</th>
+                                    <th>Correo</th>
+                                    <th>Contraseña</th>
+                                    <th>Rol</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for usuarioT in usuarios %}
+                                <tr>
+                                    <td>{{ usuarioT[1] }}</td>
+                                    <td>{{ usuarioT[2] }}</td>
+                                    <td>{{ usuarioT[3] }}</td>
+                                    <td>{{ usuarioT[4] }}</td>
+                                    <td>{{ usuarioT[5] }}</td>
+                                    <td>{{ usuarioT[6] }}</td>
+                                    <td>
+                                        {% if usuarioT[7] == "EMPLEADO" %} USUARIO
+                                        {% elif usuarioT[7] == "JEFE" %} RESPONSABLE
+                                        {% else %} {{ usuarioT[7] }}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if usuarioT[7] == "ADMIN" %}
+                                            <button class="btn btn-outline-info btn-sm" data-toggle="modal" data-target="#eliminarModal{{ usuarioT[0] }}" disabled>
+                                                Eliminar
+                                            </button>
+                                        {% elif usuarioT[7] == "JEFE" and usuario.roll != "ADMIN" %}
+                                            <button class="btn btn-outline-info btn-sm" data-toggle="modal" data-target="#eliminarModal{{ usuarioT[0] }}" disabled>
+                                                Eliminar
+                                            </button>
+                                        {% elif usuarioT[5] == usuario.mail %}
+                                            <button class="btn btn-outline-info btn-sm" data-toggle="modal" data-target="#eliminarModal{{ usuarioT[0] }}" disabled>
+                                                Eliminar
+                                            </button>
+                                        {% else %}
+                                            <button class="btn btn-outline-danger btn-sm" data-toggle="modal" data-target="#eliminarModal{{ usuarioT[0] }}">
+                                                Eliminar
+                                            </button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
 
-        form {
-            margin-top: 20px;
-            max-width: 600px;
-            background-color: #ecf0f1;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
+                                <!-- Modal Editar -->
 
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #2c3e50;
-        }
 
-        input {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 16px;
-            box-sizing: border-box;
-            border: 1px solid #bdc3c7;
-            border-radius: 4px;
-        }
+                                <!-- Modal Eliminar -->
+                                <div class="modal fade" id="eliminarModal{{ usuarioT[0] }}" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Confirmar Eliminación</h5>
+                                                <button type="button" class="btn-close" data-dismiss="modal"
+                                                    aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>¿Estás seguro de que deseas eliminar a <strong>{{ usuarioT[1] }} {{
+                                                        usuarioT[2] }}</strong>?</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <form action="/eliminarUsuario" method="POST">
+                                                    {% if usuario %}
+                                                    <input type="hidden" name="id_perfil" value="{{ usuario.id }}" >
+                                                    <input type="hidden" name="id" value="{{ usuarioT[0] }}">
+                                                    <input type="hidden" name="centro" value="{{ usuarioT[4] }}">
+                                                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                                                    {% endif %}
+                                                </form>
+                                                <button type="button" class="btn btn-secondary"
+                                                    data-dismiss="modal">Cancelar</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
-        button {
-            background-color: #3498db;
-            color: #fff;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
 
-        button:hover {
-            background-color: #2980b9;
-        }
-    </style>
-</head>
+                    <!-- Formulario para agregar usuarios en una sola línea -->
+                    <form action="/agregar_usuario" method="post" enctype=multipart/form-data class="p-3"
+                        style="background-color: #f9f9f9; border-radius: 10px;">
+                        <input type="email" class="form-control" id="email" name="usuarioM" value="{{usuario.mail}}"
+                            hidden>
+                        <input type="password" class="form-control" id="password" name="contraseniaM"
+                            value="{{usuario.contraseña}}" hidden>
+                        <h3 class="text-center mb-3">Agregar usuario</h3>
 
-<body>
+                        <div class="row align-items-center mb-2 g-2">
+                            <div class="col">
+                                <label for="nombre" class="form-label">Nombre:</label>
+                                <input type="text" id="nombre" name="nombre" class="form-control" required>
+                            </div>
+                            <div class="col">
+                                <label for="apellido" class="form-label">Apellido:</label>
+                                <input type="text" id="apellido" name="apellido" class="form-control" required>
+                            </div>
+                            {% if usuario.roll != "ADMIN" %}
 
-    <div>
-        <h2>Gestión de Usuarios</h2>
 
-        <!-- Tabla para mostrar la cantidad de usuarios -->
-        <h3>Cantidad de Usuarios: <span id="userCount">{{usuarios|length}}</span></h3>
+                            <input type="text" id="sector" name="sector" class="form-control" value="{{usuario.sector}}"
+                                hidden>
 
-        <table id="userTable">
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Apellido</th>
-                    <th>Sector</th>
-                    <th>Centro</th>
-                    <th>Correo</th>
-                    <th>Contraseña</th>
-                    <th>Rol</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for usuario in usuarios %}
-                <tr>
-                    <td>{{usuario[1]}}</td>
-                    <td>{{usuario[2]}}</td>
-                    <td>{{usuario[3]}}</td>
-                    <td>{{usuario[4]}}</td>
-                    <td>{{usuario[5]}}</td>
-                    <td>{{usuario[6]}}</td>
-                    {% if usuario[7] == "EMPLEADO" %}
-                    <td>USUARIO</td>
-                    {% endif %}
-                    {% if usuario[7] == "JEFE" %}
-                    <td>RESPONSABLE</td>
-                    {% endif %}
-                    {% if usuario[7] != "EMPLEADO" and usuario[7] != "JEFE" %}
-                    <td>{{usuario[7]}}</td>
-                    {% endif %}
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
 
-        <!-- Formulario para agregar usuarios -->
-        <form action="/agregar_usuario" method="POST">
-            <h3>Agregar Usuario</h3>
-            <label for="nombre">Nombre:</label>
-            <input type="text" id="nombre" name="nombre" required>
+                            <input type="text" id="centro" name="centro" class="form-control" value="{{usuario.centro}}"
+                                hidden>
 
-            <label for="apellido">Apellido:</label>
-            <input type="text" id="apellido" name="apellido" required>
+                            {% endif %}
+                            {% if usuario.roll == "ADMIN" %}
+                            <div class="col">
+                                <label for="sector" class="form-label">Sector:</label>
+                                <input type="text" id="sector" name="sector" class="form-control"
+                                    value="{{usuario.sector}}">
+                            </div>
 
-            <label for="sector">Sector:</label>
-            <select type="text" id="sector" name="sector" required>
-                {% for centro in centros %}
-                <option value="{{centro[2]}}">{{centro[2]}}</option>
-                {% endfor %}
-            </select>
-            <!--<input type="text" id="sector" name="sector" required>-->
+                            <div class="col">
+                                <label for="centro" class="form-label">Centro:</label>
+                                <input type="text" id="centro" name="centro" class="form-control"
+                                    value="{{usuario.centro}}">
+                            </div>
 
-            <label for="centro">Centro:</label>
-            <select type="text" id="centro" name="centro" required>
-                {% for centro in centros %}
-                <option value="{{centro[1]}}">{{centro[1]}} {{centro[2]}}</option>
-                {% endfor %}
-            </select>
-            <label for="mail">Correo:</label>
-            <input type="email" id="mail" name="mail" required>
+                            {% endif %}
 
-            <label for="contrasenia">Contraseña:</label>
-            <input type="password" id="contrasenia" name="contrasenia" required>
 
-            <label for="roll">Rol:</label>
-            
-            <select type="text" id="roll" name="roll" required>
-                <option value="EMPLEADO">Usuario</option>
-                <option value="JEFE">Responsable</option>
-                <option value="CONTROL">Control</option>
-                <option value="PROVEEDORES">Proveedores</option>
-                <option value="SERVICIOS">Pago Servicios</option>
-                <option value="DIRECTO">Pago Directo</option>
-                <option value="IMPUESTOS">Impuestos</option>
-            </select>
-            <div class="row">
-                <div class="col">
-                   <button type="submit">Agregar Usuario</button> 
-                </div>
-                <div class="col">
-                    <a class="btn btn-primary" href="/" >Volver</a>
+                            <!--CORREGIR MAIL Y CONTRASEÑA TIENEN EL MISMO NOMBRE-->
+                            <div class="col">
+                                <label for="mail" class="form-label">Correo:</label>
+                                <input type="email" id="mail" name="mail" class="form-control" required>
+                            </div>
+                            <div class="col">
+                                <label for="contrasenia" class="form-label">Contraseña:</label>
+                                <input type="password" id="contrasenia" name="contrasenia" class="form-control"
+                                    required>
+                            </div>
+                            <div class="col">
+                                <label for="roll" class="form-label">Rol:</label>
+                                <select id="roll" name="roll" class="form-control" required>
+                                    
+                                    {% if usuario.roll == "JEFE" or usuario.roll == "ADMIN" %}
+                                    {% if usuario.centro != "O510" %}
+                                    <option value="EMPLEADO">Usuario</option>
+                                    <option value="JEFE">Responsable</option>
+                                    {% endif %}
+                                    {% endif %}
+                                    {% if usuario.centro == "O215" %} 
+                                    <!--CONTADURIA-->
+                                    <option value="SERVICIOS">Pago Servicios</option>
+                                    <option value="DIRECTO">Pago Directo</option>
+                                    {% endif %}
+                                    {% if usuario.centro == "O510" %}
+                                    <!--CONTROL-->
+                                    <option value="CONTROL">Control</option>
+                                    {% endif %}
+                                    {% if usuario.roll == "PROVEEDORES" %}
+                                    <option value="PROVEEDORES">Proveedores</option>
+                                    {% endif %}
+                                    {% if usuario.roll == "IMPUESTOS" %}
+                                    <option value="IMPUESTOS">Impuestos</option>
+                                    {% endif %}
+                                    {% if usuario.roll == "ADMIN" %}
+                                    <option value="CONTROL">Control</option>
+                                    <option value="PROVEEDORES">Proveedores</option>
+                                    <option value="IMPUESTOS">Impuestos</option>
+                                    <option value="SERVICIOS">Pago Servicios</option>
+                                    <option value="DIRECTO">Pago Directo</option>
+                                    {% endif %}
+
+                                </select>
+                            </div>
+                            <div class="col">
+                                <div class="text-center mt-3">
+                                    <button type="submit" class="btn btn-primary">Agregar Usuario</button>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </form>
+
+
                 </div>
             </div>
-            
-        </form>
-        
+        </div>
     </div>
-</body>
-</html>
+</div>
+{% include 'pie.html' %}

@@ -1,0 +1,54 @@
+<div class="col">
+    <!-- Botón para abrir el modal de confirmación -->
+    {% if archivoA[7] == "FINALIZADO" %}
+    <button type="button" class="btn btn-success btn-sm" data-toggle="modal"
+        data-target="#cambiarEstadoModal{{ archivoA[0] }}">
+        
+    </button>
+    {% endif %}
+    {% if archivoA[7] != "FINALIZADO" %}
+    <button type="button" class="btn-outline-success btn-sm" data-toggle="modal"
+        data-target="#cambiarEstadoModal{{ archivoA[0] }}">
+        {{archivoA[7]}}
+    </button>
+    {% endif %}
+    <!-- Modal de confirmación -->
+    <div class="modal fade" id="cambiarEstadoModal{{ archivoA[0] }}" tabindex="-1" role="dialog"
+        aria-labelledby="cambiarEstadoModalLabel{{ archivoA[0] }}" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cambiarEstadoModalLabel{{ archivoA[0] }}">Confirmar cambiar estado:</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!--¿Desea cambiar el estado a {% if archivoA[7] == "FINALIZADO" %}'LIBERADO'{% endif %}{% if archivoA[7] != "FINALIZADO" %}'FINALIZADO'{% endif %}?-->
+                    ¿Desea cambiar el estado al documento {{archivoA[4]}} {{archivoA[6]}} ?
+                </div>
+                <form action="/actualizar_estado" method="post" enctype=multipart/form-data>
+                    <select name="estado">
+                        <option value="LIBERADO" title="A procesar">LIBERADO</option>
+                        <option value="FINALIZADO" title="Derivar a proveedores">FINALIZADO</option>
+                        
+                    </select>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <div class="form-check form-switch">
+                        
+                            <!--<input type="text" value="LIBERADO" >-->
+                            
+                            <input type="text" value="{{archivoA[0]}}" name="id_archivo" hidden>
+                            <input type="text" value="{{usuario.id}}" name="id_usuario" hidden>
+                            <button type="submit" class="btn btn-info">Aceptar</button>
+                        
+                    </div>
+                </form>
+                </div>
+            
+            </div>
+        </div>
+    </div>
+    <!-- Fin del modal de confirmación -->
+</div>

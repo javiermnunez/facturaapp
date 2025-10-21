@@ -21,7 +21,7 @@
           </div>
           <div class="col-10">
             <input type="file" name="file" id="file" class="form-control"
-              accept=".pdf, .doc, .docx, .jpg, .jpeg, .gif, .tif" autofocus />
+              accept=".pdf" autofocus /> <!--".pdf, .doc, .docx, .jpg, .jpeg, .gif, .tif"-->
           </div>
 
         </div>
@@ -42,12 +42,15 @@
       <div class="row mb-3">
         <label for="centro" class="col-sm-2 col-form-label">Centro</label>
         <div class="col-lg-10">
-          <select class="form-control" name="centro">
+            <input type="text" class="form-control" name="centro" value="{{usuario.centro}}" hidden>
+            <input type="text" class="form-control" name="centro" value="{{usuario.centro}}" disabled>
+            <!--
             <option value="{{usuario.centro}}">{{usuario.centro}}</option>
             {% for centro in centros %}
             <option value="{{centro[1]}}">{{centro[1]}} - {{centro[2]}}</option>
             {% endfor %}
-          </select>
+            -->
+          
         </div>
       </div>
 
@@ -77,7 +80,7 @@
         <div class="col-6">
           <select id="opcionesSelect" class="form-control">
             {% for centro in centros %}
-            <option value="{{centro[1]}}">{{centro[2]}}</option>
+            <option value="{{centro[1]}}">{{centro[1]}} - {{centro[2]}}</option>
             {% endfor %}
           </select>
         </div>
