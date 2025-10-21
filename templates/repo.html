@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {% include 'cabecera.html' %}
 <br>
 
@@ -220,4 +221,190 @@
   // retorno
   miInput.value = "repo";
 </script>
+=======
+{% include 'cabecera.html' %}
+<br>
+
+
+
+<div class="container-fluid" >
+  {% for archivo in archivos %}
+  <div class="modal fade" id="detalleModal{{ archivo[0] }}" tabindex="-1" role="dialog"
+    aria-labelledby="detalleModalLabel{{ archivo[0] }}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="detalleModalLabel{{ archivo[0] }}">Detalle del Archivo</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <textarea rows="5" cols="50" disabled>{{ archivo[10] }}</textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+  {% for archivoA in archivosA %}
+  <div class="modal fade" id="detalleModal{{ archivoA[0] }}" tabindex="-1" role="dialog"
+    aria-labelledby="detalleModalLabel{{ archivoA[0] }}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="detalleModalLabel{{ archivoA[0] }}">Detalle del Archivo</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <textarea rows="5" cols="50">{{ archivoA[10] }}</textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+  <div class="row">
+    <div class=" col-md-6 offset-md-3 text-center">
+      {% with messages= get_flashed_messages() %}
+      {% if messages %}
+      <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        {% for message in messages %}{{ message }}{% endfor %}
+      </div>
+      {% endif %}
+      {% endwith %}
+
+
+
+      
+    </div>
+  </div>
+  <div class="row">
+
+  </div>
+  <div class="row">
+    <div class="col-12 col-md-2"></div>
+    <div class="col-12 col-md-8 " >
+
+
+      <div class="table-responsive" style="background-color: white; border-radius: 10px;padding: 10px;margin: 10px; min-width: 710px;">
+        <h3>Archivos cargados {% if usuario.roll == "JEFE" %}para {{usuario.centro}}{% endif %}</h3>
+        <table class="table  table-bordered text-center table-hover" id="miTabla">
+          <thead class="thead-dark">
+            <tr>
+              <th style="text-align: center;"><i class="fas fa-globe"></i> Centro</th>
+              <th style="text-align: center;"><i class="fas fa-industry"></i> Cuit</th>
+              <th style="text-align: center;"><i class="fas fa-truck"></i> Proveedor</th>
+              <th style="text-align: center;"><i class="fas fa-file"></i> Nro factura</th>
+              <th style="text-align: center;"><i class="fas fa-calendar"></i> Fecha FC</th>
+              <th style="text-align: center;"><i class="fas fa-edit"></i> Detalle</th>
+              <th style="text-align: center;"><i class="fad fa-ballot-check"></i> Opciones</th>
+
+            </tr>
+          </thead>
+          <tbody>
+            {% for archivo in archivos %}
+            <tr>
+              <td>{{ archivo[5] }}</td>
+              <td>{{ archivo[11] }}</td>
+              <td>{{ archivo[4] }}</td>
+
+              <td>{{ archivo[6] }}</td>
+              <td>{{ archivo[9] }}</td>
+              <td>
+                <p hidden>{{ archivo[10] }}</p>
+                <a href="#" data-toggle="modal" data-target="#detalleModal{{ archivo[0] }}"
+                  class="btn btn-outline-secondary btn-sm">Detalle</a></td>
+              <td>
+                <div class="row">
+                  <div class="col">
+                    <form action="/verPdf" method="post" enctype=multipart/form-data target="_blank">
+                      <input type="text" name="id_archivo" value="{{archivo[0]}}" hidden>
+                      <input type="text" name="id" value="{{id}}" hidden>
+                      <button type="submit" class="btn  btn-outline-info btn-sm" title="Ver archivo"><i
+                          class="fas fa-eye" fa-lg></i></button>
+                    </form>
+                  </div>
+                  {% if usuario.roll != "EMPLEADO" %}
+                  <div class="col">
+
+                    <form action="/aprobar" method="post" enctype=multipart/form-data id="miFormulario">
+                      <input name="id_archivo" type="text" value="{{archivo[0]}}" hidden>
+                      <input name="origen" type="text" value="repo" hidden>
+                      <input type="text" name="id" value="{{id}}" hidden>
+                      <input type="text" name="archivo" value="{{archivo[1]}}" hidden>
+                      <button type="submit" class="btn btn-outline-primary btn-sm" title="Aprobar" onclick="cargarPagina()"><i
+                          class="fas fa-plus fa-lg"></i>
+                      </button>
+                      <div id="modalBackground">
+                        <div id="modalSpinner" class="spinner"></div>
+                      </div>
+                    </form>
+                  </div>
+                  {% endif %}
+                  <!--Modal Eliminar-->
+                  <div class="col">
+                    <!-- Botón para abrir el modal de confirmación -->
+                    <button type="button" class="btn btn-outline-danger btn-sm" data-toggle="modal" data-target="#eliminarModal{{ archivo[0] }}">
+                        <i class="fas fa-trash fa-lg"></i>
+                    </button>
+            
+                    <!-- Modal de confirmación -->
+                    <div class="modal fade" id="eliminarModal{{ archivo[0] }}" tabindex="-1" role="dialog" aria-labelledby="eliminarModalLabel{{ archivo[0] }}" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="eliminarModalLabel{{ archivo[0] }}">Confirmar Eliminación</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    ¿Estás seguro de que deseas eliminar este registro "{{archivo[8]}}"?
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                    <!-- Botón para confirmar la eliminación -->
+                                    <form action="/eliminarArchivo" method="post" enctype=multipart/form-data>
+                                      <input type="text" name="origen" value="repo" hidden>
+                                        
+                                        <input type="text" name="id" value="{{id}}" hidden>
+                                        <input type="text" name="archivo" value="{{archivo[1]}}" hidden>
+                                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Fin del modal de confirmación -->
+                </div>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+
+    </div>
+    <div class="col-12 col-md-2"></div>
+
+  </div>
+</div>
+<script>
+  // Obtener el elemento input por su ID
+  var miInput = document.getElementById('miOrigen');
+
+  // retorno
+  miInput.value = "repo";
+</script>
+>>>>>>> b265a5a55044b1de93c64fb8d77b11fdd76a53e5
 {% include 'pie.html' %}

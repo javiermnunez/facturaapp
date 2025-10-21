@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
   aria-hidden="true">
   <div class="modal-dialog">
@@ -136,4 +137,143 @@
       </form>
     </div>
   </div>
+=======
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel"><i class="fal fa-folder-upload" style="font-size:15pt;"></i>
+          Cargar Archivo</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form action="/repositorioSubir" method="post" enctype=multipart/form-data id="miFormularioSubir">
+        <div class="modal-body">
+
+          <input id="miOrigen" name="origen" type="text" hidden>
+          <input id="ruta" type="text" value={{repositorio}} hidden>
+          <input name="id" type="text" value={{id}} hidden>
+          <input name="usuario" type="text" value={{usuario.mail}} hidden>
+          <input name="contrasenia" type="text" value={{usuario.contraseña}} hidden>
+          <div class="form-group ">
+            <input type="file" name="file" id="file" class="inputfile inputfile-4"
+              data-multiple-caption="{count} files selected" multiple
+              accept=".pdf, .doc, .docx, .jpg, .jpeg, .gif, .tif" />
+            <label for="file">
+              <i class="fas fa-file" style="font-size:15pt"></i>
+              <br>
+              <span>Seleccione un archivo&hellip;</span>
+            </label>
+          </div>
+        </div>
+        <div class="row row-cols-lg-auto" style="padding: 5px;">
+          <div class="col-sm-2"></div>
+          <label for="proveedor" class="col-sm-2 col-form-label">Proveedor</label>
+          <div class="col-lg-8">
+            <select name="proveedor" class="form-control">
+              <option value="0">Seleccione...</option>
+              {% for p in proveedores %}
+              <option value="{{p[1]}}@{{p[2]}}">{{p[2]}} - {{p[1]}}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+          <div class="row row-cols-lg-auto" style="padding: 5px;">
+            <div class="col-sm-2"></div>
+            <label for="centro" class="col-sm-2 col-form-label">Centro</label>
+            <div class="col-lg-8">
+              <select class="form-control" name="centro">
+                <option value="{{usuario.centro}}">{{usuario.centro}}</option>
+                {% for centro in centros %}
+                <option value="{{centro[1]}}">{{centro[1]}} - {{centro[2]}}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+
+          <div class="row row-cols-lg-auto" style="padding: 5px;">
+            <div class="col-sm-2"></div>
+            <label for="nro" class="col-sm-2 col-form-label">Nro fac.</label>
+            <div class="col-lg-8">
+              <input type="number" class="form-control" name="nro" placeholder="Nro factura" required>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+
+          <div class="row row-cols-lg-auto" style="padding: 5px;">
+            <div class="col-sm-2"></div>
+            <label for="fecha" class="col-sm-2 col-form-label">Fecha factura</label>
+            <div class="col-lg-8">
+              <input type="date" class="form-control" name="fecha" required>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+
+          <div class="row row-cols-lg-auto" style="padding: 5px;">
+            <div class="col-sm-2"></div>
+            <label for="detalle" class="col-sm-2 col-form-label">Detalle</label>
+            <div class="col-lg-8">
+              <textarea id="detalle" name="detalle" rows="2" cols="80" class="form-control"></textarea>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+
+          <div class="row row-cols-lg-auto" style="padding: 5px;">
+
+            <div class="row">
+
+              <div class="col-4">
+                <label for="opcionesSelect">Agreg. Centro</label>
+              </div>
+              <div class="col-6">
+                <select id="opcionesSelect" class="form-control">
+                  {% for centro in centros %}
+                  <option value="{{centro[1]}}">{{centro[2]}}</option>
+                  {% endfor %}
+
+                </select>
+              </div>
+              <div class="col-2">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="agregarOpcion()">Agregar</button>
+              </div>
+            </div>
+
+
+          </div>
+          <script>
+            // Función para manejar el clic del botón
+            function agregarOpcion() {
+              // Obtener el valor seleccionado del select
+              var opcionSeleccionada = $('#opcionesSelect').val();
+
+              // Obtener el valor actual del textarea
+              var valorTextarea = $('#detalle').val();
+
+              // Agregar la opción seleccionada al textarea, separada por una coma (o como prefieras)
+              $('#detalle').val(valorTextarea + (valorTextarea ? '\n' : '') + opcionSeleccionada);
+            }
+            document.getElementById('file').addEventListener('change', function () {
+              const fileSize = this.files[0].size; // Tamaño del archivo en bytes
+              const maxSize = 10 * 1024 * 1024; // 10 MB
+
+              if (fileSize > maxSize) {
+                alert('El archivo es demasiado grande. El tamaño máximo permitido es 10 MB.');
+                this.value = ''; // Limpiar el campo de entrada para que el usuario pueda seleccionar otro archivo
+              }
+            });
+          </script>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal"> Cancelar</button>
+            <button type="submit" class="btn btn-primary btn-sm" onclick="cargarPaginaSubir()">Subir</button>
+
+          </div>
+
+      </form>
+    </div>
+  </div>
+>>>>>>> b265a5a55044b1de93c64fb8d77b11fdd76a53e5
 </div>

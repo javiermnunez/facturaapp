@@ -136,6 +136,43 @@
                             <input type="text" id="sector" name="sector" class="form-control" value="{{usuario.sector}}"
                                 hidden>
 
+<<<<<<< HEAD
+=======
+        <table id="userTable">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Sector</th>
+                    <th>Centro</th>
+                    <th>Correo</th>
+                    <th>Contraseña</th>
+                    <th>Rol</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for usuario in usuarios %}
+                <tr>
+                    <td>{{usuario[1]}}</td>
+                    <td>{{usuario[2]}}</td>
+                    <td>{{usuario[3]}}</td>
+                    <td>{{usuario[4]}}</td>
+                    <td>{{usuario[5]}}</td>
+                    <td>{{usuario[6]}}</td>
+                    {% if usuario[7] == "EMPLEADO" %}
+                    <td>USUARIO</td>
+                    {% endif %}
+                    {% if usuario[7] == "JEFE" %}
+                    <td>RESPONSABLE</td>
+                    {% endif %}
+                    {% if usuario[7] != "EMPLEADO" and usuario[7] != "JEFE" %}
+                    <td>{{usuario[7]}}</td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+>>>>>>> b265a5a55044b1de93c64fb8d77b11fdd76a53e5
 
                             <input type="text" id="centro" name="centro" class="form-control" value="{{usuario.centro}}"
                                 hidden>
@@ -148,6 +185,7 @@
                                     value="{{usuario.sector}}">
                             </div>
 
+<<<<<<< HEAD
                             <div class="col">
                                 <label for="centro" class="form-label">Centro:</label>
                                 <input type="text" id="centro" name="centro" class="form-control"
@@ -156,6 +194,24 @@
 
                             {% endif %}
 
+=======
+            <label for="sector">Sector:</label>
+            <select type="text" id="sector" name="sector" required>
+                {% for centro in centros %}
+                <option value="{{centro[2]}}">{{centro[2]}}</option>
+                {% endfor %}
+            </select>
+            <!--<input type="text" id="sector" name="sector" required>-->
+
+            <label for="centro">Centro:</label>
+            <select type="text" id="centro" name="centro" required>
+                {% for centro in centros %}
+                <option value="{{centro[1]}}">{{centro[1]}} {{centro[2]}}</option>
+                {% endfor %}
+            </select>
+            <label for="mail">Correo:</label>
+            <input type="email" id="mail" name="mail" required>
+>>>>>>> b265a5a55044b1de93c64fb8d77b11fdd76a53e5
 
                             <!--CORREGIR MAIL Y CONTRASEÑA TIENEN EL MISMO NOMBRE-->
                             <div class="col">
@@ -213,6 +269,26 @@
                     </form>
 
 
+<<<<<<< HEAD
+=======
+            <label for="roll">Rol:</label>
+            
+            <select type="text" id="roll" name="roll" required>
+                <option value="EMPLEADO">Usuario</option>
+                <option value="JEFE">Responsable</option>
+                <option value="CONTROL">Control</option>
+                <option value="PROVEEDORES">Proveedores</option>
+                <option value="SERVICIOS">Pago Servicios</option>
+                <option value="DIRECTO">Pago Directo</option>
+                <option value="IMPUESTOS">Impuestos</option>
+            </select>
+            <div class="row">
+                <div class="col">
+                   <button type="submit">Agregar Usuario</button> 
+                </div>
+                <div class="col">
+                    <a class="btn btn-primary" href="/" >Volver</a>
+>>>>>>> b265a5a55044b1de93c64fb8d77b11fdd76a53e5
                 </div>
             </div>
         </div>

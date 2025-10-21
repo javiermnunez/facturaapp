@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {% include 'cabeceraBloqueada.html' %}
 <div class="container mt-5">
 
@@ -114,4 +115,122 @@
         }
     });
 </script>
+=======
+{% include 'cabeceraBloqueada.html' %}
+<div class="container mt-5">
+
+    <div class="container"
+        style="background-color: white; border-radius: 10px;padding: 10px;margin: 10px; min-width: 710px;">
+        <form action="/repositorioSubirAnexo" method="post" enctype="multipart/form-data" id="miFormularioSubir">
+            
+            <div class="mb-3">
+                <label for="file" class="form-label">
+                    <h4>Cargar Anexo:</h4>
+                </label>
+
+                <div class="row">
+
+                    <div class="col-2">
+                        <label for="file" class="col-form-label">Archivo</label>
+                    </div>
+                    <div class="col-10">
+                        <input type="file" name="file" id="file" class="form-control"
+                            accept=".pdf, .doc, .docx, .jpg, .jpeg, .gif, .tif" autofocus />
+                    </div>
+
+                </div>
+
+
+            </div>
+
+            <div class="row mb-3">
+                <label for="cuit" class="col-sm-2 col-form-label">Cuit</label>
+
+                <div class="col-lg-10">
+                    {% for a in archivo %}
+                    <input id="id_archivo" name="id_archivo" type="text" value="{{a[0]}}" hidden>
+                    <input name="cuit" class="form-control" type="text" value="{{a[13]}}" hidden>
+                    <input  class="form-control" type="text" value="{{a[13]}}" disabled>
+
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="proveedor" class="col-sm-2 col-form-label">Proveedor</label>
+
+                <div class="col-lg-10">
+                    {% for a in archivo %}
+                    <input name="proveedor" class="form-control" type="text" value="{{a[4]}}" hidden>
+                    <input class="form-control" type="text" value="{{a[4]}}" disabled>
+
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="nro" class="col-sm-2 col-form-label">Número FC</label>
+
+                <div class="col-lg-10">
+                    {% for a in archivo %}
+                    <input name="nro" class="form-control" type="text" value="{{a[6]}}" hidden>
+                    <input  class="form-control" type="text" value="{{a[6]}}" disabled>
+
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="fechaPago" class="col-sm-2 col-form-label">Fecha</label>
+                <div class="col-lg-10">
+                    <input name="fechaPago" class="form-control" type="date">
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="detalle" class="col-sm-2 col-form-label">Detalle</label>
+                <div class="col-lg-10">
+                    <textarea id="detalle" name="detalle" rows="2" class="form-control" required></textarea>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-4"></div>
+                <div class="col-2">
+                    <button type="button" class="btn btn-outline-danger" data-dismiss="modal"
+                        onclick="window.close();">Cancelar</button>
+                </div>
+                <div class="col-2">
+                    <button type="submit" class="btn btn-outline-success" onclick="cargarPaginaSubir()">Enviar</button>
+                </div>
+                <div class="col-4"></div>
+
+            </div>
+        </form>
+    </div>
+
+    
+    <br><br>
+</div>
+</div>
+
+<script>
+    // Función para manejar el clic del botón
+    function agregarOpcion() {
+        // Obtener el valor seleccionado del select
+        var opcionSeleccionada = $('#opcionesSelect').val();
+
+        // Obtener el valor actual del textarea
+        var valorTextarea = $('#detalle').val();
+
+        // Agregar la opción seleccionada al textarea, separada por una coma (o como prefieras)
+        $('#detalle').val(valorTextarea + (valorTextarea ? '\n' : '') + opcionSeleccionada);
+    }
+
+    document.getElementById('file').addEventListener('change', function () {
+        const fileSize = this.files[0].size; // Tamaño del archivo en bytes
+        const maxSize = 10 * 1024 * 1024; // 10 MB
+
+        if (fileSize > maxSize) {
+            alert('El archivo es demasiado grande. El tamaño máximo permitido es 10 MB.');
+            this.value = ''; // Limpiar el campo de entrada para que el usuario pueda seleccionar otro archivo
+        }
+    });
+</script>
+>>>>>>> b265a5a55044b1de93c64fb8d77b11fdd76a53e5
 {% include 'pie.html' %}

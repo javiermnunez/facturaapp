@@ -160,6 +160,11 @@ def buscar_duplicados_y_borrar(registros):
             # Agregar al diccionario de registros únicos si es el primero
             registros_unicos[cuit] = registro
 
+
+    
+
+
+
 def generarCarpetas():
     try:
         os.makedirs(carpetaRepositorio, exist_ok=True)
@@ -612,7 +617,10 @@ def leer_archivo_xlsx(archivo): #busca el archivo y lo ingresa a la base de dato
                 cuit = cuit[:2]+"-"+cuit[2:10]+"-"+cuit[-1]
                 print(f"CUIT: {cuit} DETALLE: {r['DETALLE']} CODINT: {r['COD']}")
                 if verificarCuit(cuit):
+<<<<<<< HEAD
                     conexion = mysql.connect()
+=======
+>>>>>>> b265a5a55044b1de93c64fb8d77b11fdd76a53e5
                     cursor = conexion.cursor()
                     sqlUsuario = f"INSERT INTO `proveedores` (`id_proveedor`, `cuit`, `detalle`, `cod`) VALUES (NULL, '{cuit}', '{r['DETALLE']}', '{r['COD']}');"
                     cursor.execute(sqlUsuario)
