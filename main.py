@@ -1883,7 +1883,7 @@ def subirArchivoProveedores(id_usuario, ruta_repo, proveedor, cuit, centro, nro,
 
 
 def subirArchivoAnexo(id_archivo,ruta_repo, proveedor, cuit, nro, fechaPago, detalle):
-    
+    subio = False
     # Comprobar si la solicitud de publicación tiene la parte del archivo
     if 'file' not in request.files:
         print('No se cargó ningún archivo')
